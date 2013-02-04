@@ -1,0 +1,9 @@
+{
+  "name": "magenta",
+  "homepage": "https://github.com/timfpark/magenta",
+  "version": "0.0.1",
+  "private": "true",
+  "dependencies": {
+    "restify": "*"
+  }
+}
