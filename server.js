@@ -1,13 +1,10 @@
-var restify = require('restify');
-
-function respond(req, res, next) {
-  res.send('hello ' + req.params.name);
-}
-
-var server = restify.createServer();
-server.get('/hello/:name', respond);
-server.head('/hello/:name', respond);
-
-server.listen(8080, function() {
-  console.log('%s listening at %s', server.name, server.url);
-});
+var express = require('express'),
+    messages = require('./controllers/messages');
+ 
+var app = express();
+ 
+app.get('/messages', messages.findAll);
+app.get('/messages/:id', messages.findById);
+ 
+app.listen(3000);
+console.log('Listening on port 3000...');
