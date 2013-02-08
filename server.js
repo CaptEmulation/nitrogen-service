@@ -8,10 +8,11 @@ var config = new Config();
 
 app.use(express.bodyParser());
 
+app.get('/blobs/:id', controllers.blobs.findById);
 app.post('/blobs', controllers.blobs.create);
  
+app.get('/messages/:id', controllers.messages.findById);
 app.get('/messages', controllers.messages.findAll);
-//app.get('/messages/:id', msg_controller.findById);
 app.post('/messages', controllers.messages.create);
 
 console.log("pointing at mongodb: " + config.mongodb_url);

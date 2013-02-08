@@ -2,6 +2,7 @@ var mongoose = require('mongoose');
 
 var blobSchema = mongoose.Schema({
 	created_at: { type: Date, default: Date.now },
+	url: { type: String },
 //	principal_id: { type: String },
 });
 

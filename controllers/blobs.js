@@ -9,15 +9,18 @@ console.log("created blob service");
 blobService.createContainerIfNotExists(
 	"blobs", { publicAccessLevel : 'blob' }, 
 	function(error) {
-        if (error){
-        	console.log("error creating and perm'ing container.");
-        } else {
-        	console.log("container created and permissioned.");        	
-        }
-	}
+        if (error) throw error;
+    }
 );
 
 exports.findById = function(req, res) {
+	Blob.findOne({"_id": req.params.id}, function (err, blob) {
+		if (err) res.send(400);
+
+		blobService.getBlobToStream("blobs", blob.id, res, function(error) {
+			if (err) res.send(400);
+    	});
+	});
 };
 
 exports.create = function(req, res) {
@@ -36,13 +39,14 @@ exports.create = function(req, res) {
 					function (err, blobResult, response) {
 						blobService.commitBlobBlocks("blobs", blob.id, [blob.id], {"contentType": req.get('Content-Type')}, 
 							function(err, blobResult, response) {
-								console.log(blobResult);
+								blob.url = config.base_url + "/blobs/" + blob.id;
 								res.send(blob);
-							}); 
+							});
 					}
 				);
+			} else {
+				console.log("TODO:  couldn't create blob for some reason.");
 			}
 		});
 	});
-
 };
