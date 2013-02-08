@@ -7,6 +7,8 @@ var app = express();
 var config = new Config();
 
 app.use(express.bodyParser());
+
+app.post('/blobs', controllers.blobs.create);
  
 app.get('/messages', controllers.messages.findAll);
 //app.get('/messages/:id', msg_controller.findById);
