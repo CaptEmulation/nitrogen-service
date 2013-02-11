@@ -10,22 +10,26 @@ var config = new Config();
 
 describe('blobs REST endpoint', function() {
 	it('should be able to create a blob', function(done) {
-		fs.createReadStream('test/fixtures/images/image.jpg').
-			pipe(
-				request.post(config.base_url + '/blobs', { headers: { 'Content-Type': 'image/jpeg' } },
-					function (err, resp, body) {
-					  assert.ifError(err);
-			
 
-					  var body_json = JSON.parse(body);
-				      assert.equal(resp.statusCode, 200);
-				      assert.notEqual(body_json._id, undefined);
-				      assert.equal(body_json.url, config.base_url + "/blobs/" + body_json._id);
+		var fixture_path = 'test/fixtures/images/image.jpg';
 
-				      done();
-					}
-				)
-			);
+		fs.stat(fixture_path, function(err, stats) {
+				fs.createReadStream(fixture_path).
+				pipe(
+					request.post(config.base_url + '/blobs', { headers: { 'Content-Type': 'image/jpeg', 'Content-Length': stats.size } },
+						function (err, resp, body) {
+						  assert.ifError(err);
+
+						  var body_json = JSON.parse(body);
+					      assert.equal(resp.statusCode, 200);
+					      assert.notEqual(body_json._id, undefined);
+
+					      done();
+						}
+					)
+				);
+		});
+
     });
 
 	it('should be able to fetch a blob', function(done) {

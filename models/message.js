@@ -1,10 +1,12 @@
-var mongoose = require('mongoose');
+var mongoose = require('mongoose')
+//    Mixed = Schema.Types.Mixed;
 
 var messageSchema = mongoose.Schema({
 	timestamp: { type: Date, default: Date.now },
 //	principal_id: { type: String },
-//	schema: { type: String },
-//	schema_version: { type: Number }
+	schema_type: { type: String },
+	schema_version: { type: Number } //,
+//	attributes: { type: Mixed }
 });
 
 var Message = mongoose.model('Message', messageSchema);

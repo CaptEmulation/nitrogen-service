@@ -1,10 +1,10 @@
 var azure = require('azure'),
 	Config = require('../config'),
-	Blob = require("../models/blob").Blob;
+	Blob = require("../models/blob").Blob,
+	ObjectID = require('mongodb').ObjectID;
 
 var config = new Config();
 var blobService = azure.createBlobService(config.azure_storage_account, config.azure_storage_key, config.azure_storage_endpoint);
-console.log("created blob service");
 
 blobService.createContainerIfNotExists(
 	"blobs", { publicAccessLevel : 'blob' }, 
@@ -24,29 +24,18 @@ exports.findById = function(req, res) {
 };
 
 exports.create = function(req, res) {
-	var buffers = new Array();
+	var blob = new Blob();
+	blob.id = new ObjectID();
 
-	req.on('data', function(chunk) {
-		buffers.push(chunk);
-	});
+	blobService.createBlockBlobFromStream("blobs", blob.id, req, req.get('Content-Length'), {"contentType": req.get('Content-Type')}, 
+		function(err, blobResult, response) {
+			if (err) res.send(400);
 
-	req.on('end', function() {
-		var data = Buffer.concat(buffers);
-		var blob = new Blob();
-		blob.save(function(err, blob) {
-			if (!err) {
-				blobService.createBlobBlockFromText(blob.id, "blobs", blob.id, data.toString(), {"contentType": req.get('Content-Type')}, 
-					function (err, blobResult, response) {
-						blobService.commitBlobBlocks("blobs", blob.id, [blob.id], {"contentType": req.get('Content-Type')}, 
-							function(err, blobResult, response) {
-								blob.url = config.base_url + "/blobs/" + blob.id;
-								res.send(blob);
-							});
-					}
-				);
-			} else {
-				console.log("TODO:  couldn't create blob for some reason.");
-			}
+			blob.save(function(err, blob) {
+				if (!err) 
+					res.send(blob);
+				else
+					res.send(400);
+			});
 		});
-	});
 };
