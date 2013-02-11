@@ -37,4 +37,12 @@ describe('blobs REST endpoint', function() {
 
     });
 
+    it('should return 404 for unknown blobs', function(done) {
+    	request(config.base_url + '/blobs/51195d5f116000000a000001', function(err,resp,body) {
+	    	  assert.equal(resp.statusCode, 404);
+
+	    	  done();
+	      });
+    });
+
 });
