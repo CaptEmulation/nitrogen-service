@@ -9,7 +9,7 @@ var app = require('../../server'),
 var config = new Config();
 
 describe('blobs REST endpoint', function() {
-	it('should be able to create a blob', function(done) {
+	it('should be able to create and then fetch a blob', function(done) {
 
 		var fixture_path = 'test/fixtures/images/image.jpg';
 
@@ -24,7 +24,12 @@ describe('blobs REST endpoint', function() {
 					      assert.equal(resp.statusCode, 200);
 					      assert.notEqual(body_json._id, undefined);
 
-					      done();
+  					      request(config.base_url + '/blobs/' + body_json._id, function(err,resp,body) {
+					    	  assert.equal(resp.statusCode, 200);
+					    	  assert.equal(resp.body.length, 28014);
+
+					    	  done();
+					      });
 						}
 					)
 				);
@@ -32,12 +37,4 @@ describe('blobs REST endpoint', function() {
 
     });
 
-	it('should be able to fetch a blob', function(done) {
-	    request(config.base_url + '/blobs/511479530acf3d0026000001', function(err,resp,body) {
-	    	assert.equal(resp.statusCode, 200);
-	    	assert.equal(resp.body.length, 28014);
-
-	    	done();
-	    });
-	});    
 });

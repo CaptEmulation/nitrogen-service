@@ -15,11 +15,13 @@ blobService.createContainerIfNotExists(
 
 exports.findById = function(req, res) {
 	Blob.findOne({"_id": req.params.id}, function (err, blob) {
-		if (err) res.send(400);
+		if (err) return res.send(400, err);
+		if (!blob) return res.send(404);
 
 		blobService.getBlobToStream("blobs", blob.id, res, function(error) {
-			if (err) res.send(400);
+			if (err) return res.send(400);
     	});
+
 	});
 };
 
@@ -29,13 +31,12 @@ exports.create = function(req, res) {
 
 	blobService.createBlockBlobFromStream("blobs", blob.id, req, req.get('Content-Length'), {"contentType": req.get('Content-Type')}, 
 		function(err, blobResult, response) {
-			if (err) res.send(400);
+			if (err) return res.send(400);
 
 			blob.save(function(err, blob) {
-				if (!err) 
-					res.send(blob);
-				else
-					res.send(400);
+				if (err) return res.send(400); 
+
+				res.send(blob);
 			});
 		});
 };
