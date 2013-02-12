@@ -4,7 +4,7 @@ module.exports = function() {
     if (process.env.NODE_ENV == "production") {
         config = {
             host: "magenta.windows.net",
-            http_port: 80,
+            http_port: process.env.PORT,
             protocol: "http",
 
             mongodb_url: "mongodb://localhost/magenta",
