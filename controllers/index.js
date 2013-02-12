@@ -1,2 +1,2 @@
-exports.messages = require("./messages.js");
 exports.blobs = require("./blobs.js");
+exports.messages = require("./messages.js");
