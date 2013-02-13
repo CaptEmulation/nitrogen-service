@@ -12,6 +12,10 @@ var allowCrossDomain = function(req, res, next) {
   res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
   res.header('Access-Control-Allow-Headers', 'Content-Type');
 
+  // everything is JSON out of magenta
+
+  res.setHeader('Content-Type', 'application/json');
+
   // intercept OPTIONS method
   if ('OPTIONS' == req.method) {
     res.send(200);
@@ -29,14 +33,6 @@ app.post('/blobs', controllers.blobs.create);
 app.get('/messages/:id', controllers.messages.findById);
 app.get('/messages', controllers.messages.findAll);
 app.post('/messages', controllers.messages.create);
-
-//app.get('/js/ember.js', function(req, res) { res.sendfile('vendor/javascript/ember-1.0.0-pre.4.js'); });
-//app.get('/js/ember-data.js', function(req, res) { res.sendfile('vendor/javascript/ember-data-latest.js'); });
-//app.get('/js/handlebars.js', function(req, res) { res.sendfile('vendor/javascript/handlebars.js'); });
-//app.get('/js/jquery.js', function(req, res) { res.sendfile('vendor/javascript/jquery-1.9.1.min.js'); });
-
-//app.get('/js/app.js', function(req, res){ res.sendfile('assets/javascript/app.js'); });
-//app.get('/', function(req, res){ res.sendfile('assets/app.html'); });
 
 console.log("pointing at mongodb: " + config.mongodb_url);
 mongoose.connect(config.mongodb_url);

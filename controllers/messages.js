@@ -11,13 +11,12 @@ exports.findAll = function(req, res) {
 };
 
 exports.findById = function(req, res) {
+	console.log("id: " + req.params.id);
 	Message.findOne({"_id": req.params.id}, function (err, message) {
-		if (!err) {
-			res.send({"message": message});
-		} else {
-			console.log("message findById error: " + err);
-			res.send(400);
-		}
+		if (err) return res.send(400, err);
+		if (!message) return res.send(404);
+
+		res.send({"message": message});
 	});
 };
 
@@ -25,11 +24,7 @@ exports.create = function(req, res) {
 	var message = new Message(req.body);
 
 	message.save(function(err, obj) {
-		if (!err) {
-			res.send({"message": message});
-		} else {
-			console.log("message create error: " + err);
-			res.send(400);
-		}
+		if (err) return res.send(400, err);
+		res.send({"message": message});
 	});
 };

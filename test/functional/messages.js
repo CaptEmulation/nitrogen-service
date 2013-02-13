@@ -8,6 +8,7 @@ var app = require('../../server'),
 var config = new Config();
 
 describe('messages REST endpoint', function() {
+
 	it('should return all messages json', function(done) {
 	    request(config.base_url + '/messages', function(err,resp,body) {
 	      assert.equal(resp.statusCode, 200);
@@ -15,19 +16,23 @@ describe('messages REST endpoint', function() {
 	    });
 	});
 
-	it('should create a message', function(done) {
+	it('should create and fetch a message', function(done) {
 		request.post(config.base_url + '/messages', 
-			{ json: { timestamp: new Date(2012,1,31) } }, function(err,resp,body) {
-		      assert.equal(resp.statusCode, 200);
-		      assert.equal(resp.body.message.timestamp, new Date(2012,1,31).toISOString());
-		      done(); 
-	    }); 
+			{ json: { attributes: { reading: 5.1 } } }, function(post_err, post_resp, post_body) {
+			  assert.equal(post_err, null);
+		      assert.equal(post_resp.statusCode, 200);
+
+		      assert.equal(post_body.message.attributes.reading, 5.1);
+
+		      request({ url: config.base_url + '/messages/' + post_body.message._id, json: true}, function(get_err, get_resp, get_body) {
+		      	assert.equal(get_err, null);
+	      	  	assert.equal(get_resp.statusCode, 200);
+
+	      		assert.equal(get_body.message.attributes.reading, 5.1);
+
+	      		done(); 
+	    	  });
+	    });
     }); 
 
-	it('should fetch a message', function(done) {
-	    request(config.base_url + '/messages/51147ca4f47471c82f000002', function(err,resp,body) {
-	      assert.equal(resp.statusCode, 200);
-	      done(); 
-	    });
-	});
 });
