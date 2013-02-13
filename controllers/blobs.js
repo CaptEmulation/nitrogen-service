@@ -36,7 +36,7 @@ exports.create = function(req, res) {
 			blob.save(function(err, blob) {
 				if (err) return res.send(400); 
 
-				res.send(blob);
+				res.send({"blob": blob});
 			});
 		});
 };

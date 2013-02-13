@@ -22,9 +22,9 @@ describe('blobs REST endpoint', function() {
 
 						  var body_json = JSON.parse(body);
 					      assert.equal(resp.statusCode, 200);
-					      assert.notEqual(body_json._id, undefined);
+					      assert.notEqual(body_json.blob._id, undefined);
 
-  					      request(config.base_url + '/blobs/' + body_json._id, function(err,resp,body) {
+  					      request(config.base_url + '/blobs/' + body_json.blob._id, function(err,resp,body) {
 					    	  assert.equal(resp.statusCode, 200);
 					    	  assert.equal(resp.body.length, 28014);
 

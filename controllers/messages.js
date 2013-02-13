@@ -1,9 +1,9 @@
 var Message = require("../models/message").Message;
 
 exports.findAll = function(req, res) {
-	Message.find(function (err, models) {
+	Message.find(function (err, messages) {
 		if (!err) {
-			res.send(models);			
+			res.send({"messages": messages});			
 		} else {
 			res.send(400);
 		}
@@ -13,7 +13,7 @@ exports.findAll = function(req, res) {
 exports.findById = function(req, res) {
 	Message.findOne({"_id": req.params.id}, function (err, message) {
 		if (!err) {
-			res.send(message);
+			res.send({"message": message});
 		} else {
 			console.log("message findById error: " + err);
 			res.send(400);
@@ -26,7 +26,7 @@ exports.create = function(req, res) {
 
 	message.save(function(err, obj) {
 		if (!err) {
-			res.send(message);
+			res.send({"message": message});
 		} else {
 			console.log("message create error: " + err);
 			res.send(400);

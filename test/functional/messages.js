@@ -19,7 +19,7 @@ describe('messages REST endpoint', function() {
 		request.post(config.base_url + '/messages', 
 			{ json: { timestamp: new Date(2012,1,31) } }, function(err,resp,body) {
 		      assert.equal(resp.statusCode, 200);
-		      assert.equal(resp.body.timestamp, new Date(2012,1,31).toISOString());
+		      assert.equal(resp.body.message.timestamp, new Date(2012,1,31).toISOString());
 		      done(); 
 	    }); 
     }); 
