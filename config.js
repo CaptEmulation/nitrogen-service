@@ -7,7 +7,7 @@ module.exports = function() {
             http_port: process.env.PORT,
             protocol: "http",
 
-            mongodb_url: "mongodb://localhost/magenta",
+            mongodb_connection_string: "mongodb://magenta-mongodb:5eGtQRz5dDNukmDTf6hEUfTuoj2cBwUGiOiTfo0vDVI-@ds045107.mongolab.com:45107/magenta-mongodb",
 
             azure_storage_account: "magenta",
             azure_storage_key: "qPvb6jLVnT4s9/xv6aTxVLDoAEiNnX9qazbl32NO+gO6G+H7txhBw/UYsEC/Jgz30EGzODJs/pIC1UajGb7CIw==",
@@ -19,7 +19,7 @@ module.exports = function() {
             http_port: 3050,
             protocol: "http",
 
-            mongodb_url: "mongodb://localhost/magenta_test",
+            mongodb_connection_string: "mongodb://localhost/magenta_test",
 
             azure_storage_account: "magentadev",
             azure_storage_key: "jU+As2CX8WFu/lWOX85PQzG3f+GhNx2SNaeYIpZeNZQ4sndHxX/D3rZtPjlwL+Lq5Zr+7ggLHbT3ytz1izzTJw==",
@@ -31,7 +31,7 @@ module.exports = function() {
             http_port: 3030,
             protocol: "http",
 
-            mongodb_url: "mongodb://localhost/magenta_dev",
+            mongodb_connection_string: "mongodb://localhost/magenta_dev",
 
             azure_storage_account: "magentadev",
             azure_storage_key: "jU+As2CX8WFu/lWOX85PQzG3f+GhNx2SNaeYIpZeNZQ4sndHxX/D3rZtPjlwL+Lq5Zr+7ggLHbT3ytz1izzTJw==",

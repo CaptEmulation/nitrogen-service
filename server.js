@@ -34,8 +34,8 @@ app.get('/messages/:id', controllers.messages.findById);
 app.get('/messages', controllers.messages.findAll);
 app.post('/messages', controllers.messages.create);
 
-console.log("pointing at mongodb: " + config.mongodb_url);
-mongoose.connect(config.mongodb_url);
+console.log("mongodb: " + config.mongodb_connection_string);
+mongoose.connect(config.mongodb_connection_string);
 var db = mongoose.connection;
 db.once('open', function callback() {
 	console.log("mongodb connection established");
