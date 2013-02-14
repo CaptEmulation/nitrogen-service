@@ -4,10 +4,12 @@ var mongoose = require('mongoose'),
 
 var messageSchema = mongoose.Schema({
 	timestamp: { type: Date, default: Date.now },
-//	principal_id: { type: String },
-	schema_type: { type: String },
+//	from: { type: String },  		// who emitted this message
+//	to: { type: String },  			// who should respond message is targeted to (if any)
+//  response_to: { type: ObjectId } // message this message is in response to
+	body_schema: { type: String },
 	schema_version: { type: Number },
-	attributes: { type: Mixed }
+	body: { type: Mixed }
 });
 
 var Message = mongoose.model('Message', messageSchema);

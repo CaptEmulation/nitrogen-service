@@ -11,7 +11,6 @@ exports.findAll = function(req, res) {
 };
 
 exports.findById = function(req, res) {
-	console.log("id: " + req.params.id);
 	Message.findOne({"_id": req.params.id}, function (err, message) {
 		if (err) return res.send(400, err);
 		if (!message) return res.send(404);
@@ -25,6 +24,7 @@ exports.create = function(req, res) {
 
 	message.save(function(err, obj) {
 		if (err) return res.send(400, err);
+		console.log("created message: " + message._id + ": " + message);
 		res.send({"message": message});
 	});
 };

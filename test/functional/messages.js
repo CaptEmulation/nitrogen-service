@@ -18,17 +18,17 @@ describe('messages REST endpoint', function() {
 
 	it('should create and fetch a message', function(done) {
 		request.post(config.base_url + '/messages', 
-			{ json: { attributes: { reading: 5.1 } } }, function(post_err, post_resp, post_body) {
+			{ json: { body: { reading: 5.1 } } }, function(post_err, post_resp, post_body) {
 			  assert.equal(post_err, null);
 		      assert.equal(post_resp.statusCode, 200);
 
-		      assert.equal(post_body.message.attributes.reading, 5.1);
+		      assert.equal(post_body.message.body.reading, 5.1);
 
 		      request({ url: config.base_url + '/messages/' + post_body.message._id, json: true}, function(get_err, get_resp, get_body) {
 		      	assert.equal(get_err, null);
 	      	  	assert.equal(get_resp.statusCode, 200);
 
-	      		assert.equal(get_body.message.attributes.reading, 5.1);
+	      		assert.equal(get_body.message.body.reading, 5.1);
 
 	      		done(); 
 	    	  });
