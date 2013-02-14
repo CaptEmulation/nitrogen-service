@@ -3,8 +3,7 @@ module.exports = function() {
 
     if (process.env.NODE_ENV == "production") {
         config = {
-            host: "magenta.windows.net",
-            http_port: process.env.PORT,
+            host: "magenta.azurewebsites.net",
             protocol: "http",
 
             mongodb_connection_string: "mongodb://magenta-mongodb:5eGtQRz5dDNukmDTf6hEUfTuoj2cBwUGiOiTfo0vDVI-@ds045107.mongolab.com:45107/magenta-mongodb",
