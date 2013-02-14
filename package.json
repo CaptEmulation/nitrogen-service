@@ -3,6 +3,7 @@
   "homepage": "https://github.com/timfpark/magenta",
   "version": "0.0.1",
   "private": "true",
+  "engine": "node 0.8.18",
   "dependencies": {
     "azure": "*",
     "express": "*",
