@@ -2,11 +2,9 @@ var Message = require("../models/message").Message;
 
 exports.findAll = function(req, res) {
 	Message.find(function (err, messages) {
-		if (!err) {
-			res.send({"messages": messages});			
-		} else {
-			res.send(400);
-		}
+		if (err) return res.send(400);
+
+		res.send({"messages": messages});			
 	});
 };
 
