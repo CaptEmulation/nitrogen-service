@@ -11,6 +11,8 @@
     "mongodb": "*",
     "mongoose": "*",
     "passport": "*",
-    "request": "*"
+    "redis": "*",
+    "request": "*",
+    "socket.io": "*"
   }
 }
