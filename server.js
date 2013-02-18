@@ -1,16 +1,23 @@
 var Config = require('./config'),
-	controllers = require('./controllers'),
-	express = require('express'),
+    config = new Config(),
+    controllers = require('./controllers'),
+    express = require('express'),
+    app = express(),
+
+    http = require('http'),
+    port = process.env.PORT || config.http_port || 3030,
+    server = app.listen(port),
+    io = require('socket.io').listen(server),
+
     mongoose = require('mongoose');
 
-var app = express();
-var config = new Config();
+console.log('listening for http connections on port ' + port + '...');
 
 var allowCrossDomain = function(req, res, next) {
   res.header('Access-Control-Allow-Origin', "*");
   res.header('Access-Control-Allow-Credentials', true);
-  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  res.header('Access-Control-Allow-Methods', '*');
+  res.header('Access-Control-Allow-Headers', '*');
 
   // everything is JSON out of magenta
 
@@ -41,7 +48,15 @@ db.once('open', function callback() {
 	console.log("mongodb connection established");
 });
 
-port = process.env.PORT || config.http_port || 3030;
+io.sockets.on('connection', function (socket) {
+    socket.emit('deviceid', { hello: "world"});
 
-app.listen(port);
-console.log('listening for http connections on port ' + port + '...');
+//  socket.on('subscribe', function (list) {
+//    console.log("subscription: " + list);
+//  });
+
+//  socket.on('online', function() {
+//    console.log("got online message");
+//  });
+
+});
