@@ -13,10 +13,9 @@ var Config = require('./config'),
 
 console.log('listening for http connections on port ' + port + '...');
 
-var allowCrossDomain = function(req, res, next) {
-  res.header('Access-Control-Allow-Origin', "*");
-  res.header('Access-Control-Allow-Credentials', true);
-  res.header('Access-Control-Allow-Methods', '*');
+var allowCrossOrigin = function(req, res, next) {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
   res.header('Access-Control-Allow-Headers', 'Content-Type');
 
   // everything is JSON out of magenta
@@ -29,9 +28,9 @@ var allowCrossDomain = function(req, res, next) {
   } else {
     next();
   }
-}
+};
 
-app.use(allowCrossDomain);
+app.use(allowCrossOrigin);
 app.use(express.bodyParser());
 
 app.get('/blobs/:id', controllers.blobs.findById);
