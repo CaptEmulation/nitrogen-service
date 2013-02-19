@@ -14,7 +14,7 @@ var Config = require('./config'),
 console.log('listening for http connections on port ' + port + '...');
 
 var allowCrossOrigin = function(req, res, next) {
-  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Origin', 'localhost:8080');
   res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
   res.header('Access-Control-Allow-Headers', 'Content-Type');
 
