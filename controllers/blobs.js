@@ -7,7 +7,7 @@ var config = new Config();
 var blobService = azure.createBlobService(config.azure_storage_account, config.azure_storage_key, config.azure_storage_endpoint);
 
 blobService.createContainerIfNotExists(
-	"blobs", { publicAccessLevel : 'blob' }, 
+	"blobs", 
 	function(error) {
         if (error) throw error;
     }
@@ -19,7 +19,7 @@ exports.findById = function(req, res) {
 		if (!blob) return res.send(404);
 
 		blobService.getBlobToStream("blobs", blob.id, res, function(error) {
-			if (err) return res.send(400);
+			if (err) return res.send(400, err);
     	});
 
 	});
@@ -35,6 +35,9 @@ exports.create = function(req, res) {
 
 			blob.save(function(err, blob) {
 				if (err) return res.send(400); 
+
+			    var blob_url = config.base_url + '/blobs/' + blob._id;
+			    console.log("created blob: " + blob_url);
 
 				res.send({"blob": blob});
 			});

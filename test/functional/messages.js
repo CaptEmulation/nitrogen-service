@@ -2,12 +2,11 @@ process.env.NODE_ENV = 'test';
 
 var app = require('../../server'),
 	assert = require('assert'),
-	Config = require('../../config'),
+	config = require('../../config')(),
+	io = require('socket.io-client'),
     request = require('request');
 
-var config = new Config();
-
-describe('messages REST endpoint', function() {
+describe('messages endpoint', function() {
 
 	it('should return all messages json', function(done) {
 	    request(config.base_url + '/messages', function(err,resp,body) {
@@ -33,6 +32,15 @@ describe('messages REST endpoint', function() {
 	      		done(); 
 	    	  });
 	    });
+    });
+
+    it('should be able to accept socket.io connections', function(done) {
+        console.log("trying to socket io connect to:" + config.base_url);
+		var socket = io.connect(config.base_url);
+
+		socket.on('connect', function() {
+			done();
+		});
     }); 
 
 });
