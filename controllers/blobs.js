@@ -13,7 +13,7 @@ blobService.createContainerIfNotExists(
     }
 );
 
-exports.findById = function(req, res) {
+exports.show = function(req, res) {
 	Blob.findOne({"_id": req.params.id}, function (err, blob) {
 		if (err) return res.send(400, err);
 		if (!blob) return res.send(404);

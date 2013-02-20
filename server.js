@@ -34,11 +34,11 @@ var allowCrossDomain = function(req, res, next) {
 app.use(allowCrossDomain);
 app.use(express.bodyParser());
 
-app.get('/blobs/:id', controllers.blobs.findById);
+app.get('/blobs/:id', controllers.blobs.show);
 app.post('/blobs', controllers.blobs.create);
  
-app.get('/messages/:id', controllers.messages.findById);
-app.get('/messages', controllers.messages.findAll);
+app.get('/messages/:id', controllers.messages.show);
+app.get('/messages', controllers.messages.index);
 app.post('/messages', controllers.messages.create);
 
 console.log("mongodb: " + config.mongodb_connection_string);

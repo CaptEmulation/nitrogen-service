@@ -1,6 +1,6 @@
 var Message = require("../models/message").Message;
 
-exports.findAll = function(req, res) {
+exports.index = function(req, res) {
 	Message.find(function (err, messages) {
 		if (err) return res.send(400);
 
@@ -8,7 +8,7 @@ exports.findAll = function(req, res) {
 	});
 };
 
-exports.findById = function(req, res) {
+exports.show = function(req, res) {
 	Message.findOne({"_id": req.params.id}, function (err, message) {
 		if (err) return res.send(400, err);
 		if (!message) return res.send(404);
