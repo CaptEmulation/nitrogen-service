@@ -1,7 +1,8 @@
 var Config = require('../config'),
     config = new Config(),
 	Message = require("../models/message").Message,
-	redis = require('redis');
+	redis = require('redis'),
+	_ = require('underscore');
 
 var redisClient = redis.createClient(config.redis_port, config.redis_host);
 
@@ -9,7 +10,8 @@ exports.index = function(req, res) {
 	Message.find(function (err, messages) {
 		if (err) return res.send(400);
 
-		res.send({"messages": messages});			
+		var cleaned_messages = _.map(messages, function(message) { return message.transformForClient() });
+		res.send({"messages": cleaned_messages});
 	});
 };
 
@@ -18,7 +20,7 @@ exports.show = function(req, res) {
 		if (err) return res.send(400, err);
 		if (!message) return res.send(404);
 
-		res.send({"message": message});
+		res.send({"message": message.transformForClient()});
 	});
 };
 
@@ -27,9 +29,10 @@ exports.create = function(req, res) {
 
 	message.save(function(err, obj) {
 		if (err) return res.send(400, err);
-		console.log("created message: " + message._id + ": " + message);
-		res.send({"message": message});
 
-		redisClient.publish('messages', message);
+		console.log("created message: " + message._id + ": " + message.transformForClient());
+
+		res.send({"message": message.transformForClient()});
+		redisClient.publish('messages', JSON.stringify(message.transformForClient()));
 	});
 };

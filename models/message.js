@@ -13,6 +13,15 @@ var messageSchema = mongoose.Schema({
 });
 
 var Message = mongoose.model('Message', messageSchema);
+Message.prototype.transformForClient = function() {
+	var obj = this.toObject();
+
+	obj.id = obj._id;
+	delete obj._id;
+	delete obj.__v;
+
+	return obj;
+}
 
 module.exports = {
   Message: Message

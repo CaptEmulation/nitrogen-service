@@ -33,7 +33,7 @@ describe('messages endpoint', function() {
 
 			      assert.equal(post_body.message.body.reading, 5.1);
 
-			      request({ url: config.base_url + '/messages/' + post_body.message._id, json: true}, function(get_err, get_resp, get_body) {
+			      request({ url: config.base_url + '/messages/' + post_body.message.id, json: true}, function(get_err, get_resp, get_body) {
                     assert.equal(get_err, null);
                     assert.equal(get_resp.statusCode, 200);
 

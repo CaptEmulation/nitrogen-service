@@ -13,6 +13,7 @@
     "passport": "*",
     "redis": "*",
     "request": "*",
-    "socket.io": "*"
+    "socket.io": "*",
+    "underscore": "*"
   }
 }
