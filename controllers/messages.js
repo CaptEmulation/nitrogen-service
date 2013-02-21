@@ -1,4 +1,9 @@
-var Message = require("../models/message").Message;
+var Config = require('../config'),
+    config = new Config(),
+	Message = require("../models/message").Message,
+	redis = require('redis');
+
+var redisClient = redis.createClient(config.redis_port, config.redis_host);
 
 exports.index = function(req, res) {
 	Message.find(function (err, messages) {
@@ -24,5 +29,7 @@ exports.create = function(req, res) {
 		if (err) return res.send(400, err);
 		console.log("created message: " + message._id + ": " + message);
 		res.send({"message": message});
+
+		redisClient.publish('messages', message);
 	});
 };

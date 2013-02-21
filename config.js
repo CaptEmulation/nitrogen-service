@@ -18,6 +18,9 @@ module.exports = function() {
             http_port: 3050,
             protocol: "http",
 
+            redis_port: 6379,
+            redis_host: "localhost",
+
             mongodb_connection_string: "mongodb://localhost/magenta_test",
 
             azure_storage_account: "magentadev",
@@ -29,6 +32,9 @@ module.exports = function() {
             host: "localhost",
             http_port: 3030,
             protocol: "http",
+
+            redis_port: 6379,
+            redis_host: "localhost",
 
             mongodb_connection_string: "mongodb://localhost/magenta_dev",
 

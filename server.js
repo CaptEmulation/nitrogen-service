@@ -9,7 +9,8 @@ var Config = require('./config'),
     server = app.listen(port),
     io = require('socket.io').listen(server),
 
-    mongoose = require('mongoose');
+    mongoose = require('mongoose'),
+    redis = require('redis');
 
 console.log('listening for http connections on port ' + port + '...');
 
@@ -48,15 +49,15 @@ db.once('open', function callback() {
 	console.log("mongodb connection established");
 });
 
+var pubsubClient = redis.createClient(config.redis_port, config.redis_host);
+pubsubClient.subscribe("messages");
+
 io.sockets.on('connection', function (socket) {
-    socket.emit('deviceid', { hello: "world"});
+  pubsubClient.on('message', function(channel, message) {
+    socket.emit('message', message);
+  });
 
 //  socket.on('subscribe', function (list) {
 //    console.log("subscription: " + list);
 //  });
-
-//  socket.on('online', function() {
-//    console.log("got online message");
-//  });
-
 });
