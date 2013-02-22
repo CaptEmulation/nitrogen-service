@@ -7,7 +7,7 @@ var messageSchema = mongoose.Schema({
 //	from: { type: String },  		// who emitted this message
 //	to: { type: String },  			// who should respond message is targeted to (if any)
 //  response_to: { type: ObjectId } // message this message is in response to
-	body_schema: { type: String },
+	message_type: { type: String },
 	schema_version: { type: Number },
 	body: { type: Mixed }
 });
