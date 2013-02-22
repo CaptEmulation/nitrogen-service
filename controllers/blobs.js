@@ -29,17 +29,15 @@ exports.create = function(req, res) {
 	var blob = new Blob();
 	blob.id = new ObjectID();
 
-	blobService.createBlockBlobFromStream("blobs", blob.id, req, req.get('Content-Length'), {"contentType": req.get('Content-Type')}, 
+	blobService.createBlockBlobFromStream("blobs", blob.id, req, req.get('Content-Length'), 
+		{"contentType": req.get('Content-Type')}, 
 		function(err, blobResult, response) {
 			if (err) return res.send(400);
 
 			blob.save(function(err, blob) {
 				if (err) return res.send(400); 
 
-			    var blob_url = config.base_url + '/blobs/' + blob._id;
-			    console.log("created blob: " + blob_url);
-
-				res.send({"blob": blob});
+				res.send({"blob": blob.transformForClient()});
 			});
 		});
 };
