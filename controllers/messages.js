@@ -27,10 +27,10 @@ exports.show = function(req, res) {
 exports.create = function(req, res) {
 	var message = new Message(req.body);
 
-	message.save(function(err, obj) {
+	message.save(function(err, message) {
 		if (err) return res.send(400, err);
 
-		console.log("created message: " + message._id + ": " + message.transformForClient());
+		console.log("created message: " + message.id + ": " + message.transformForClient());
 
 		res.send({"message": message.transformForClient()});
 		redisClient.publish('messages', JSON.stringify(message.transformForClient()));
