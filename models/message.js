@@ -3,10 +3,11 @@ var mongoose = require('mongoose'),
     Mixed = Schema.Types.Mixed;
 
 var messageSchema = mongoose.Schema({
+	created_at: { type: Date, default: Date.now },
 	timestamp: { type: Date, default: Date.now },
-//	from: { type: String },  		// who emitted this message
-//	to: { type: String },  			// who should respond message is targeted to (if any)
-//  response_to: { type: ObjectId } // message this message is in response to
+//	from: { type: ObjectId },  		// principal who emitted this message
+//	to: { type: ObjectId },  			// principal message is targeted to (if any)
+//  response_to: { type: ObjectId } // message this message is in response to (if any)
 	message_type: { type: String },
 	schema_version: { type: Number },
 	body: { type: Mixed }

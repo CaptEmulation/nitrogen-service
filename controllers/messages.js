@@ -7,7 +7,18 @@ var Config = require('../config'),
 var redisClient = redis.createClient(config.redis_port, config.redis_host);
 
 exports.index = function(req, res) {
-	Message.find(function (err, messages) {
+
+	// TODO: paging
+	var start = 0;
+	var limit = 200;
+
+	Message.find({}, null, {
+		skip: start, 
+		limit: limit,
+	    sort:{
+	        timestamp: -1
+	    }
+	},function (err, messages) {
 		if (err) return res.send(400);
 
 		var cleaned_messages = _.map(messages, function(message) { return message.transformForClient() });
