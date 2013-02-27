@@ -41,7 +41,7 @@ exports.create = function(req, res) {
 				if (err) return res.send(400); 
 
 				console.log('created blob with id: ' + blob._id);
-				res.send({"blob": blob.transformForClient()});
+				res.send({"blob": blob.toClientObject()});
 			});
 		});
 };

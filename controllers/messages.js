@@ -16,7 +16,7 @@ exports.index = function(req, res) {
 		if (err) return res.send(400);
 
 		var cleaned_messages = _.map(messages, function(message) {
-			return message.transformForClient();
+			return message.toClientObject();
 		});
 
 		res.send({"messages": cleaned_messages});
@@ -28,7 +28,7 @@ exports.show = function(req, res) {
 		if (err) return res.send(400, err);
 		if (!message) return res.send(404);
 
-		res.send({"message": message.transformForClient()});
+		res.send({"message": message.toClientObject()});
 	});
 };
 
@@ -38,7 +38,7 @@ exports.create = function(req, res) {
 	message.save(function(err, message) {
 		if (err) return res.send(400, err);
 
-		var client_message = message.transformForClient();
+		var client_message = message.toClientObject();
 
 		console.log("created message: " + message.id + ": " + client_message);
 
