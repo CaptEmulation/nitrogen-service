@@ -2,8 +2,10 @@ var mongoose = require('mongoose');
 
 var blobSchema = mongoose.Schema({
 	created_at: { type: Date, default: Date.now },
+	content_length: { type: Number },
+	content_type: { type: String }
 //	principal_id: { type: String },
-});
+}, { autoIndex: false });
 
 var Blob = mongoose.model('Blob', blobSchema);
 Blob.prototype.transformForClient = function() {
@@ -16,6 +18,4 @@ Blob.prototype.transformForClient = function() {
 	return obj;
 }
 
-module.exports = {
-  Blob: Blob
-}
+module.exports = Blob;

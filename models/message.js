@@ -22,8 +22,6 @@ Message.prototype.transformForClient = function() {
 	delete obj.__v;
 
 	return obj;
-}
+};
 
-module.exports = {
-  Message: Message
-}
+module.exports = Message;

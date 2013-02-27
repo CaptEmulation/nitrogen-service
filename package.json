@@ -7,13 +7,12 @@
   "dependencies": {
     "azure": "*",
     "express": "*",
+    "faye": "*",
     "mocha": "*",
     "mongodb": "*",
     "mongoose": "*",
     "passport": "*",
-    "redis": "*",
     "request": "*",
-    "socket.io": "*",
     "underscore": "*"
   }
 }

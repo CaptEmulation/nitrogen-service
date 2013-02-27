@@ -2,11 +2,9 @@ process.env.NODE_ENV = 'test';
 
 var app = require('../../server'),
 	assert = require('assert'),
-	Config = require('../../config'),
+	config = require('../../config'),
 	fs = require('fs'),
     request = require('request');
-
-var config = new Config();
 
 describe('blobs REST endpoint', function() {
 	it('should be able to create and then fetch a blob', function(done) {
@@ -28,7 +26,10 @@ describe('blobs REST endpoint', function() {
 					      var blob_url = config.base_url + '/blobs/' + body_json.blob.id;
 
   					      request(blob_url, function(err,resp,body) {
-  					      	  if (err) console.log('fetching blob failed: ' + err);
+  					      	  if (err) {
+  					      	  	console.log('fetching blob failed: ' + err);
+  					      	  	return res.send(400, err);
+  					      	  }
 					    	  assert.equal(resp.statusCode, 200);
 					    	  assert.equal(resp.body.length, 28014);
 

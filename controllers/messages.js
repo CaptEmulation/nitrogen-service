@@ -1,33 +1,30 @@
-var Config = require('../config'),
-    config = new Config(),
-	Message = require("../models/message").Message,
-	redis = require('redis'),
+var config = require('../config'),
+    faye = require('faye'),
+	models = require('../models'),
 	_ = require('underscore');
 
-var redisClient = redis.createClient(config.redis_port, config.redis_host);
-
 exports.index = function(req, res) {
-
 	// TODO: paging
 	var start = 0;
 	var limit = 200;
 
-	Message.find({}, null, {
+	models.Message.find({}, null, {
 		skip: start, 
 		limit: limit,
-	    sort:{
-	        timestamp: -1
-	    }
-	},function (err, messages) {
+	    sort:{ timestamp: -1 }
+	}, function (err, messages) {
 		if (err) return res.send(400);
 
-		var cleaned_messages = _.map(messages, function(message) { return message.transformForClient() });
+		var cleaned_messages = _.map(messages, function(message) {
+			return message.transformForClient();
+		});
+
 		res.send({"messages": cleaned_messages});
 	});
 };
 
 exports.show = function(req, res) {
-	Message.findOne({"_id": req.params.id}, function (err, message) {
+	models.Message.findOne({"_id": req.params.id}, function (err, message) {
 		if (err) return res.send(400, err);
 		if (!message) return res.send(404);
 
@@ -36,14 +33,16 @@ exports.show = function(req, res) {
 };
 
 exports.create = function(req, res) {
-	var message = new Message(req.body);
+	var message = new models.Message(req.body);
 
 	message.save(function(err, message) {
 		if (err) return res.send(400, err);
 
-		console.log("created message: " + message.id + ": " + message.transformForClient());
+		var client_message = message.transformForClient();
 
-		res.send({"message": message.transformForClient()});
-		redisClient.publish('messages', JSON.stringify(message.transformForClient()));
+		console.log("created message: " + message.id + ": " + client_message);
+
+		res.send({"message": client_message});
+		global.bayeux.getClient().publish('/messages', client_message);
 	});
 };

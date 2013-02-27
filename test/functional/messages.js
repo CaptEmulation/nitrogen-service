@@ -2,8 +2,8 @@ process.env.NODE_ENV = 'test';
 
 var app = require('../../server'),
 	assert = require('assert'),
-	config = require('../../config')(),
-	io = require('socket.io-client'),
+	config = require('../../config'),
+	faye = require('faye'),
     request = require('request');
 
 describe('messages endpoint', function() {
@@ -17,15 +17,20 @@ describe('messages endpoint', function() {
 	it('should create and fetch a message', function(done) {
 		var notification_passed = false,
 			get_passed = false,
-		    socket = io.connect(config.base_url);
+			started_post = false;
 
-		socket.on('message', function(message) {
-			console.log(message);
+		var client = new faye.Client(config.realtime_url);
+
+		client.subscribe('/messages', function(message) {
+			assert.equal(message.body.reading, 5.1);
 			notification_passed = true;
 		    if (notification_passed && get_passed) done(); 
 		});
 
-		socket.on('connect', function() {
+		global.bayeux.bind('subscribe', function(clientId) {
+			if (started_post) return;
+			started_post = true;
+
 			request.post(config.base_url + '/messages', 
 				{ json: { body: { reading: 5.1 } } }, function(post_err, post_resp, post_body) {
 				  assert.equal(post_err, null);
@@ -34,17 +39,16 @@ describe('messages endpoint', function() {
 			      assert.equal(post_body.message.body.reading, 5.1);
 
 			      request({ url: config.base_url + '/messages/' + post_body.message.id, json: true}, function(get_err, get_resp, get_body) {
-                    assert.equal(get_err, null);
-                    assert.equal(get_resp.statusCode, 200);
+	                assert.equal(get_err, null);
+	                assert.equal(get_resp.statusCode, 200);
 
-                    assert.equal(get_body.message.body.reading, 5.1);
+	                assert.equal(get_body.message.body.reading, 5.1);
 
-                    get_passed = true;
-
-                    if (notification_passed && get_passed) done(); 
-                  });
+	                get_passed = true;
+	                if (notification_passed && get_passed) done(); 
+	              });
 		    });
-		});
+    	});
+	});
 
-    });
 });
