@@ -32,7 +32,7 @@ describe('messages endpoint', function() {
 			started_post = true;
 
 			request.post(config.base_url + '/messages', 
-				{ json: { body: { reading: 5.1 } } }, function(post_err, post_resp, post_body) {
+				{ json: [{ body: { reading: 5.1 } }] }, function(post_err, post_resp, post_body) {
 				  assert.equal(post_err, null);
 			      assert.equal(post_resp.statusCode, 200);
 
@@ -43,6 +43,7 @@ describe('messages endpoint', function() {
 	                assert.equal(get_resp.statusCode, 200);
 
 	                assert.equal(get_body.message.body.reading, 5.1);
+	                assert.notEqual(get_body.message.created_at, 5.1);
 
 	                get_passed = true;
 	                if (notification_passed && get_passed) done(); 

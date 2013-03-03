@@ -2,14 +2,14 @@ var config = null;
 
 if (process.env.NODE_ENV == "production") {
     config = {
-        host: "magenta.azurewebsites.net",
+        host: process.env.HOST_NAME,
         protocol: "http",
 
-        mongodb_connection_string: "mongodb://magenta-mongodb:5eGtQRz5dDNukmDTf6hEUfTuoj2cBwUGiOiTfo0vDVI-@ds045107.mongolab.com:45107/magenta-mongodb",
+        mongodb_connection_string: process.env.MONGODB_CONNECTION_STRING,
 
-        azure_storage_account: "magenta",
-        azure_storage_key: "qPvb6jLVnT4s9/xv6aTxVLDoAEiNnX9qazbl32NO+gO6G+H7txhBw/UYsEC/Jgz30EGzODJs/pIC1UajGb7CIw==",
-        azure_storage_endpoint: "magenta.blob.core.windows.net"
+        azure_storage_account: process.env.AZURE_STORAGE_ACCOUNT,
+        azure_storage_key: process.env.AZURE_STORAGE_KEY,
+        azure_storage_endpoint: process.env.AZURE_STORAGE_ENDPOINT,
     };
 } else if (process.env.NODE_ENV == "test") {
     config = {

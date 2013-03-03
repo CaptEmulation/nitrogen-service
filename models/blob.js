@@ -7,6 +7,7 @@ blobSchema.add({
 	created_at: { type: Date, default: Date.now },
 	content_length: { type: Number },
 	content_type: { type: String },
+
 	owner: { type: Schema.Types.ObjectId }
 });
 

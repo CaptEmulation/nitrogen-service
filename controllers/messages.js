@@ -1,7 +1,6 @@
 var config = require('../config'),
     faye = require('faye'),
-	models = require('../models'),
-	_ = require('underscore');
+	models = require('../models');
 
 exports.index = function(req, res) {
 	// TODO: paging
@@ -15,7 +14,7 @@ exports.index = function(req, res) {
 	}, function (err, messages) {
 		if (err) return res.send(400);
 
-		var cleaned_messages = _.map(messages, function(message) {
+		var cleaned_messages = messages.map(function(message) {
 			return message.toClientObject();
 		});
 
@@ -33,16 +32,19 @@ exports.show = function(req, res) {
 };
 
 exports.create = function(req, res) {
-	var message = new models.Message(req.body);
+	console.log("Message.create received " + req.body.length + " messages.");
+	req.body.forEach(function(msg) {
+		var message = new models.Message(msg);
 
-	message.save(function(err, message) {
-		if (err) return res.send(400, err);
+		message.save(function(err, message) {
+			if (err) return res.send(400, err);
 
-		var client_message = message.toClientObject();
+			var client_message = message.toClientObject();
 
-		console.log("created message: " + message.id + ": " + client_message);
+			console.log("created message: " + message.id + ": " + client_message);
 
-		res.send({"message": client_message});
-		global.bayeux.getClient().publish('/messages', client_message);
+			res.send({"message": client_message});
+			global.bayeux.getClient().publish('/messages', client_message);
+		});
 	});
 };

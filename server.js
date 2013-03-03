@@ -38,8 +38,6 @@ app.post('/blobs', controllers.blobs.create);
 
 app.get('/ops/health', controllers.ops.health);
 
-app.post('/logs', controllers.logs.create);
-
 app.get('/devices/:id', controllers.devices.show);
 app.get('/devices', controllers.devices.index);
 app.post('/devices', controllers.devices.create);
@@ -70,7 +68,7 @@ global.bayeux.bind('publish', function(clientId, channel, data) {
 });
 
 global.bayeux.attach(server);
-console.log('listening for realtime connections at: ' + config.realtime_url);
+console.log('listening for realtime connections on ' + config.realtime_url);
 
 if (process.env.NODE_ENV != "production") {
     mongoose.connection.on('error', function(err) {

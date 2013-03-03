@@ -12,21 +12,27 @@ principalSchema.add({
 
 	external_id: { type: String },
 
-// device (only valid for "device" principal type)
+// account (billing principal and root owner for all principals)
+	// could be 1-1 with user for personal account to 1-many with user for corporate.
+
+// owner of this principal (could be account or user)
+	owner: { type: Schema.Types.ObjectId },			// account that owns this device
+
+// device items
 
     manufacturer_id: { type: String },
 
-// user (only valid for "user" principal type)
+// user items
 
 	email: { type: String },
 	password_hash: { type: String },
 	salt: { type: String },
 
-// group (only valid for "group" principal type)
+// group items (used to organize and permisson principals)
 	
 	name: { type: String },
-	owner: { type: Schema.Types.ObjectId },
 	principals: { type: Array }
+
 });
 
 var Principal = mongoose.model('Principal', principalSchema);
