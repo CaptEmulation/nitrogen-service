@@ -33,18 +33,29 @@ exports.show = function(req, res) {
 
 exports.create = function(req, res) {
 	console.log("Message.create received " + req.body.length + " messages.");
+
+	var return_messages = [];
+	var count = 0;
+
 	req.body.forEach(function(msg) {
 		var message = new models.Message(msg);
 
 		message.save(function(err, message) {
+			count++;
 			if (err) return res.send(400, err);
 
 			var client_message = message.toClientObject();
 
-			console.log("created message: " + message.id + ": " + client_message);
+			console.log("created message: " + message.id + ": " + JSON.stringify(client_message));
 
-			res.send({"message": client_message});
+			return_messages.push(client_message);
 			global.bayeux.getClient().publish('/messages', client_message);
-		});
-	});
+
+			// are we finished?
+			if (count == req.body.length) {
+			    res.send({"messages": return_messages});
+			}
+		}.bind(this));
+
+	}.bind(this));
 };

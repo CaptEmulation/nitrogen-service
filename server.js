@@ -38,9 +38,9 @@ app.post('/blobs', controllers.blobs.create);
 
 app.get('/ops/health', controllers.ops.health);
 
-app.get('/devices/:id', controllers.devices.show);
-app.get('/devices', controllers.devices.index);
-app.post('/devices', controllers.devices.create);
+app.get('/principals/:id', controllers.principals.show);
+app.get('/principals', controllers.principals.index);
+app.post('/principals', controllers.principals.create);
 
 app.get('/messages/:id', controllers.messages.show);
 app.get('/messages', controllers.messages.index);

@@ -10,7 +10,7 @@ describe('messages endpoint', function() {
 	it('should return all messages json', function(done) {
 	    request(config.base_url + '/messages', function(err,resp,body) {
 	      assert.equal(resp.statusCode, 200);
-	      done(); 
+	      done();
 	    });
 	});
 
@@ -24,29 +24,36 @@ describe('messages endpoint', function() {
 		client.subscribe('/messages', function(message) {
 			assert.equal(message.body.reading, 5.1);
 			notification_passed = true;
-		    if (notification_passed && get_passed) done(); 
+		    if (notification_passed && get_passed) done();
 		});
 
 		global.bayeux.bind('subscribe', function(clientId) {
 			if (started_post) return;
 			started_post = true;
 
-			request.post(config.base_url + '/messages', 
+			request.post(config.base_url + '/messages',
 				{ json: [{ body: { reading: 5.1 } }] }, function(post_err, post_resp, post_body) {
 				  assert.equal(post_err, null);
 			      assert.equal(post_resp.statusCode, 200);
 
-			      assert.equal(post_body.message.body.reading, 5.1);
+			      var message_id = null;
+                  post_body.messages.forEach(function(message) {
+				      assert.equal(message.body.reading, 5.1);
+				      message_id = message.id;
+                  });
 
-			      request({ url: config.base_url + '/messages/' + post_body.message.id, json: true}, function(get_err, get_resp, get_body) {
-	                assert.equal(get_err, null);
-	                assert.equal(get_resp.statusCode, 200);
+                  assert.notEqual(message_id, null);
 
-	                assert.equal(get_body.message.body.reading, 5.1);
-	                assert.notEqual(get_body.message.created_at, 5.1);
+			      request({ url: config.base_url + '/messages/' + message_id, json: true},
+					function(get_err, get_resp, get_body) {
+		                assert.equal(get_err, null);
+		                assert.equal(get_resp.statusCode, 200);
 
-	                get_passed = true;
-	                if (notification_passed && get_passed) done(); 
+		                assert.equal(get_body.message.body.reading, 5.1);
+		                assert.notEqual(get_body.message.created_at, 5.1);
+
+		                get_passed = true;
+		                if (notification_passed && get_passed) done();
 	              });
 		    });
     	});

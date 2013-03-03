@@ -3,20 +3,20 @@ var config = require('../config'),
 	_ = require('underscore');
 
 exports.create = function(req, res) {
-	var device = new models.Principal(req.body);
+	var principal = new models.Principal(req.body);
 
-	device.last_ip = req.ip;
+	principal.last_ip = req.ip;
 
-	device.save(function(err, device) {
+	principal.save(function(err, principal) {
 		if (err) {
-			console.log('device create error: ' + err);
+			console.log('principal create error: ' + err);
 			return res.send(400, err);
 		}	
 
-		var device_json = device.toClientObject();
+		var principal_json = principal.toClientObject();
 
-		res.send({"device": device_json});
-		global.bayeux.getClient().publish('/devices', device_json);
+		res.send({"principal": principal_json});
+		global.bayeux.getClient().publish('/principals', principal_json);
 	});
 };
 
@@ -35,7 +35,7 @@ exports.index = function(req, res) {
 		var devices_json = _.map(devices, function(device) {
 			return device.toClientObject();
 		});
-		res.send({"devices": devices_json});
+		res.send({"principals": devices_json});
 	});
 };
 
@@ -44,6 +44,6 @@ exports.show = function(req, res) {
 		if (err) return res.send(400, err);
 		if (!device) return res.send(404);
 
-		res.send({"device": device.toClientObject()});
+		res.send({"principal": device.toClientObject()});
 	});
 };
