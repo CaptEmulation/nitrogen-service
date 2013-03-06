@@ -16,6 +16,8 @@ principalSchema.add({
 	// could be 1-1 with user for personal account to 1-many with user for corporate.
 
 // owner of this principal (could be account or user)
+// for devices this could be initially null to indicate that pairing needed
+
 	owner: { type: Schema.Types.ObjectId },			// account that owns this device
 
 // device items
@@ -29,11 +31,15 @@ principalSchema.add({
 	salt: { type: String },
 
 // group items (used to organize and permisson principals)
-	
+
 	name: { type: String },
 	principals: { type: Array }
 
 });
+
+principalSchema.path('principal_type').validate(function (value) {
+  return !!value;
+}, 'Principal must have principal_type.');
 
 var Principal = mongoose.model('Principal', principalSchema);
 Principal.prototype.toClientObject = function() {

@@ -2,13 +2,10 @@ var BaseSchema = require('./base_schema'),
 	mongoose = require('mongoose'),
 	Schema = mongoose.Schema;
 
-var defaultExpirationDate = new Date();
-defaultExpirationDate.setDate(new Date().getDate() + 30);
-
 var messageSchema = new BaseSchema();
 messageSchema.add({
 	timestamp: { type: Date, default: Date.now },
-	expires: { type: Date, default: defaultExpirationDate },
+	expires: { type: Date },
 	message_type: { type: String },
 	schema_version: { type: Number },
 
@@ -18,6 +15,18 @@ messageSchema.add({
 
 	body: { type: Schema.Types.Mixed }
 });
+
+messageSchema.path('message_type').validate(function (value) {
+  return !!value;
+}, 'Message must have message type.');
+
+messageSchema.path('schema_version').validate(function (value) {
+  return !!value;
+}, 'Message must have schema_version.');
+
+messageSchema.path('from').validate(function (value) {
+  return !!value;
+}, 'Message must have from principal.');
 
 var Message = mongoose.model('Message', messageSchema);
 Message.prototype.toClientObject = function() {
