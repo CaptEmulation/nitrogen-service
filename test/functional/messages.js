@@ -24,7 +24,10 @@ describe('messages endpoint', function() {
 		client.subscribe('/messages', function(message) {
 			assert.equal(message.body.reading, 5.1);
 			notification_passed = true;
-		    if (notification_passed && get_passed) done();
+		    if (notification_passed && get_passed) {
+                client.unsubscribe('/messages');
+                done();
+		    }
 		});
 
 		global.bayeux.bind('subscribe', function(clientId) {
@@ -53,7 +56,10 @@ describe('messages endpoint', function() {
 		                assert.notEqual(get_body.message.created_at, 5.1);
 
 		                get_passed = true;
-		                if (notification_passed && get_passed) done();
+		                if (notification_passed && get_passed) {
+							client.unsubscribe('/messages');
+							done();
+		                }
 	              });
 		    });
     	});

@@ -1,3 +1,5 @@
+var models = require("../models");
+
 exports.create = function(message, callback) {
     if (!message.expires) {
         var defaultExpirationDate = new Date();
@@ -37,7 +39,7 @@ exports.createMany = function(messages, callback) {
 
                 // rollback all saved_messages
                 saved_messages.forEach(function(message_for_delete) {
-                    message_for_delete.remove();
+                    exports.remove(message_for_delete);
                 });
 
                 // callback immediately.
@@ -51,4 +53,10 @@ exports.createMany = function(messages, callback) {
             }
         });
     });
+}
+
+exports.remove = function(message, callback) {
+    models.Message.remove({"_id": message.id}, function (err) {
+        callback(err);
+    })
 }
