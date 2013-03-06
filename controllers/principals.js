@@ -11,9 +11,11 @@ exports.create = function(req, res) {
 		if (err) {
 			console.log('principal create error: ' + err);
 			return res.send(400, err);
-		}	
+		}
 
 		var principal_json = principal.toClientObject();
+
+		console.log("created principal: " + JSON.stringify(principal_json));
 
 		res.send({"principal": principal_json});
 		global.bayeux.getClient().publish('/principals', principal_json);
@@ -26,7 +28,7 @@ exports.index = function(req, res) {
  	var limit = 200;
 
 	models.Principal.find({}, null, {
-		skip: start, 
+		skip: start,
 		limit: limit,
 	    sort:{ timestamp: -1 }
 	}, function (err, devices) {

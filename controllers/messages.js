@@ -8,7 +8,7 @@ exports.index = function(req, res) {
 	var limit = 200;
 
 	models.Message.find({}, null, {
-		skip: start, 
+		skip: start,
 		limit: limit,
 	    sort:{ timestamp: -1 }
 	}, function (err, messages) {
@@ -39,6 +39,15 @@ exports.create = function(req, res) {
 
 	req.body.forEach(function(msg) {
 		var message = new models.Message(msg);
+
+		if (!message.expires) {
+			var defaultExpirationDate = new Date();
+			defaultExpirationDate.setDate(new Date().getDate() + 30);
+
+			message.expires = defaultExpirationDate;
+		}
+
+		// TODO: enforce from principal based on auth
 
 		message.save(function(err, message) {
 			count++;

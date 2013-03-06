@@ -3,14 +3,14 @@ var azure = require('azure'),
 	models = require('../models'),
 	mongodb = require('mongodb');
 
-var blobService = azure.createBlobService(config.azure_storage_account, 
-										  config.azure_storage_key, 
+var blobService = azure.createBlobService(config.azure_storage_account,
+										  config.azure_storage_key,
 										  config.azure_storage_endpoint);
 
 blobService.createContainerIfNotExists(
-	"blobs", 
+	"blobs",
 	function(error) {
-        if (error) throw error;
+        if (error) console.log("not able to create/confirm blob container: " + error);
     }
 );
 
@@ -32,13 +32,13 @@ exports.create = function(req, res) {
 	blob.content_type = req.get('Content-Type');
 	blob.content_length = req.get('Content-Length');
 
-	blobService.createBlockBlobFromStream("blobs", blob.id, req, blob.content_length, 
-		{"contentType": blob.content_type}, 
+	blobService.createBlockBlobFromStream("blobs", blob.id, req, blob.content_length,
+		{"contentType": blob.content_type},
 		function(err, blobResult, response) {
 			if (err) return res.send(400);
 
 			blob.save(function(err, blob) {
-				if (err) return res.send(400); 
+				if (err) return res.send(400);
 
 				console.log('created blob with id: ' + blob._id);
 				res.send({"blob": blob.toClientObject()});
