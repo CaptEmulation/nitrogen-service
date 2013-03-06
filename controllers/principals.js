@@ -1,6 +1,5 @@
 var config = require('../config'),
-	models = require('../models'),
-	_ = require('underscore');
+	models = require('../models');
 
 exports.create = function(req, res) {
 	var principal = new models.Principal(req.body);
@@ -34,7 +33,7 @@ exports.index = function(req, res) {
 	}, function (err, devices) {
 		if (err) return res.send(400);
 
-		var devices_json = _.map(devices, function(device) {
+		var devices_json = devices.map(function(device) {
 			return device.toClientObject();
 		});
 		res.send({"principals": devices_json});

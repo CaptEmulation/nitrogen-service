@@ -12,7 +12,6 @@
     "mongodb": "*",
     "mongoose": "*",
     "passport": "*",
-    "request": "*",
-    "underscore": "*"
+    "request": "*"
   }
 }
