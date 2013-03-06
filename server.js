@@ -73,7 +73,7 @@ console.log('listening for realtime connections on ' + config.realtime_url);
 if (process.env.NODE_ENV != "production") {
     mongoose.connection.on('error', function(err) {
         console.error('MongoDB error: %s', err);
-    });    
+    });
 
-    mongoose.set('debug', true);
+//    mongoose.set('debug', true);
 }
