@@ -4,6 +4,7 @@ var app = require('../../server'),
 	assert = require('assert'),
 	config = require('../../config'),
 	faye = require('faye'),
+    mongoose = require('mongoose'),
     request = require('request');
 
 describe('messages endpoint', function() {
@@ -35,7 +36,9 @@ describe('messages endpoint', function() {
 			started_post = true;
 
 			request.post(config.base_url + '/messages',
-				{ json: [{ message_type: "custom", body: { reading: 5.1 } }] }, function(post_err, post_resp, post_body) {
+				{ json: [{ from: new mongoose.Types.ObjectId(),
+                           message_type: "custom",
+                           body: { reading: 5.1 } }] }, function(post_err, post_resp, post_body) {
 				  assert.equal(post_err, null);
 			      assert.equal(post_resp.statusCode, 200);
 

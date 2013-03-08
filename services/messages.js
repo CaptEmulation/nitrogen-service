@@ -25,7 +25,7 @@ var create = function(message, callback) {
             callback(null, [client_message]);
         });
     });
-}
+};
 
 var createMany = function(messages, callback) {
     validateAll(messages, function(result) {
@@ -33,9 +33,9 @@ var createMany = function(messages, callback) {
 
         async.concat(messages, create, function(err, saved_messages) {
             if (err) {
-                // rollback all saved_messages
+                // rollback any already saved_messages
                 async.each(saved_messages, remove, function(err2) {
-                    console.log("rollback error: " + err2);
+                    console.log("error during rollback: " + err2);
                     return callback(err, []);
                 });
             }
@@ -44,12 +44,11 @@ var createMany = function(messages, callback) {
         });
 
     });
-
-}
+};
 
 var validate = function(message, callback) {
-//    if (!message.from)
-//        return callback(false);
+    if (!message.from)
+        return callback(false);
 
     if (!message.message_type)
         return callback(false);
