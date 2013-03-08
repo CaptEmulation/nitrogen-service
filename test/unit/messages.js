@@ -13,11 +13,11 @@ describe('messages service', function() {
         var message = new models.Message({ message_type: "image",
                                            body: { url: "http://127.0.0.1/photo.jpg" } });
 
-        services.messages.create(message, function(err, saved_message) {
+        services.messages.create(message, function(err, saved_messages) {
           assert.equal(err, null);
-          assert.notEqual(saved_message.id, null);
+          assert.notEqual(saved_messages[0].id, null);
 
-          services.messages.remove(saved_message, function(err) {
+          services.messages.remove(saved_messages[0], function(err) {
             assert.equal(err, null);
             done();
           })

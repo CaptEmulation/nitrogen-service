@@ -1,4 +1,5 @@
-var config = require('../config'),
+var async = require('async'),
+    config = require('../config'),
     faye = require('faye'),
 	models = require('../models'),
 	services = require('../services');
@@ -33,20 +34,15 @@ exports.show = function(req, res) {
 };
 
 exports.create = function(req, res) {
-	var count = 0;
-	var messages = [];
-
-	req.body.forEach(function(message_object) {
-		count += 1;
-		messages.push(new models.Message(message_object));
-
-		if (count == req.body.length) {
-			services.messages.createMany(messages, function(err, saved_messages) {
-				if (err)
-					res.send(400, err);
-				else
-			        res.send({"messages": saved_messages});
-			});
-		}
-	}.bind(this));
+    async.concat(req.body, function(message_object, callback) {
+        var message = new models.Message(message_object);
+        callback(null, [message]);
+    }, function (err, messages) {
+        services.messages.createMany(messages, function(err, saved_messages) {
+            if (err)
+                res.send(400, err);
+            else
+                res.send({"messages": saved_messages});
+        });
+    });
 };

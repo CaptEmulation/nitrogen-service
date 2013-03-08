@@ -1,4 +1,5 @@
-var models = require("../models");
+var async = require("async"),
+    models = require("../models");
 
 exports.create = function(message, callback) {
     if (!message.expires) {
@@ -9,7 +10,7 @@ exports.create = function(message, callback) {
     }
 
     message.save(function(err, message) {
-        if (err) return callback(err, null);
+        if (err) return callback(err, []);
 
         var client_message = message.toClientObject();
 
@@ -18,40 +19,21 @@ exports.create = function(message, callback) {
         global.bayeux.getClient().publish('/messages', client_message);
         global.bayeux.getClient().publish('/messages/type/' + client_message.message_type, client_message);
 
-        callback(null, client_message);
-
-    }.bind(this));
+        callback(null, [client_message]);
+    });
 }
 
 exports.createMany = function(messages, callback) {
-    var count = 0;
-    var saved_messages = [];
-    var failed = false;
+    async.concat(messages, exports.create, function(err, saved_messages) {
+        if (err) {
+            // rollback all saved_messages
+            async.each(saved_messages, exports.remove, function(err2) {
+                console.log("rollback error: " + err2);
+                return callback(err, []);
+            });
+        }
 
-    messages.forEach(function(message) {
-        if (failed) return;
-
-        exports.create(message, function(err, saved_message) {
-            count += 1;
-
-            if (err) {
-                failed = true;
-
-                // rollback all saved_messages
-                saved_messages.forEach(function(message_for_delete) {
-                    exports.remove(message_for_delete);
-                });
-
-                // callback immediately.
-                callback(err, []);
-            }
-
-            saved_messages.push(saved_message);
-
-            if (count == messages.length) {
-                callback(err, saved_messages);
-            }
-        });
+        callback(null, saved_messages);
     });
 }
 

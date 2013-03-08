@@ -5,6 +5,7 @@
   "private": "true",
   "engines" : { "node" : "~0.8.2" }, 
   "dependencies": {
+    "async": "*",
     "azure": "*",
     "express": "*",
     "faye": "*",
