@@ -1,7 +1,7 @@
 var async = require("async"),
     models = require("../models");
 
-exports.create = function(message, callback) {
+var create = function(message, callback) {
     if (!message.expires) {
         var defaultExpirationDate = new Date();
         defaultExpirationDate.setDate(new Date().getDate() + 30);
@@ -9,36 +9,68 @@ exports.create = function(message, callback) {
         message.expires = defaultExpirationDate;
     }
 
-    message.save(function(err, message) {
-        if (err) return callback(err, []);
+    validate(message, function(result) {
+        if (!result) return callback("One or more messages did not validate", []);
 
-        var client_message = message.toClientObject();
+        message.save(function(err, message) {
+            if (err) return callback(err, []);
 
-        console.log("created message: " + message.id + ": " + JSON.stringify(client_message));
+            var client_message = message.toClientObject();
 
-        global.bayeux.getClient().publish('/messages', client_message);
-        global.bayeux.getClient().publish('/messages/type/' + client_message.message_type, client_message);
+            console.log("created message: " + message.id + ": " + JSON.stringify(client_message));
 
-        callback(null, [client_message]);
+            global.bayeux.getClient().publish('/messages', client_message);
+            global.bayeux.getClient().publish('/messages/type/' + client_message.message_type, client_message);
+
+            callback(null, [client_message]);
+        });
     });
 }
 
-exports.createMany = function(messages, callback) {
-    async.concat(messages, exports.create, function(err, saved_messages) {
-        if (err) {
-            // rollback all saved_messages
-            async.each(saved_messages, exports.remove, function(err2) {
-                console.log("rollback error: " + err2);
-                return callback(err, []);
-            });
-        }
+var createMany = function(messages, callback) {
+    validateAll(messages, function(result) {
+        if (!result) return callback("One or more messages did not validate", []);
 
-        callback(null, saved_messages);
+        async.concat(messages, create, function(err, saved_messages) {
+            if (err) {
+                // rollback all saved_messages
+                async.each(saved_messages, remove, function(err2) {
+                    console.log("rollback error: " + err2);
+                    return callback(err, []);
+                });
+            }
+
+            callback(null, saved_messages);
+        });
+
     });
+
 }
 
-exports.remove = function(message, callback) {
+var validate = function(message, callback) {
+//    if (!message.from)
+//        return callback(false);
+
+    if (!message.message_type)
+        return callback(false);
+
+    callback(true);
+};
+
+var validateAll = function(messages, callback) {
+    async.every(messages, validate, callback);
+};
+
+var remove = function(message, callback) {
     models.Message.remove({"_id": message.id}, function (err) {
         callback(err);
     })
-}
+};
+
+module.exports = {
+    create: create,
+    createMany: createMany,
+    remove: remove,
+    validate: validate,
+    validateAll: validateAll
+};

@@ -35,7 +35,7 @@ describe('messages endpoint', function() {
 			started_post = true;
 
 			request.post(config.base_url + '/messages',
-				{ json: [{ body: { reading: 5.1 } }] }, function(post_err, post_resp, post_body) {
+				{ json: [{ message_type: "custom", body: { reading: 5.1 } }] }, function(post_err, post_resp, post_body) {
 				  assert.equal(post_err, null);
 			      assert.equal(post_resp.statusCode, 200);
 

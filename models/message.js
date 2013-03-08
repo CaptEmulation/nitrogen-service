@@ -16,18 +16,6 @@ messageSchema.add({
 	body: { type: Schema.Types.Mixed }
 });
 
-messageSchema.path('message_type').validate(function (value) {
-  return !!value;
-}, 'Message must have message type.');
-
-messageSchema.path('schema_version').validate(function (value) {
-  return !!value;
-}, 'Message must have schema_version.');
-
-messageSchema.path('from').validate(function (value) {
-  return !!value;
-}, 'Message must have from principal.');
-
 var Message = mongoose.model('Message', messageSchema);
 Message.prototype.toClientObject = function() {
 	var obj = this.toObject();
