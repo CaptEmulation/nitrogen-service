@@ -5,14 +5,16 @@
   "private": "true",
   "engines" : { "node" : "~0.8.2" }, 
   "dependencies": {
-    "async": "*",
-    "azure": "*",
-    "express": "*",
-    "faye": "*",
-    "mocha": "*",
-    "mongodb": "*",
-    "mongoose": "*",
-    "passport": "*",
-    "request": "*"
+    "async": "0.2.x",
+    "azure": "0.6.x",
+    "express": "3.x",
+    "faye": "0.8.x",
+    "mongodb": "1.x",
+    "mongoose": "3.x",
+    "passport": "0.1.x",
+    "request": "2.x"
+  },
+  "devDependencies": {
+    "mocha": "1.x"
   }
 }
