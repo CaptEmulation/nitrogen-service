@@ -16,6 +16,8 @@ messageSchema.add({
 	body: { type: Schema.Types.Mixed }
 });
 
+messageSchema.index({ timestamp: 1, type: -1 });
+
 var Message = mongoose.model('Message', messageSchema);
 Message.prototype.toClientObject = function() {
 	var obj = this.toObject();
