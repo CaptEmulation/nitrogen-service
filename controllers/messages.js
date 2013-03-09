@@ -7,7 +7,7 @@ var async = require('async'),
 exports.index = function(req, res) {
 	// TODO: paging
 	var start = 0;
-	var limit = 200;
+	var limit = 50;
 
 	models.Message.find({}, null, {
 		skip: start,
@@ -34,11 +34,14 @@ exports.show = function(req, res) {
 };
 
 exports.create = function(req, res) {
+    console.log("message.create: received " + req.body.length + " messages.");
     async.concat(req.body, function(message_object, callback) {
         var message = new models.Message(message_object);
         callback(null, [message]);
     }, function (err, messages) {
+        console.log("message.create: creating " + req.body.length + " messages.");
         services.messages.createMany(messages, function(err, saved_messages) {
+            console.log("message.create: saved messages: " + JSON.stringify(saved_messages));
             if (err)
                 res.send(400, err);
             else

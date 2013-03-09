@@ -22,7 +22,8 @@ describe('messages endpoint', function() {
 
 		var client = new faye.Client(config.realtime_url);
 
-		client.subscribe('/messages', function(message) {
+		client.subscribe('/messages', function(message_json) {
+            var message = JSON.parse(message_json);
 			assert.equal(message.body.reading, 5.1);
 			notification_passed = true;
 		    if (notification_passed && get_passed) {

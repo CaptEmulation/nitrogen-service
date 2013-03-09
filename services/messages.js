@@ -10,17 +10,21 @@ var create = function(message, callback) {
     }
 
     validate(message, function(result) {
-        if (!result) return callback("One or more messages did not validate", []);
+        if (!result) {
+            console.log("ERROR: One or more messages did not validate");
+            return callback("One or more messages did not validate", []);
+        }
 
         message.save(function(err, message) {
             if (err) return callback(err, []);
 
             var client_message = message.toClientObject();
+            var client_json = JSON.stringify(client_message);
 
-            console.log("created message: " + message.id + ": " + JSON.stringify(client_message));
+            console.log("created message: " + message.id + ": " + client_json);
 
-            global.bayeux.getClient().publish('/messages', client_message);
-            global.bayeux.getClient().publish('/messages/type/' + client_message.message_type, client_message);
+            global.bayeux.getClient().publish('/messages', client_json);
+            global.bayeux.getClient().publish('/messages/type/' + client_message.message_type, client_json);
 
             callback(null, [client_message]);
         });
