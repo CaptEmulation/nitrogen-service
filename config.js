@@ -45,7 +45,10 @@ if (process.env.NODE_ENV == "production") {
 
 // common & computed properties 
 
-config.base_url = config.protocol + "://" + config.host + ":" + config.http_port;
+config.path_prefix = "/api/v1";
+config.base_url = config.protocol + "://" + config.host + ":" + config.http_port + config.path_prefix;
+
+// NOTE:  cannot have a trailing slash on realtime_path below or faye client will fail.
 config.realtime_path = "/realtime";
 config.realtime_url = config.base_url + config.realtime_path;
 

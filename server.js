@@ -33,25 +33,25 @@ app.use(express.bodyParser());
 
 // REST endpoint routing
 
-app.get('/blobs/:id', controllers.blobs.show);
-app.post('/blobs', controllers.blobs.create);
+app.get('/api/v1/blobs/:id', controllers.blobs.show);
+app.post('/api/v1/blobs', controllers.blobs.create);
 
-app.get('/ops/health', controllers.ops.health);
+app.get('/api/v1/ops/health', controllers.ops.health);
 
-app.get('/principals/:id', controllers.principals.show);
-app.get('/principals', controllers.principals.index);
-app.post('/principals', controllers.principals.create);
+app.get('/api/v1/principals/:id', controllers.principals.show);
+app.get('/api/v1/principals', controllers.principals.index);
+app.post('/api/v1/principals', controllers.principals.create);
 
-app.get('/messages/:id', controllers.messages.show);
-app.get('/messages', controllers.messages.index);
-app.post('/messages', controllers.messages.create);
+app.get('/api/v1/messages/:id', controllers.messages.show);
+app.get('/api/v1/messages', controllers.messages.index);
+app.post('/api/v1/messages', controllers.messages.create);
 
 mongoose.connect(config.mongodb_connection_string);
 
 // Realtime endpoint setup
 
 global.bayeux = new faye.NodeAdapter({
-  mount: config.realtime_path,
+  mount: config.path_prefix + config.realtime_path,
   timeout: 90
 });
 
@@ -68,7 +68,7 @@ global.bayeux.bind('publish', function(clientId, channel, data) {
 });
 
 global.bayeux.attach(server);
-console.log('listening for realtime connections on ' + config.realtime_url);
+console.log('listening for realtime connections on ' + config.path_prefix + config.realtime_path);
 
 if (process.env.NODE_ENV != "production") {
     mongoose.connection.on('error', function(err) {

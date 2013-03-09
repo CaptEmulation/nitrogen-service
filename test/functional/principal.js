@@ -19,6 +19,7 @@ describe('principal endpoint', function() {
 			assert.equal(device.external_id, "opaqueid");
 			notification_passed = true;
 		    if (notification_passed && get_passed) {
+                console.log("got principal notification");
 		    	done();
 		    } 
 		});
@@ -44,6 +45,7 @@ describe('principal endpoint', function() {
 		                get_passed = true;
 
 		                if (notification_passed && get_passed) {
+                            console.log("got REST notification");
 		                	done();
 		                } 
 	              });
