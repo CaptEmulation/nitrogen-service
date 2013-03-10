@@ -1,23 +1,16 @@
 var config = require('../config'),
-	models = require('../models');
+	models = require('../models'),
+	services = require('../services');
 
 exports.create = function(req, res) {
 	var principal = new models.Principal(req.body);
-
 	principal.last_ip = req.ip;
 
-	principal.save(function(err, principal) {
-		if (err) {
-			console.log('principal create error: ' + err);
-			return res.send(400, err);
-		}
-
-		var principal_json = principal.toClientObject();
-
-		console.log("created principal: " + JSON.stringify(principal_json));
-
-		res.send({"principal": principal_json});
-		global.bayeux.getClient().publish('/principals', principal_json);
+	services.principals.create(principal, function(err, principal) {
+		if (err)
+			res.send(400, err);
+		else
+        	res.send({"principal": principal.toClientObject()});
 	});
 };
 

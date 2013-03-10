@@ -1,1 +1,2 @@
-exports.messages = require("./messages.js");
+exports.messages = require('./messages');
+exports.principals = require('./principals');

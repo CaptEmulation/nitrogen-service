@@ -1,6 +1,8 @@
-var config = require('./config'),
+//var agents = require('./agents'),
+var    config = require('./config'),
     controllers = require('./controllers'),
-    mongoose = require('mongoose');
+    models = require('./models'),
+    mongoose = require('mongoose'),
     express = require('express'),
     app = express(),
 
@@ -74,6 +76,17 @@ if (process.env.NODE_ENV != "production") {
     mongoose.connection.on('error', function(err) {
         console.error('MongoDB error: %s', err);
     });
-
-//    mongoose.set('debug', true);
 }
+
+//services.principals.getServicePrincipal(function(err, callback) {
+
+  // use magenta sdk with system principal to execute agents.
+//  magenta.Service.initialize(config, function(err, service) {
+//      if (err) return console.log(err);
+
+//      service.connect(service.principal, function(err, session) {
+//          session.attachAgent(agents.autopairing);
+//      });
+//  });
+
+//});

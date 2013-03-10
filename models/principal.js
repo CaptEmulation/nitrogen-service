@@ -5,7 +5,7 @@ var BaseSchema = require('./base_schema'),
 var principalSchema = new BaseSchema();
 principalSchema.add({
 
-	principal_type: {type: String},
+	principal_type: {type: String},        // user, device, service, app
 
 	last_ip: { type: String },
 	last_connection: { type: Date, default: Date.now },
