@@ -1,6 +1,6 @@
-var BaseSchema = require('./base_schema'),
-	mongoose = require('mongoose'),
-	Schema = mongoose.Schema;
+var BaseSchema = require('./base_schema')
+  ,	mongoose = require('mongoose')
+  , Schema = mongoose.Schema;
 
 var principalSchema = new BaseSchema();
 principalSchema.add({
@@ -10,7 +10,8 @@ principalSchema.add({
 	last_ip: { type: String },
 	last_connection: { type: Date, default: Date.now },
 
-	external_id: { type: String },
+    capabilities: { type: Array },
+    external_id: { type: String },
 
 // account (billing principal and root owner for all principals)
 	// could be 1-1 with user for personal account to 1-many with user for corporate.

@@ -9,6 +9,7 @@
     "azure": "0.6.x",
     "express": "3.x",
     "faye": "0.8.x",
+    "magenta": "0.0.x",
     "mongodb": "1.x",
     "mongoose": "3.x",
     "passport": "0.1.x",

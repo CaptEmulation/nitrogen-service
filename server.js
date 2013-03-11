@@ -48,6 +48,11 @@ app.get('/api/v1/messages/:id', controllers.messages.show);
 app.get('/api/v1/messages', controllers.messages.index);
 app.post('/api/v1/messages', controllers.messages.create);
 
+// client serving endpoint
+
+// app.use(express.static(__dirname + '/client'));
+// TODO: use symlink to grunted version of latest client that works with this service.
+
 mongoose.connect(config.mongodb_connection_string);
 
 // Realtime endpoint setup

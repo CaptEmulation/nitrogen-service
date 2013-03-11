@@ -15,7 +15,8 @@ describe('principal endpoint', function() {
 
 		var client = new faye.Client(config.realtime_url);
 
-		client.subscribe('/principals', function(device) {
+		client.subscribe('/principals', function(device_json) {
+            var device = JSON.parse(device_json);
 			assert.equal(device.external_id, "opaqueid");
 			notification_passed = true;
 		    if (notification_passed && get_passed) {
