@@ -17,7 +17,7 @@ exports.index = function(req, res) {
 		if (err) return res.send(400);
 
 		var cleaned_messages = messages.map(function(message) {
-			return message.toClientObject();
+			return message.toClientView();
 		});
 
 		res.send({"messages": cleaned_messages});
@@ -29,7 +29,7 @@ exports.show = function(req, res) {
 		if (err) return res.send(400, err);
 		if (!message) return res.send(404);
 
-		res.send({"message": message.toClientObject()});
+		res.send({"message": message.toClientView()});
 	});
 };
 

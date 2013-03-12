@@ -10,7 +10,7 @@ exports.create = function(req, res) {
 		if (err)
 			res.send(400, err);
 		else
-        	res.send({"principal": principal.toClientObject()});
+        	res.send({"principal": principal.toClientView()});
 	});
 };
 
@@ -27,7 +27,7 @@ exports.index = function(req, res) {
 		if (err) return res.send(400);
 
 		var devices_json = devices.map(function(device) {
-			return device.toClientObject();
+			return device.toClientView();
 		});
 		res.send({"principals": devices_json});
 	});
@@ -38,6 +38,6 @@ exports.show = function(req, res) {
 		if (err) return res.send(400, err);
 		if (!device) return res.send(404);
 
-		res.send({"principal": device.toClientObject()});
+		res.send({"principal": device.toClientView()});
 	});
 };

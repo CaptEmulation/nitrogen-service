@@ -8,7 +8,7 @@ var create = function(principal, callback) {
             return callback(err, null);
         }
 
-        var principal_json = JSON.stringify(principal.toClientObject());
+        var principal_json = JSON.stringify(principal.toClientView());
 
         console.log("created principal: " + principal_json);
         global.bayeux.getClient().publish('/principals', principal_json);

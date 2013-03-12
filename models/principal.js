@@ -43,14 +43,6 @@ principalSchema.path('principal_type').validate(function (value) {
 }, 'Principal must have principal_type.');
 
 var Principal = mongoose.model('Principal', principalSchema);
-Principal.prototype.toClientObject = function() {
-	var obj = this.toObject();
-
-	obj.id = obj._id;
-	delete obj._id;
-	delete obj.__v;
-
-	return obj;
-};
+Principal.prototype.toClientView = BaseSchema.toClientView;
 
 module.exports = Principal;

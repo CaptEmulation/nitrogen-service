@@ -18,7 +18,7 @@ var create = function(message, callback) {
         message.save(function(err, message) {
             if (err) return callback(err, []);
 
-            var client_message = message.toClientObject();
+            var client_message = message.toClientView();
             var client_json = JSON.stringify(client_message);
 
             console.log("created message: " + message.id + ": " + client_json);

@@ -13,14 +13,6 @@ blobSchema.add({
 
 var Blob = mongoose.model('Blob', blobSchema);
 
-Blob.prototype.toClientObject = function() {
-	var obj = this.toObject();
-
-	obj.id = obj._id;
-	delete obj._id;
-	delete obj.__v;
-
-	return obj;
-}
+Blob.prototype.toClientView = BaseSchema.toClientView;
 
 module.exports = Blob;

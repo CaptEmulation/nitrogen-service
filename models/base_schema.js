@@ -9,8 +9,18 @@ var BaseSchema = function() {
   this.add({
 	created_at: { type: Date, default: Date.now } 
   });
-}
+};
 
 util.inherits(BaseSchema, mongoose.Schema);
+
+BaseSchema.toClientView = function() {
+    var obj = this.toObject();
+
+    obj.id = obj._id;
+    delete obj._id;
+    delete obj.__v;
+
+    return obj;
+};
 
 module.exports = BaseSchema;
