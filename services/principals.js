@@ -4,13 +4,10 @@ var async = require("async"),
 var create = function(principal, callback) {
     principal.save(function(err, principal) {
         if (err) {
-            console.log('principal create error: ' + err);
             return callback(err, null);
         }
 
         var principal_json = JSON.stringify(principal.toClientView());
-
-        console.log("created principal: " + principal_json);
         global.bayeux.getClient().publish('/principals', principal_json);
 
         callback(null, principal);

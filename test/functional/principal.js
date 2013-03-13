@@ -15,9 +15,11 @@ describe('principal endpoint', function() {
 
 		var client = new faye.Client(config.realtime_url);
 
-		client.subscribe('/principals', function(device_json) {
-            var device = JSON.parse(device_json);
-			assert.equal(device.external_id, "opaqueid");
+		client.subscribe('/principals', function(principal_json) {
+            var principal = JSON.parse(principal_json);
+            if (principal.principal_type != "device") return;
+
+			assert.equal(principal.external_id, "opaqueid");
 			notification_passed = true;
 		    if (notification_passed && get_passed) {
                 console.log("got principal notification");
@@ -30,7 +32,8 @@ describe('principal endpoint', function() {
 			started_post = true;
 			
 			request.post(config.base_url + '/principals', 
-				{ json: { external_id: "opaqueid" } }, function(post_err, post_resp, post_body) {
+				{ json: { principal_type: "device",
+                          external_id: "opaqueid" } }, function(post_err, post_resp, post_body) {
 				  assert.equal(post_err, null);
 			      assert.equal(post_resp.statusCode, 200);
 
@@ -61,4 +64,16 @@ describe('principal endpoint', function() {
 	    });
 	});
 
+    it('should create a user principal', function(done) {
+        request.post(config.base_url + '/principals',
+            { json: { principal_type: "user",
+                      email: "user@gmail.com",
+                      password: "sEcReT44" } }, function(err, resp, body) {
+                assert.equal(err, null);
+                assert.equal(resp.statusCode, 200);
+                assert.equal(body.principal.principal_type, "user");
+                assert.notEqual(body.principal.id, undefined);
+                done();
+            });
+    });
 });

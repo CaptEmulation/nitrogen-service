@@ -7,10 +7,11 @@ exports.create = function(req, res) {
 	principal.last_ip = req.ip;
 
 	services.principals.create(principal, function(err, principal) {
-		if (err)
+		if (err) {
 			res.send(400, err);
-		else
-        	res.send({"principal": principal.toClientView()});
+        } else {
+            res.send({ "principal": principal.toClientView() });
+        }
 	});
 };
 

@@ -1,14 +1,18 @@
 //var agents = require('./agents'),
-var    config = require('./config'),
-    controllers = require('./controllers'),
-    models = require('./models'),
-    mongoose = require('mongoose'),
-    express = require('express'),
-    app = express(),
+var   config = require('./config')
+    , controllers = require('./controllers')
+    , express = require('express')
+    , models = require('./models')
+    , mongoose = require('mongoose')
+//    , passport = require('passport')
 
-    http = require('http'),
-    port = process.env.PORT || config.http_port || 3030,
-    faye = require('faye');
+    , app = express()
+
+    , http = require('http')
+    , port = process.env.PORT || config.http_port || 3030
+    , faye = require('faye')
+
+//    , BearerStrategy = require('passport-http-bearer').Strategy;
 
 var server = app.listen(port);
 console.log('listening for http connections on ' + config.base_url);
@@ -31,6 +35,7 @@ var allowCrossDomain = function(req, res, next) {
 };
 
 app.use(allowCrossDomain);
+//app.use(passport.initialize());
 app.use(express.bodyParser());
 
 // REST endpoint routing
@@ -51,7 +56,7 @@ app.post('/api/v1/messages', controllers.messages.create);
 // client serving endpoint
 
 // app.use(express.static(__dirname + '/client'));
-// TODO: use symlink to grunted version of latest client that works with this service.
+// TODO: ability to serve out magenta js client using symlink to client that works with this service.
 
 mongoose.connect(config.mongodb_connection_string);
 
@@ -85,13 +90,11 @@ if (process.env.NODE_ENV != "production") {
 
 //services.principals.getServicePrincipal(function(err, callback) {
 
-  // use magenta sdk with system principal to execute agents.
-//  magenta.Service.initialize(config, function(err, service) {
-//      if (err) return console.log(err);
+//  use magenta sdk with system principal to execute agents.
+//  var service = new Service(config);
 
-//      service.connect(service.principal, function(err, session) {
-//          session.attachAgent(agents.autopairing);
-//      });
+//  service.connect(service.principal, function(err, session) {
+//     session.attachAgent(agents.devicePairings);
 //  });
 
 //});

@@ -12,6 +12,7 @@ describe('blobs REST endpoint', function() {
 		var fixture_path = 'test/fixtures/images/image.jpg';
 
 		fs.stat(fixture_path, function(err, stats) {
+                assert.ifError(err);
 				fs.createReadStream(fixture_path).
 				pipe(
 					request.post(config.base_url + '/blobs', 

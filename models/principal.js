@@ -1,11 +1,11 @@
-var BaseSchema = require('./base_schema')
+var BaseSchema = require('./baseSchema')
   ,	mongoose = require('mongoose')
   , Schema = mongoose.Schema;
 
 var principalSchema = new BaseSchema();
 principalSchema.add({
 
-	principal_type: {type: String},        // user, device, service, app
+	principal_type: { type: String },        // user, device, service, app
 
 	last_ip: { type: String },
 	last_connection: { type: Date, default: Date.now },
@@ -19,7 +19,7 @@ principalSchema.add({
 // owner of this principal (could be account or user)
 // for devices this could be initially null to indicate that pairing needed
 
-	owner: { type: Schema.Types.ObjectId },			// account that owns this device
+	owner: { type: Schema.Types.ObjectId, ref: 'Principal' },			// account that owns this device
 
 // device items
 
@@ -37,6 +37,8 @@ principalSchema.add({
 	principals: { type: Array }
 
 });
+
+principalSchema.index({ email: 1, type: 1 });
 
 principalSchema.path('principal_type').validate(function (value) {
   return !!value;

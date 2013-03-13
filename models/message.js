@@ -1,4 +1,4 @@
-var BaseSchema = require('./base_schema'),
+var BaseSchema = require('./baseSchema'),
 	mongoose = require('mongoose'),
 	Schema = mongoose.Schema;
 
