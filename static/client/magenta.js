@@ -1,0 +1,1 @@
+../../node_modules/magenta/browser/magenta.js
