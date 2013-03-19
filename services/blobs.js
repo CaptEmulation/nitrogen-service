@@ -3,14 +3,12 @@ var config = require('../config'),
 
 var stream = function(blobId, stream, callback) {
     models.Blob.findOne({"_id": blobId}, function (err, blob) {
-        if (err) return callback(err);
-        if (!blob) return callback("Blob not found");
+        if (err) return callback(err, null);
+        if (!blob) return callback(null, null);
 
         // TODO:  do authorization here
 
-        config.blob_provider.stream(blob, stream, function(error) {
-            callback(error);
-        });
+        config.blob_provider.stream(blob, stream, callback);
     });
 };
 

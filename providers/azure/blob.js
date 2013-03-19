@@ -20,7 +20,7 @@ AzureBlobProvider.prototype.create = function(blob, stream, callback) {
     this.azureBlobService.createBlockBlobFromStream("blobs", blob.id, stream, blob.content_length,
         {"contentType": blob.content_type},
         function(err, blobResult, response) {
-            callback(err);
+            callback(err, blob);
         });
 };
 
