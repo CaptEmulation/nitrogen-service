@@ -25,7 +25,7 @@ exports.index = function(req, res) {
 };
 
 exports.show = function(req, res) {
-	models.Message.findOne({"_id": req.params.id}, function (err, message) {
+    services.messages.findById(req.params.id, function(err, message) {
 		if (err) return res.send(400, err);
 		if (!message) return res.send(404);
 

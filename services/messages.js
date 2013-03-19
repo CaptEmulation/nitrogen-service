@@ -50,6 +50,23 @@ var createMany = function(messages, callback) {
     });
 };
 
+var findById = function(messageId, callback) {
+    // TODO: add authorization of principal here
+
+    models.Message.findOne({"_id": messageId}, function (err, message) {
+        if (err) return callback(err, null);
+        if (!message) return callback(null, null);
+
+        callback(null, message);
+    });
+};
+
+var remove = function(message, callback) {
+    models.Message.remove({"_id": message.id}, function (err) {
+        callback(err);
+    })
+};
+
 var validate = function(message, callback) {
     if (!message.from)
         return callback(false);
@@ -64,15 +81,10 @@ var validateAll = function(messages, callback) {
     async.every(messages, validate, callback);
 };
 
-var remove = function(message, callback) {
-    models.Message.remove({"_id": message.id}, function (err) {
-        callback(err);
-    })
-};
-
 module.exports = {
     create: create,
     createMany: createMany,
+    findById: findById,
     remove: remove,
     validate: validate,
     validateAll: validateAll
