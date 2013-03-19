@@ -1,23 +1,24 @@
 //var agents = require('./agents'),
-var   config = require('./config')
-    , controllers = require('./controllers')
-    , express = require('express')
-    , models = require('./models')
-    , mongoose = require('mongoose')
+var   config = require('./config'),
+      controllers = require('./controllers'),
+      express = require('express'),
+      models = require('./models'),
+      mongoose = require('mongoose'),
 //    , passport = require('passport')
 
-    , app = express()
+      app = express(),
 
-    , http = require('http')
-    , port = process.env.PORT || config.http_port || 3030
-    , faye = require('faye')
+      http = require('http'),
+      port = process.env.PORT || config.http_port || 3030,
+      faye = require('faye')
 
 //    , BearerStrategy = require('passport-http-bearer').Strategy;
 
 var server = app.listen(port);
 console.log('listening for http connections on ' + config.base_url);
 
-var allowCrossDomain = function(req, res, next) {
+// Allow cross domain access
+app.use(function(req, res, next) {
   res.header('Access-Control-Allow-Origin', "*");
   res.header('Access-Control-Allow-Credentials', true);
   res.header('Access-Control-Allow-Methods', '*');
@@ -32,9 +33,8 @@ var allowCrossDomain = function(req, res, next) {
   } else {
     next();
   }
-};
+});
 
-app.use(allowCrossDomain);
 //app.use(passport.initialize());
 app.use(express.bodyParser());
 
@@ -53,10 +53,9 @@ app.get('/api/v1/messages/:id', controllers.messages.show);
 app.get('/api/v1/messages', controllers.messages.index);
 app.post('/api/v1/messages', controllers.messages.create);
 
-// client serving endpoint
+// static serving endpoint
 
-// app.use(express.static(__dirname + '/client'));
-// TODO: ability to serve out magenta js client using symlink to client that works with this service.
+app.use(express.static(__dirname + '/static'));
 
 mongoose.connect(config.mongodb_connection_string);
 

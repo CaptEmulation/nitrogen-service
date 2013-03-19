@@ -1,3 +1,4 @@
+var providers = require('./providers');
 var config = null;
 
 if (process.env.NODE_ENV == "production") {
@@ -24,9 +25,6 @@ if (process.env.NODE_ENV == "production") {
 }
 
 config.mongodb_connection_string = config.mongodb_connection_string || process.env.MONGODB_CONNECTION_STRING;
-config.azure_storage_account = config.azure_storage_account || process.env.AZURE_STORAGE_ACCOUNT;
-config.azure_storage_key = config.azure_storage_key || process.env.AZURE_STORAGE_KEY;
-config.azure_storage_endpoint = config.azure_storage_endpoint || process.env.AZURE_STORAGE_ENDPOINT;
 
 config.path_prefix = "/api/v1";
 config.base_url = config.protocol + "://" + config.host + ":" + config.http_port + config.path_prefix;
@@ -35,4 +33,5 @@ config.base_url = config.protocol + "://" + config.host + ":" + config.http_port
 config.realtime_path = "/realtime";
 config.realtime_url = config.base_url + config.realtime_path;
 
+config.blob_provider = new providers.azure.AzureBlobProvider(config);
 module.exports = config;
