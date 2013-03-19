@@ -5,23 +5,22 @@ var async = require('async'),
 	services = require('../services');
 
 exports.index = function(req, res) {
-	// TODO: paging
-	var start = 0;
-	var limit = 50;
 
-	models.Message.find({}, null, {
-		skip: start,
-		limit: limit,
-	    sort:{ timestamp: -1 }
-	}, function (err, messages) {
-		if (err) return res.send(400);
+    // TODO: add paging, querying
+    var filter = {};
+    var start = 0;
+    var limit = 50;
+    var sort = { timestamp: -1 };
 
-		var cleaned_messages = messages.map(function(message) {
-			return message.toClientView();
-		});
+    services.messages.find(filter, start, limit, sort, function(err, messages) {
+        if (err) return res.send(400, err);
 
-		res.send({"messages": cleaned_messages});
-	});
+        var clientMessages = messages.map(function(message) {
+            return message.toClientView();
+        });
+
+        res.send({"messages": clientMessages});
+    });
 };
 
 exports.show = function(req, res) {

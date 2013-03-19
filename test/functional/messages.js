@@ -11,6 +11,9 @@ describe('messages endpoint', function() {
 	it('should return all messages json', function(done) {
 	    request(config.base_url + '/messages', function(err,resp,body) {
 	      assert.equal(resp.statusCode, 200);
+
+          var messages_json = JSON.parse(body);
+          assert.notEqual(messages_json.messages, undefined);
 	      done();
 	    });
 	});
