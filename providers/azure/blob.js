@@ -3,7 +3,7 @@ var azure = require('azure');
 function AzureBlobProvider(config) {
     var azure_storage_account = config.azure_storage_account || process.env.AZURE_STORAGE_ACCOUNT;
     var azure_storage_key = config.azure_storage_key || process.env.AZURE_STORAGE_KEY;
-    var azure_storage_endpoint = config.azure_storage_endpoint || process.env.AZURE_STORAGE_ENDPOINT;
+    var azure_storage_endpoint = azure_storage_account + ".blob.core.windows.net";
 
     this.azureBlobService = azure.createBlobService(azure_storage_account,
                                                     azure_storage_key, azure_storage_endpoint);
