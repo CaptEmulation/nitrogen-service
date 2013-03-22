@@ -26,7 +26,8 @@ if (process.env.NODE_ENV == "production") {
 
 config.mongodb_connection_string = config.mongodb_connection_string || process.env.MONGODB_CONNECTION_STRING;
 
-config.path_prefix = "/api/v1";
+config.api_prefix = "/api/";
+config.path_prefix = config.api_prefix + "v1";
 config.base_url = config.protocol + "://" + config.host + ":" + config.http_port + config.path_prefix;
 
 // NOTE:  cannot have a trailing slash on realtime_path below or faye client will fail.

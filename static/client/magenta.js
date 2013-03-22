@@ -1,1 +1,1 @@
-../../node_modules/magenta/browser/magenta.js
+../../../sdk/browser/magenta.js

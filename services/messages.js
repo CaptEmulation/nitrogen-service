@@ -11,7 +11,6 @@ var create = function(message, callback) {
 
     validate(message, function(result) {
         if (!result) {
-            console.log("ERROR: One or more messages did not validate");
             return callback("One or more messages did not validate", []);
         }
 

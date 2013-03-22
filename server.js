@@ -1,18 +1,15 @@
-//var agents = require('./agents'),
-var   config = require('./config'),
+var   express = require('express'),
+      app = express(),
+      BearerStrategy = require('passport-http-bearer').Strategy,
+      config = require('./config'),
       controllers = require('./controllers'),
-      express = require('express'),
+      faye = require('faye'),
+      http = require('http'),
       models = require('./models'),
       mongoose = require('mongoose'),
-//    , passport = require('passport')
-
-      app = express(),
-
-      http = require('http'),
+      passport = require('passport')
       port = process.env.PORT || config.http_port || 3030,
-      faye = require('faye')
-
-//    , BearerStrategy = require('passport-http-bearer').Strategy;
+      services = require('./services');
 
 var server = app.listen(port);
 console.log('listening for http connections on ' + config.base_url);
@@ -35,23 +32,27 @@ app.use(function(req, res, next) {
   }
 });
 
-//app.use(passport.initialize());
+app.use(passport.initialize());
 app.use(express.bodyParser());
+
+passport.use(new BearerStrategy({}, services.accessTokens.verify));
 
 // REST endpoint routing
 
-app.get('/api/v1/blobs/:id', controllers.blobs.show);
-app.post('/api/v1/blobs', controllers.blobs.create);
+//app.get(config.api_prefix + 'v1/services', controllers.services.index);
 
-app.get('/api/v1/ops/health', controllers.ops.health);
+app.get(config.api_prefix + 'v1/blobs/:id', controllers.blobs.show);
+app.post(config.api_prefix + 'v1/blobs', controllers.blobs.create);
 
-app.get('/api/v1/principals/:id', controllers.principals.show);
-app.get('/api/v1/principals', controllers.principals.index);
-app.post('/api/v1/principals', controllers.principals.create);
+app.get(config.api_prefix + 'v1/ops/health', controllers.ops.health);
 
-app.get('/api/v1/messages/:id', controllers.messages.show);
-app.get('/api/v1/messages', controllers.messages.index);
-app.post('/api/v1/messages', controllers.messages.create);
+app.get(config.api_prefix + 'v1/principals/:id', controllers.principals.show);
+app.get(config.api_prefix + 'v1/principals', controllers.principals.index);
+app.post(config.api_prefix + 'v1/principals', controllers.principals.create);
+
+app.get(config.api_prefix + 'v1/messages/:id', controllers.messages.show);
+app.get(config.api_prefix +'v1/messages', controllers.messages.index);
+app.post(config.api_prefix +'v1/messages', controllers.messages.create);
 
 // static serving endpoint
 

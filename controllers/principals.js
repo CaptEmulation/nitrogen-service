@@ -10,7 +10,13 @@ exports.create = function(req, res) {
 		if (err) {
 			res.send(400, err);
         } else {
-            res.send({ "principal": principal.toClientView() });
+            services.accessTokens.create(principal, function(err, accessToken) {
+                if (err) res.send(400, err);
+
+                res.send({ "principal": principal.toClientView(),
+                           "accessToken": accessToken.toClientView() });
+
+            });
         }
 	});
 };

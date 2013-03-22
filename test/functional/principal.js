@@ -34,10 +34,14 @@ describe('principal endpoint', function() {
 			request.post(config.base_url + '/principals', 
 				{ json: { principal_type: "device",
                           external_id: "opaqueid" } }, function(post_err, post_resp, post_body) {
-				  assert.equal(post_err, null);
+				  assert.ifError(post_err);
 			      assert.equal(post_resp.statusCode, 200);
 
 			      assert.equal(post_body.principal.external_id, "opaqueid");
+                  assert.equal(post_body.accessToken.token.length, 64);
+                  assert.ok(Date.now() < Date.parse(post_body.accessToken.expires_at));
+                  console.log("******************: " + JSON.stringify(post_body));
+                  assert.equal(post_body.principal.id, post_body.accessToken.principal_id);
 
 			      request({ url: config.base_url + '/principals/' + post_body.principal.id, json: true}, 
 			      	function(get_err, get_resp, get_body) {
