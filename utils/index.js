@@ -19,7 +19,7 @@ module.exports.uid = function(len) {
     }
 
     return buf.join('');
-}
+};
 
 /**
  * Return a random int, used by `utils.uid()`
@@ -33,3 +33,7 @@ module.exports.uid = function(len) {
 function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
+
+module.exports.stringEndsWith = function(s, suffix) {
+    return s.indexOf(suffix, s.length - suffix.length) !== -1;
+};

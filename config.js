@@ -34,5 +34,9 @@ config.base_url = config.protocol + "://" + config.host + ":" + config.http_port
 config.realtime_path = "/realtime";
 config.realtime_url = config.base_url + config.realtime_path;
 
+config.blobs_endpoint = config.base_url + "/blobs/";
+config.messages_endpoint = config.base_url + "/messages/";
+config.principals_endpoint = config.base_url + "/principals/";
+
 config.blob_provider = new providers.azure.AzureBlobProvider(config);
 module.exports = config;

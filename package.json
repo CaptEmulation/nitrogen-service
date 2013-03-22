@@ -1,6 +1,6 @@
 {
   "name": "magenta",
-  "homepage": "https://github.com/timfpark/magenta",
+  "homepage": "https://github.com/magentajs/service",
   "version": "0.0.1",
   "private": "true",
   "engines" : { "node" : "~0.8.2" }, 

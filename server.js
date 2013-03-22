@@ -37,22 +37,27 @@ app.use(express.bodyParser());
 
 passport.use(new BearerStrategy({}, services.accessTokens.verify));
 
+var authenticateRequest = function(req, res, next) {
+    if (req.user) { return next() } // already authenticated via session cookie
+    passport.authenticate(['bearer'])(req, res, next)
+}
+
 // REST endpoint routing
 
-//app.get(config.api_prefix + 'v1/services', controllers.services.index);
+app.get(config.api_prefix + 'v1/headwaiter',                             controllers.headwaiter.index);
 
-app.get(config.api_prefix + 'v1/blobs/:id', controllers.blobs.show);
-app.post(config.api_prefix + 'v1/blobs', controllers.blobs.create);
+app.get(config.api_prefix + 'v1/blobs/:id',        /* authenticateRequest, */ controllers.blobs.show);
+app.post(config.api_prefix + 'v1/blobs',           /* authenticateRequest, */ controllers.blobs.create);
 
-app.get(config.api_prefix + 'v1/ops/health', controllers.ops.health);
+app.get(config.api_prefix + 'v1/ops/health',                             controllers.ops.health);
 
-app.get(config.api_prefix + 'v1/principals/:id', controllers.principals.show);
-app.get(config.api_prefix + 'v1/principals', controllers.principals.index);
-app.post(config.api_prefix + 'v1/principals', controllers.principals.create);
+app.get(config.api_prefix + 'v1/principals/:id',   /* authenticateRequest, */ controllers.principals.show);
+app.get(config.api_prefix + 'v1/principals',       /* authenticateRequest, */ controllers.principals.index);
+app.post(config.api_prefix + 'v1/principals',                            controllers.principals.create);
 
-app.get(config.api_prefix + 'v1/messages/:id', controllers.messages.show);
-app.get(config.api_prefix +'v1/messages', controllers.messages.index);
-app.post(config.api_prefix +'v1/messages', controllers.messages.create);
+app.get(config.api_prefix + 'v1/messages/:id',     /* authenticateRequest, */ controllers.messages.show);
+app.get(config.api_prefix +'v1/messages',          /* authenticateRequest, */ controllers.messages.index);
+app.post(config.api_prefix +'v1/messages',         /* authenticateRequest, */ controllers.messages.create);
 
 // static serving endpoint
 
