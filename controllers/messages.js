@@ -9,7 +9,7 @@ exports.index = function(req, res) {
     // TODO: add paging, querying
     var filter = {};
     var start = 0;
-    var limit = 200;
+    var limit = 400;
     var sort = { timestamp: -1 };
 
     services.messages.find(filter, start, limit, sort, function(err, messages) {
