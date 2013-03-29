@@ -32,28 +32,34 @@ app.use(function(req, res, next) {
   }
 });
 
-app.use(passport.initialize());
+app.use(express.logger());
+app.use(express.cookieParser());
 app.use(express.bodyParser());
+app.use(express.session({ secret: 'keyboard cat' }));
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 passport.use(new BearerStrategy({}, services.accessTokens.verify));
 
 var authenticateRequest = function(req, res, next) {
     if (req.user) { return next() } // already authenticated via session cookie
     passport.authenticate(['bearer'])(req, res, next)
-}
+};
 
 // REST endpoint routing
 
-app.get(config.api_prefix + 'v1/headwaiter',                             controllers.headwaiter.index);
+app.get(config.api_prefix + 'v1/headwaiter',                            controllers.headwaiter.index);
 
 app.get(config.api_prefix + 'v1/blobs/:id',        /* authenticateRequest, */ controllers.blobs.show);
 app.post(config.api_prefix + 'v1/blobs',           /* authenticateRequest, */ controllers.blobs.create);
 
-app.get(config.api_prefix + 'v1/ops/health',                             controllers.ops.health);
+app.get(config.api_prefix + 'v1/ops/health',                            controllers.ops.health);
 
 app.get(config.api_prefix + 'v1/principals/:id',   /* authenticateRequest, */ controllers.principals.show);
 app.get(config.api_prefix + 'v1/principals',       /* authenticateRequest, */ controllers.principals.index);
-app.post(config.api_prefix + 'v1/principals',                            controllers.principals.create);
+app.post(config.api_prefix + 'v1/principals',                           controllers.principals.create);
+app.post(config.api_prefix + 'v1/principals/auth',                      controllers.principals.authenticate);
 
 app.get(config.api_prefix + 'v1/messages/:id',     /* authenticateRequest, */ controllers.messages.show);
 app.get(config.api_prefix +'v1/messages',          /* authenticateRequest, */ controllers.messages.index);
@@ -63,6 +69,7 @@ app.post(config.api_prefix +'v1/messages',         /* authenticateRequest, */ co
 
 app.use(express.static(__dirname + '/static'));
 
+console.log("connecting to mongodb instance: " + config.mongodb_connection_string);
 mongoose.connect(config.mongodb_connection_string);
 
 // Realtime endpoint setup
@@ -72,6 +79,7 @@ global.bayeux = new faye.NodeAdapter({
   timeout: 90
 });
 
+/*
 global.bayeux.bind('handshake', function(clientId) {
   console.log('handshake received: ' + clientId);
 });
@@ -83,6 +91,7 @@ global.bayeux.bind('subscribe', function(clientId, channel) {
 global.bayeux.bind('publish', function(clientId, channel, data) {
   console.log('publish received: ' + clientId + ":" + channel + " :" + data);
 });
+*/
 
 global.bayeux.attach(server);
 console.log('listening for realtime connections on ' + config.path_prefix + config.realtime_path);

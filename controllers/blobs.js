@@ -19,6 +19,6 @@ exports.create = function(req, res) {
          if (err)
             res.send(400, err);
          else
-            res.send({"blob": blob.toClientView()});
+            res.send({"blob": blob});
     });
 };

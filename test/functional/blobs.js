@@ -1,10 +1,8 @@
-process.env.NODE_ENV = 'test';
-
-var app = require('../../server'),
-	assert = require('assert'),
-	config = require('../../config'),
-	fs = require('fs'),
-    request = require('request');
+var app = require('../../server')
+  , assert = require('assert')
+  , config = require('../../config')
+  ,	fs = require('fs')
+  , request = require('request');
 
 describe('blobs REST endpoint', function() {
 	it('should be able to create and then fetch a blob', function(done) {
@@ -22,6 +20,7 @@ describe('blobs REST endpoint', function() {
 
 						  var body_json = JSON.parse(body);
 					      assert.equal(resp.statusCode, 200);
+                          assert.equal(body_json.blob._id, undefined);
 					      assert.notEqual(body_json.blob.id, undefined);
 
 					      var blob_url = config.base_url + '/blobs/' + body_json.blob.id;

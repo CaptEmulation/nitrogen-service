@@ -15,11 +15,7 @@ exports.index = function(req, res) {
     services.messages.find(filter, start, limit, sort, function(err, messages) {
         if (err) return res.send(400, err);
 
-        var clientMessages = messages.map(function(message) {
-            return message.toClientView();
-        });
-
-        res.send({"messages": clientMessages});
+        res.send({"messages": messages});
     });
 };
 
@@ -28,7 +24,7 @@ exports.show = function(req, res) {
 		if (err) return res.send(400, err);
 		if (!message) return res.send(404);
 
-		res.send({"message": message.toClientView()});
+		res.send({"message": message});
 	});
 };
 
@@ -40,7 +36,6 @@ exports.create = function(req, res) {
     }, function (err, messages) {
         console.log("message.create: creating " + req.body.length + " messages.");
         services.messages.createMany(messages, function(err, saved_messages) {
-            console.log("message.create: saved messages: " + JSON.stringify(saved_messages));
             if (err)
                 res.send(400, err);
             else

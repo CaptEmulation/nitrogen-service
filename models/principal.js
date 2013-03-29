@@ -4,8 +4,8 @@ var BaseSchema = require('./baseSchema')
 
 var principalSchema = new BaseSchema();
 principalSchema.add({
-
-	principal_type: { type: String },        // user, device, service, app
+	principal_type: { type: String },        // user, device
+    name: { type: String },                  // user friendly name for this principal
 
 	last_ip: { type: String },
 	last_connection: { type: Date, default: Date.now },
@@ -13,38 +13,47 @@ principalSchema.add({
     capabilities: { type: Array },
     external_id: { type: String },
 
-// account (billing principal and root owner for all principals)
-	// could be 1-1 with user for personal account to 1-many with user for corporate.
-
-// owner of this principal (could be account or user)
-// for devices this could be initially null to indicate that pairing needed
-
-	owner: { type: Schema.Types.ObjectId, ref: 'Principal' },			// account that owns this device
-
 // device items
 
-    manufacturer_id: { type: String },
+    secret_hash: { type: String },    // stored in base64
 
 // user items
 
 	email: { type: String },
-	password_hash: { type: String },
-	salt: { type: String },
-
-// group items (used to organize and permisson principals)
-
-	name: { type: String },
-	principals: { type: Array }
-
+	password_hash: { type: String },       // hashed and stored in base64
+	salt: { type: String }            // stored in base64
 });
 
 principalSchema.index({ email: 1, type: 1 });
 
+principalSchema.set('toObject', { transform: BaseSchema.baseObjectTransform });
+principalSchema.set('toJSON', { transform: BaseSchema.baseObjectTransform });
+
+principalSchema.virtual('secret').set(function(value) { this._secret = value; });
+principalSchema.virtual('secret').get(function() { return this._secret; });
+principalSchema.virtual('password').set(function(value) { this._password = value; });
+principalSchema.virtual('password').get(function() { return this._password; });
+
+var principalObjectTransform = function(doc, ret, options) {
+    BaseSchema.baseObjectTransform(doc, ret, options);
+};
+
 principalSchema.path('principal_type').validate(function (value) {
-  return !!value;
-}, 'Principal must have principal_type.');
+    var invalid = false;
+
+    if (!value)
+        invalid = true;
+
+    if (value != "user" && value != "device")
+        invalid = true;
+
+    return !invalid;
+}, 'Principal must have valid principal_type.');
 
 var Principal = mongoose.model('Principal', principalSchema);
-Principal.prototype.toClientView = BaseSchema.toClientView;
+
+Principal.prototype.isUser = function() {
+    return this.principal_type == "user";
+};
 
 module.exports = Principal;
