@@ -1,14 +1,14 @@
-process.env.NODE_ENV = 'test';
-
-var app = require('../../server'),
-	assert = require('assert'),
-	config = require('../../config'),
-	faye = require('faye'),
-    request = require('request');
+var app = require('../../server')
+  ,	assert = require('assert')
+  , config = require('../../config')
+  ,	faye = require('faye')
+  , fixtures = require('../fixtures')
+  , mongoose = require('mongoose')
+  , request = require('request');
 
 describe('principal endpoint', function() {
 
-	it('should create and fetch a principal', function(done) {
+	it('should create and fetch a device principal', function(done) {
 		var notification_passed = false,
 			get_passed = false,
 			started_post = false;
@@ -18,11 +18,10 @@ describe('principal endpoint', function() {
 		client.subscribe('/principals', function(principal_json) {
             var principal = JSON.parse(principal_json);
             if (principal.principal_type != "device") return;
+            if (principal.external_id != "subscription_test") return;
 
-			assert.equal(principal.external_id, "opaqueid");
 			notification_passed = true;
 		    if (notification_passed && get_passed) {
-                console.log("got principal notification");
 		    	done();
 		    } 
 		});
@@ -33,29 +32,26 @@ describe('principal endpoint', function() {
 			
 			request.post(config.base_url + '/principals', 
 				{ json: { principal_type: "device",
-                          external_id: "opaqueid" } }, function(post_err, post_resp, post_body) {
+                          external_id: "subscription_test" } }, function(post_err, post_resp, post_body) {
 				  assert.ifError(post_err);
 			      assert.equal(post_resp.statusCode, 200);
 
-			      assert.equal(post_body.principal.external_id, "opaqueid");
-                  assert.equal(post_body.accessToken.token.length, 64);
+			      assert.equal(post_body.principal.external_id, "subscription_test");
                   assert.ok(Date.now() < Date.parse(post_body.accessToken.expires_at));
-                  console.log("******************: " + JSON.stringify(post_body));
                   assert.equal(post_body.principal.id, post_body.accessToken.principal_id);
 
-			      request({ url: config.base_url + '/principals/' + post_body.principal.id, json: true}, 
+			      request({ url: config.base_url + '/principals/' + post_body.principal.id, json: true},
 			      	function(get_err, get_resp, get_body) {
 		                assert.equal(get_err, null);
 		                assert.equal(get_resp.statusCode, 200);
 
-		                assert.equal(get_body.principal.external_id, "opaqueid");
+		                assert.equal(get_body.principal.external_id, "subscription_test");
 
 		                get_passed = true;
 
 		                if (notification_passed && get_passed) {
-                            console.log("got REST notification");
 		                	done();
-		                } 
+		                }
 	              });
 		    });
     	});
@@ -64,20 +60,32 @@ describe('principal endpoint', function() {
 	it('should fetch all principals', function(done) {
 	    request(config.base_url + '/principals', function(err, resp, body) {
 	      assert.equal(resp.statusCode, 200);
-	      done(); 
+	      done();
 	    });
 	});
 
-    it('should create a user principal', function(done) {
-        request.post(config.base_url + '/principals',
-            { json: { principal_type: "user",
-                      email: "user@gmail.com",
-                      password: "sEcReT44" } }, function(err, resp, body) {
-                assert.equal(err, null);
+    it('should login device principal', function (done) {
+        var deviceId = fixtures.models.device.id;
+        var externalId = fixtures.models.device.externa_id;
+        var secret = fixtures.models.device.secret;
+
+        request.post(config.base_url + '/principals/auth',
+            { json: { principal_type: 'device',
+                      id: deviceId,
+                      secret: secret} }, function(err, resp, body) {
                 assert.equal(resp.statusCode, 200);
-                assert.equal(body.principal.principal_type, "user");
-                assert.notEqual(body.principal.id, undefined);
                 done();
             });
     });
+
+    it('should login user principal', function(done) {
+        request.post(config.base_url + '/principals/auth',
+            { json: { principal_type: 'user',
+                      email: 'user@server.org',
+                      password: 'sEcReT44'} }, function(err, resp, body) {
+                assert.equal(resp.statusCode, 200);
+                done();
+            });
+    });
+
 });

@@ -1,9 +1,7 @@
-process.env.NODE_ENV = 'test';
-
-var assert = require('assert'),
-    config = require('../../config'),
-    request = require('request'),
-    utils = require('../../utils');
+var assert = require('assert')
+  , config = require('../../config')
+  , request = require('request')
+  , utils = require('../../utils');
 
 describe('headwaiter endpoint', function() {
     it('should return service endpoints json', function(done) {

@@ -1,5 +1,3 @@
-process.env.NODE_ENV = 'test';
-
 var app = require('../../server'),
 	assert = require('assert'),
 	config = require('../../config'),
@@ -8,8 +6,21 @@ var app = require('../../server'),
     request = require('request');
 
 describe('messages endpoint', function() {
-	it('should return all messages json', function(done) {
-	    request(config.base_url + '/messages', function(err,resp,body) {
+
+    /*
+    it('index should be not be accessible anonymously', function(done) {
+        request(config.base_url + '/messages', function(err, resp, body) {
+            assert.equal(resp.statusCode, 401);
+            done();
+        });
+    });
+    */
+
+	it('index should return all messages json', function(done) {
+
+        // TODO: , headers: { authorization: "Bearer 53243sdf" }
+
+	    request({url: config.base_url + '/messages'}, function(err,resp,body) {
 	      assert.equal(resp.statusCode, 200);
 
           var messages_json = JSON.parse(body);
@@ -24,10 +35,8 @@ describe('messages endpoint', function() {
 			started_post = false;
 
 		var client = new faye.Client(config.realtime_url);
-        console.log("messages functional test: created client: " + config.realtime_url);
 
 		client.subscribe('/messages', function(message_json) {
-            console.log("messages functional test: got subscription message");
             var message = JSON.parse(message_json);
 			assert.equal(message.body.reading, 5.1);
 			notification_passed = true;
@@ -37,10 +46,7 @@ describe('messages endpoint', function() {
 		    }
 		});
 
-        console.log("messages functional test: created subscription");
-
         global.bayeux.bind('subscribe', function(clientId) {
-            console.log("messages functional test: subscription is bound, posting message");
 			if (started_post) return;
 			started_post = true;
 
@@ -48,7 +54,6 @@ describe('messages endpoint', function() {
 				{ json: [{ from: new mongoose.Types.ObjectId(),
                            message_type: "custom",
                            body: { reading: 5.1 } }] }, function(post_err, post_resp, post_body) {
-                  console.log("messages functional test: message posted, fetching message for confirmation.");
 				  assert.equal(post_err, null);
 			      assert.equal(post_resp.statusCode, 200);
 
@@ -62,7 +67,6 @@ describe('messages endpoint', function() {
 
 			      request({ url: config.base_url + '/messages/' + message_id, json: true},
 					function(get_err, get_resp, get_body) {
-                        console.log("messages functional test: message fetched.");
 
 		                assert.equal(get_err, null);
 		                assert.equal(get_resp.statusCode, 200);

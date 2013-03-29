@@ -12,8 +12,10 @@ accessTokenSchema.add({
 accessTokenSchema.index({ expires: 1 });
 accessTokenSchema.index({ token: 1 });
 
+accessTokenSchema.set('toObject', { transform: BaseSchema.baseObjectTransform });
+accessTokenSchema.set('toJSON', { transform: BaseSchema.baseObjectTransform });
+
 var AccessToken = mongoose.model('AccessToken', accessTokenSchema);
-AccessToken.prototype.toClientView = BaseSchema.toClientView;
 
 AccessToken.prototype.expired = function() {
     return Date.now() > this.expires_at.getTime();

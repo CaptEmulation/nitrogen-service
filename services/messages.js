@@ -1,5 +1,5 @@
-var async = require("async"),
-    models = require("../models");
+var async = require("async")
+  , models = require("../models");
 
 var create = function(message, callback) {
     if (!message.expires) {
@@ -9,30 +9,27 @@ var create = function(message, callback) {
         message.expires = defaultExpirationDate;
     }
 
-    validate(message, function(result) {
-        if (!result) {
-            return callback("One or more messages did not validate", []);
-        }
+    validate(message, function(err) {
+        if (err) return callback(err, []);
 
         message.save(function(err, message) {
             if (err) return callback(err, []);
 
-            var client_message = message.toClientView();
-            var client_json = JSON.stringify(client_message);
+            var client_json = JSON.stringify(message);
 
             console.log("created message: " + message.id + ": " + client_json);
 
             global.bayeux.getClient().publish('/messages', client_json);
-            global.bayeux.getClient().publish('/messages/type/' + client_message.message_type, client_json);
+            global.bayeux.getClient().publish('/messages/type/' + message.message_type, client_json);
 
-            callback(null, [client_message]);
+            callback(null, [message]);
         });
     });
 };
 
 var createMany = function(messages, callback) {
-    validateAll(messages, function(result) {
-        if (!result) return callback("One or more messages did not validate", []);
+    validateAll(messages, function(err) {
+        if (err) return callback(err, []);
 
         async.concat(messages, create, function(err, saved_messages) {
             if (err) {
@@ -62,19 +59,20 @@ var findById = function(messageId, callback) {
 };
 
 var remove = function(message, callback) {
-    models.Message.remove({"_id": message.id}, function (err) {
-        callback(err);
-    })
+    models.Message.remove({"_id": message.id}, callback);
 };
 
 var validate = function(message, callback) {
     if (!message.from)
-        return callback(false);
+        return callback("Message must have a from principal.");
 
     if (!message.message_type)
-        return callback(false);
+        return callback("Message must have a message type.");
 
-    callback(true);
+    // TODO: do validation of message_type values if they are not prefixed custom
+    // TODO: schema validation of messages
+
+    callback(null);
 };
 
 var validateAll = function(messages, callback) {

@@ -22,7 +22,9 @@ messageSchema.index({ to: 1, type: 1 });
 messageSchema.index({ message_type: 1, type: 1 });
 messageSchema.index({ expires: 1, type: 1 });
 
+messageSchema.set('toObject', { transform: BaseSchema.baseObjectTransform });
+messageSchema.set('toJSON', { transform: BaseSchema.baseObjectTransform });
+
 var Message = mongoose.model('Message', messageSchema);
-Message.prototype.toClientView = BaseSchema.toClientView;
 
 module.exports = Message;

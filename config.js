@@ -1,6 +1,8 @@
 var providers = require('./providers');
 var config = null;
 
+console.log("CONFIG NODE_ENV: " + process.env.NODE_ENV);
+
 if (process.env.NODE_ENV == "production") {
     config = {
         host: process.env.HOST_NAME,
@@ -38,5 +40,13 @@ config.blobs_endpoint = config.base_url + "/blobs/";
 config.messages_endpoint = config.base_url + "/messages/";
 config.principals_endpoint = config.base_url + "/principals/";
 
+config.password_hash_iterations = 1;
+config.password_hash_length = 128;
+config.salt_length_bytes = 64;
+
+config.access_token_bytes = 128;
+config.device_secret_bytes = 128;
+
 config.blob_provider = new providers.azure.AzureBlobProvider(config);
+
 module.exports = config;

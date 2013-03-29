@@ -1,6 +1,14 @@
-var config = require('../config'),
-	models = require('../models'),
-	services = require('../services');
+var config = require('../config')
+  ,	models = require('../models')
+  , services = require('../services');
+
+exports.authenticate = function(req, res) {
+    services.principals.authenticate(req.body, function (err, principal, accessToken) {
+        if (err) return res.send(401, err);
+
+        res.send({ "principal": principal, "accessToken": accessToken });
+    });
+};
 
 exports.create = function(req, res) {
 	var principal = new models.Principal(req.body);
@@ -13,8 +21,8 @@ exports.create = function(req, res) {
             services.accessTokens.create(principal, function(err, accessToken) {
                 if (err) res.send(400, err);
 
-                res.send({ "principal": principal.toClientView(),
-                           "accessToken": accessToken.toClientView() });
+                res.send({ "principal": principal,
+                           "accessToken": accessToken });
 
             });
         }
@@ -22,29 +30,23 @@ exports.create = function(req, res) {
 };
 
 exports.index = function(req, res) {
-	// TODO: paging
+
+	// TODO: paging, move out to service
 	var start = 0;
  	var limit = 200;
 
-	models.Principal.find({}, null, {
-		skip: start,
-		limit: limit,
-	    sort:{ timestamp: -1 }
-	}, function (err, devices) {
+    services.principals.find({}, start, limit, { timestamp: -1 }, function (err, principals) {
 		if (err) return res.send(400);
 
-		var devices_json = devices.map(function(device) {
-			return device.toClientView();
-		});
-		res.send({"principals": devices_json});
+		res.send({"principals": principals});
 	});
 };
 
 exports.show = function(req, res) {
-	models.Principal.findOne({"_id": req.params.id}, function (err, device) {
+	services.principals.findById(req.params.id, function (err, principal) {
 		if (err) return res.send(400, err);
-		if (!device) return res.send(404);
+		if (!principal) return res.send(404);
 
-		res.send({"principal": device.toClientView()});
+		res.send({"principal": principal});
 	});
 };

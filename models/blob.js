@@ -7,11 +7,12 @@ blobSchema.add({
 	content_length: { type: Number },
 	content_type: { type: String },
 
-	owner: { type: Schema.Types.ObjectId }
+	owner: { type: Schema.Types.ObjectId, ref: 'Principal' }
 });
 
-var Blob = mongoose.model('Blob', blobSchema);
+blobSchema.set('toObject', { transform: BaseSchema.baseObjectTransform });
+blobSchema.set('toJSON', { transform: BaseSchema.baseObjectTransform });
 
-Blob.prototype.toClientView = BaseSchema.toClientView;
+var Blob = mongoose.model('Blob', blobSchema);
 
 module.exports = Blob;

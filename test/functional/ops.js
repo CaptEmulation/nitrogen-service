@@ -1,8 +1,6 @@
-process.env.NODE_ENV = 'test';
-
-var assert = require('assert'),
-	config = require('../../config'),
-    request = require('request');
+var assert = require('assert')
+  ,	config = require('../../config')
+  , request = require('request');
 
 describe('ops endpoint', function() {
 
