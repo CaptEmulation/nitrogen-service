@@ -5,9 +5,10 @@ exports.index = function(req, res) {
     // Could do principal level or service group level redirection here
     // But use static routing to API endpoints for now.
 
-    res.send({
-        blobs_endpoint: config.blobs_endpoint,
-        messages_endpoint: config.messages_endpoint,
-        principals_endpoint: config.principals_endpoint
+    res.send({ endpoints: {
+                    blobs_endpoint: config.blobs_endpoint,
+                    messages_endpoint: config.messages_endpoint,
+                    principals_endpoint: config.principals_endpoint
+               }
     });
 };
