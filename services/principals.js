@@ -1,7 +1,8 @@
 var async = require("async")
   , config = require('../config')
   , crypto = require("crypto")
-  , models = require("../models");
+  , models = require("../models")
+  , services = require("../services");
 
 var authenticate = function(authBody, callback) {
     if (authBody.email && authBody.password) {

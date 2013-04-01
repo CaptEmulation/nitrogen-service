@@ -5,7 +5,7 @@ var config = require("../config")
 
 var create = function(principal, callback) {
     var accessToken = new models.AccessToken();
-    accessToken.principal_id = principal.id;
+    accessToken.principal = principal;
 
     // TODO: factor this out into some sort of util function.
     accessToken.expires_at = new Date();
@@ -14,7 +14,7 @@ var create = function(principal, callback) {
     crypto.randomBytes(config.access_token_bytes, function(err, tokenBuf) {
         if (err) return callback(err);
 
-        console.log("creating access token for principal id: " + accessToken.principal_id +
+        console.log("creating access token for principal id: " + accessToken.principal.id +
             " with expiration: " + accessToken.expires_at);
 
         accessToken.token = tokenBuf.toString('base64');
@@ -23,7 +23,7 @@ var create = function(principal, callback) {
 };
 
 var findOrCreateToken = function(principal, callback) {
-    models.AccessToken.find({"principal_id": principal.id}, null, {sort: { expires_at: -1 } }, function(err, tokens) {
+    models.AccessToken.find({"principal": principal.id}, null, {sort: { expires_at: -1 } }, function(err, tokens) {
         if (err) return callback(err);
 
         if (tokens && tokens.length > 0 && !tokens[0].expired()) {
@@ -35,11 +35,11 @@ var findOrCreateToken = function(principal, callback) {
                 callback(null, accessToken);
             });
         }
-    });
+    }).populate('principal');
 };
 
 var findByToken = function(token, callback) {
-    models.AccessToken.findOne({"token": token}, callback);
+    models.AccessToken.findOne({"token": token}, callback).populate('principal');
 };
 
 var verify = function(token, done) {
@@ -47,11 +47,7 @@ var verify = function(token, done) {
         if (err) { return done(err); }
         if (!accessToken || accessToken.expired()) { return done(null, false); }
 
-        services.principals.findById(accessToken.principal_id, function(err, principal) {
-            if (err) { return done(err); }
-
-            return done(null, principal);
-        });
+        done(null, accessToken.principal);
     });
 };
 

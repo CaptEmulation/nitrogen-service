@@ -4,7 +4,7 @@ var BaseSchema = require('./baseSchema'),
 
 var accessTokenSchema = new BaseSchema();
 accessTokenSchema.add({
-    principal_id: { type: Schema.Types.ObjectId, ref: 'Principal' },
+    principal: { type: Schema.Types.ObjectId, ref: 'Principal' },
     expires_at: { type: Date },
     token: { type: String }
 });

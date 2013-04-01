@@ -38,7 +38,8 @@ describe('principal endpoint', function() {
 
 			      assert.equal(post_body.principal.external_id, "subscription_test");
                   assert.ok(Date.now() < Date.parse(post_body.accessToken.expires_at));
-                  assert.equal(post_body.principal.id, post_body.accessToken.principal_id);
+
+                  assert.equal(post_body.principal.id, post_body.accessToken.principal);
 
 			      request({ url: config.base_url + '/principals/' + post_body.principal.id, json: true},
 			      	function(get_err, get_resp, get_body) {
