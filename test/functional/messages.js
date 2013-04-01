@@ -16,9 +16,8 @@ describe('messages endpoint', function() {
     });
 
 	it('index should return all messages json', function(done) {
-
-        var authHeader =  "Bearer " + fixtures.models.device_accessToken.token;
-	    request({ url: config.base_url + '/messages', headers: { Authorization: authHeader } }, function(err,resp,body) {
+	    request({ url: config.base_url + '/messages',
+                  headers: { Authorization: fixtures.authHeaders.device } }, function(err,resp,body) {
 	        assert.equal(resp.statusCode, 200);
 
             var messages_json = JSON.parse(body);
@@ -35,7 +34,6 @@ describe('messages endpoint', function() {
 		var client = new faye.Client(config.realtime_url);
 
 		client.subscribe('/messages', function(message_json) {
-            console.log("R: " + message_json);
             var message = JSON.parse(message_json);
 			assert.equal(message.body.reading, 5.1);
 			notification_passed = true;

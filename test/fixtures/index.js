@@ -16,6 +16,10 @@ var addToFixture = function(fixtureId) {
     };
 };
 
+function authHeaderFromToken(accessToken) {
+    return "Bearer " + accessToken.token;
+};
+
 exports.reset = function(callback) {
     var modelTypes = Object.keys(models).map(function(key) { return models[key]; });
 
@@ -28,7 +32,10 @@ exports.reset = function(callback) {
                 if (err) throw err;
                 fixtures['device'] = device;
 
-                services.accessTokens.create(device, addToFixture('device_accessToken'));
+                services.accessTokens.create(device, function(err, accessToken) {
+                    fixtures['deviceAccessToken'] = accessToken;
+                    exports.authHeaders.device = authHeaderFromToken(accessToken);
+                });
             }
         );
 
@@ -41,3 +48,5 @@ exports.reset = function(callback) {
 };
 
 exports.models = fixtures;
+exports.authHeaders = {};
+
