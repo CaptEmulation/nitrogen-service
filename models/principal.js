@@ -26,9 +26,6 @@ principalSchema.add({
 
 principalSchema.index({ email: 1, type: 1 });
 
-principalSchema.set('toObject', { transform: BaseSchema.baseObjectTransform });
-principalSchema.set('toJSON', { transform: BaseSchema.baseObjectTransform });
-
 principalSchema.virtual('secret').set(function(value) { this._secret = value; });
 principalSchema.virtual('secret').get(function() { return this._secret; });
 principalSchema.virtual('password').set(function(value) { this._password = value; });
@@ -36,7 +33,13 @@ principalSchema.virtual('password').get(function() { return this._password; });
 
 var principalObjectTransform = function(doc, ret, options) {
     BaseSchema.baseObjectTransform(doc, ret, options);
+
+    delete ret.salt;
+    delete ret.secret_hash;
 };
+
+principalSchema.set('toObject', { transform: principalObjectTransform });
+principalSchema.set('toJSON', { transform: principalObjectTransform });
 
 principalSchema.path('principal_type').validate(function (value) {
     var invalid = false;
@@ -54,6 +57,10 @@ var Principal = mongoose.model('Principal', principalSchema);
 
 Principal.prototype.isUser = function() {
     return this.principal_type == "user";
+};
+
+Principal.prototype.isDevice = function() {
+    return this.principal_type == "device";
 };
 
 module.exports = Principal;

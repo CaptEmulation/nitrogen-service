@@ -36,6 +36,8 @@ describe('principal endpoint', function() {
 				  assert.ifError(post_err);
 			      assert.equal(post_resp.statusCode, 200);
 
+                  assert.notEqual(post_body.principal.secret, undefined);
+                  assert.equal(post_body.principal.secret_hash, undefined);
 			      assert.equal(post_body.principal.external_id, "subscription_test");
                   assert.ok(Date.now() < Date.parse(post_body.accessToken.expires_at));
 
@@ -46,6 +48,7 @@ describe('principal endpoint', function() {
 		                assert.equal(get_err, null);
 		                assert.equal(get_resp.statusCode, 200);
 
+                        assert.equal(get_body.principal.secret, undefined);
 		                assert.equal(get_body.principal.external_id, "subscription_test");
 
 		                get_passed = true;

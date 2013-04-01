@@ -21,9 +21,14 @@ exports.create = function(req, res) {
             services.accessTokens.create(principal, function(err, accessToken) {
                 if (err) res.send(400, err);
 
-                res.send({ "principal": principal,
-                           "accessToken": accessToken });
+                var principalJSON = principal.toObject();
 
+                if (principal.isDevice()) {
+                    // for create (and create only) we want to pass back the secret to the device.
+                    principalJSON.secret = principal.secret;
+                }
+
+                res.send({ "principal": principalJSON, "accessToken": accessToken });
             });
         }
 	});
