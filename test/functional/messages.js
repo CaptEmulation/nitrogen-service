@@ -35,6 +35,8 @@ describe('messages endpoint', function() {
 
 		client.subscribe('/messages', function(message_json) {
             var message = JSON.parse(message_json);
+            if (message.message_type != "_messageSubscriptionTest") return;
+
 			assert.equal(message.body.reading, 5.1);
 			notification_passed = true;
 		    if (notification_passed && get_passed) {
@@ -48,8 +50,8 @@ describe('messages endpoint', function() {
 			started_post = true;
 
 			request.post(config.base_url + '/messages',
-				{ json: [{ from: new mongoose.Types.ObjectId(),
-                           message_type: "_custom",
+				{ json: [{ from: fixtures.models.device.id,
+                           message_type: "_messageSubscriptionTest",
                            body: { reading: 5.1 } }] }, function(post_err, post_resp, post_body) {
 				  assert.equal(post_err, null);
 			      assert.equal(post_resp.statusCode, 200);
@@ -62,7 +64,8 @@ describe('messages endpoint', function() {
 
                   assert.notEqual(message_id, null);
 
-			      request({ url: config.base_url + '/messages/' + message_id, json: true},
+			      request({ url: config.base_url + '/messages/' + message_id, json: true,
+                          headers: { Authorization: fixtures.authHeaders.device } },
 					function(get_err, get_resp, get_body) {
 
 		                assert.equal(get_err, null);

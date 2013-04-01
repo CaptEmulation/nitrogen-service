@@ -1,5 +1,6 @@
-var async = require("async")
-  , models = require("../models");
+var async = require('async')
+  , models = require('../models')
+  , services = require('../services');
 
 var create = function(message, callback) {
     if (!message.expires) {
@@ -69,10 +70,15 @@ var validate = function(message, callback) {
     if (!message.message_type)
         return callback("Message must have a message type.");
 
-    // TODO: do validation of message_type values if they are not prefixed custom
+    // TODO: do validation of message_type values if they are not custom prefixed
     // TODO: schema validation of messages
 
-    callback(null);
+    services.principals.findById(message.from, function(err, principal) {
+        if (err) return callback(err);
+        if (!principal) return callback("Message must have an existing from principal.");
+
+        callback(null);
+    });
 };
 
 var validateAll = function(messages, callback) {
