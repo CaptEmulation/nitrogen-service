@@ -4,14 +4,13 @@ var express = require('express')
   , config = require('./config')
   , controllers = require('./controllers')
   , faye = require('faye')
-  , http = require('http')
   , middleware = require('./middleware')
   , models = require('./models')
   , mongoose = require('mongoose')
   , passport = require('passport')
-  , port = process.env.PORT || config.http_port || 3030
   , services = require('./services');
 
+var port = process.env.PORT || config.http_port || 3030;
 var server = app.listen(port);
 console.log('listening for http connections on ' + config.base_url);
 
