@@ -36,6 +36,12 @@ exports.reset = function(callback) {
                     fixtures['deviceAccessToken'] = accessToken;
                     exports.authHeaders.device = authHeaderFromToken(accessToken);
                 });
+
+                var message = new models.Message({ from: device.id,
+                    message_type: "image",
+                    body: { url: "http://127.0.0.1/photo.jpg" } });
+
+                services.messages.create(message, addToFixture('deviceMessage'));
             }
         );
 

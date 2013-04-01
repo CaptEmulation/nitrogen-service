@@ -32,6 +32,10 @@ exports.create = function(req, res) {
     console.log("message.create: received " + req.body.length + " messages.");
     async.concat(req.body, function(message_object, callback) {
         var message = new models.Message(message_object);
+
+        // force message to be from POSTing principal.
+        message.from = req.user.id;
+
         callback(null, [message]);
     }, function (err, messages) {
         console.log("message.create: creating " + req.body.length + " messages.");

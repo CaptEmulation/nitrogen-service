@@ -26,7 +26,24 @@ describe('messages endpoint', function() {
 	    });
 	});
 
-	it('should create and fetch a message', function(done) {
+    it('show should be not be accessible without accessToken', function(done) {
+        request(config.base_url + '/messages/' + fixtures.models.deviceMessage.id, function(err, resp, body) {
+            assert.equal(resp.statusCode, 401);
+            done();
+        });
+    });
+
+    it('create should be not be accessible without accessToken', function(done) {
+        request.post(config.base_url + '/messages',
+            { json: [{ from: fixtures.models.device.id,
+                       message_type: "_custom"}] }, function(err, resp, body) {
+            assert.equal(err, null);
+            assert.equal(resp.statusCode, 401);
+            done();
+        });
+    });
+
+    it('should create and fetch a message', function(done) {
 		var notification_passed = false,
 			get_passed = false,
 			started_post = false;
