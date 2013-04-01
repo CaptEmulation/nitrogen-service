@@ -11,30 +11,28 @@ describe('blobs REST endpoint', function() {
 
 		fs.stat(fixture_path, function(err, stats) {
                 assert.ifError(err);
+
 				fs.createReadStream(fixture_path).
 				pipe(
 					request.post(config.base_url + '/blobs', 
 						{ headers: { 'Content-Type': 'image/jpeg', 'Content-Length': stats.size } },
-						function (err, resp, body) {
-						  assert.ifError(err);
+                        function (err, resp, body) {
+						    assert.ifError(err);
 
-						  var body_json = JSON.parse(body);
-					      assert.equal(resp.statusCode, 200);
-                          assert.equal(body_json.blob._id, undefined);
-					      assert.notEqual(body_json.blob.id, undefined);
+						    var body_json = JSON.parse(body);
+					        assert.equal(resp.statusCode, 200);
+                            assert.equal(body_json.blob._id, undefined);
+					        assert.notEqual(body_json.blob.id, undefined);
 
-					      var blob_url = config.base_url + '/blobs/' + body_json.blob.id;
+					        var blob_url = config.base_url + '/blobs/' + body_json.blob.id;
 
-  					      request(blob_url, function(err,resp,body) {
-  					      	  if (err) {
-  					      	  	console.log('fetching blob failed: ' + err);
-  					      	  	return res.send(400, err);
-  					      	  }
-					    	  assert.equal(resp.statusCode, 200);
-					    	  assert.equal(resp.body.length, 28014);
+  					        request.get(blob_url, function(err,resp,body) {
+  					      	    assert.ifError(err);
+					    	    assert.equal(resp.statusCode, 200);
+					    	    assert.equal(resp.body.length, 28014);
 
-					    	  done();
-					      });
+					    	    done();
+					        });
 						}
 					)
 				);

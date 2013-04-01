@@ -14,40 +14,36 @@ var   express = require('express'),
 var server = app.listen(port);
 console.log('listening for http connections on ' + config.base_url);
 
-// Allow cross domain access
-app.use(function(req, res, next) {
-  res.header('Access-Control-Allow-Origin', "*");
-  res.header('Access-Control-Allow-Credentials', true);
-  res.header('Access-Control-Allow-Methods', '*');
-  res.header('Access-Control-Allow-Headers', 'Content-Type');
-
-  // Everything out of magenta is JSON
-  res.setHeader('Content-Type', 'application/json');
-
-  // intercept OPTIONS method
-  if ('OPTIONS' == req.method) {
-    res.send(200);
-  } else {
-    next();
-  }
-});
-
-app.use(express.logger());
-app.use(express.cookieParser());
 app.use(express.bodyParser());
-app.use(express.session({ secret: 'keyboard cat' }));
 
 app.use(passport.initialize());
-app.use(passport.session());
-
 passport.use(new BearerStrategy({}, services.accessTokens.verify));
 
+// Allow cross domain access
+app.use(function(req, res, next) {
+    res.header('Access-Control-Allow-Origin', "*");
+    res.header('Access-Control-Allow-Credentials', true);
+    res.header('Access-Control-Allow-Methods', '*');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+
+    // Everything out of magenta is JSON
+    res.setHeader('Content-Type', 'application/json');
+
+    // intercept OPTIONS method
+    if ('OPTIONS' == req.method) {
+        res.send(200);
+    } else {
+        next();
+    }
+});
+
 var authenticateRequest = function(req, res, next) {
+    console.log("AUTH headers: " + JSON.stringify(req.headers));
     if (req.user) { return next() } // already authenticated via session cookie
-    passport.authenticate(['bearer'])(req, res, next)
+    passport.authenticate(['bearer'], { session: false })(req, res, next);
 };
 
-// REST endpoint routing
+// REST endpoints
 
 app.get(config.api_prefix + 'v1/headwaiter',                            controllers.headwaiter.index);
 
@@ -60,10 +56,12 @@ app.get(config.api_prefix + 'v1/principals/:id',   /* authenticateRequest, */ co
 app.get(config.api_prefix + 'v1/principals',       /* authenticateRequest, */ controllers.principals.index);
 app.post(config.api_prefix + 'v1/principals',                           controllers.principals.create);
 app.post(config.api_prefix + 'v1/principals/auth',                      controllers.principals.authenticate);
+//app.put(config.api_prefix + 'v1/principals/:id',   /* authenticateRequest, */ controllers.principals.update);
+//app.delete(config.api_prefix + 'v1/principals/:id',   /* authenticateRequest, */ controllers.principals.update);
 
 app.get(config.api_prefix + 'v1/messages/:id',     /* authenticateRequest, */ controllers.messages.show);
-app.get(config.api_prefix +'v1/messages',          /* authenticateRequest, */ controllers.messages.index);
-app.post(config.api_prefix +'v1/messages',         /* authenticateRequest, */ controllers.messages.create);
+app.get(config.api_prefix + 'v1/messages',         authenticateRequest,  controllers.messages.index);
+app.post(config.api_prefix + 'v1/messages',        /* authenticateRequest, */ controllers.messages.create);
 
 // static serving endpoint
 

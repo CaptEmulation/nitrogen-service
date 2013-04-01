@@ -38,22 +38,26 @@ var findOrCreateToken = function(principal, callback) {
     });
 };
 
-var findById = function(token, callback) {
+var findByToken = function(token, callback) {
     models.AccessToken.findOne({"token": token}, callback);
 };
 
 var verify = function(token, done) {
-    findById(token, function(err, accessToken) {
+    findByToken(token, function(err, accessToken) {
         if (err) { return done(err); }
         if (!accessToken || accessToken.expired()) { return done(null, false); }
 
-        return done(null, accessToken.principal);
+        services.principals.findById(accessToken.principal_id, function(err, principal) {
+            if (err) { return done(err); }
+
+            return done(null, principal);
+        });
     });
 };
 
 module.exports = {
     create: create,
-    findById: findById,
+    findByToken: findByToken,
     findOrCreateToken: findOrCreateToken,
     verify: verify
 };

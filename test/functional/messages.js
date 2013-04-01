@@ -1,31 +1,29 @@
-var app = require('../../server'),
-	assert = require('assert'),
-	config = require('../../config'),
-	faye = require('faye'),
-    mongoose = require('mongoose'),
-    request = require('request');
+var app = require('../../server')
+  ,	assert = require('assert')
+  ,	config = require('../../config')
+  ,	faye = require('faye')
+  , fixtures = require('../fixtures')
+  , mongoose = require('mongoose')
+  , request = require('request');
 
 describe('messages endpoint', function() {
 
-    /*
     it('index should be not be accessible anonymously', function(done) {
         request(config.base_url + '/messages', function(err, resp, body) {
             assert.equal(resp.statusCode, 401);
             done();
         });
     });
-    */
 
 	it('index should return all messages json', function(done) {
 
-        // TODO: , headers: { authorization: "Bearer 53243sdf" }
+        var authHeader =  "Bearer " + fixtures.models.device_accessToken.token;
+	    request({ url: config.base_url + '/messages', headers: { Authorization: authHeader } }, function(err,resp,body) {
+	        assert.equal(resp.statusCode, 200);
 
-	    request({url: config.base_url + '/messages'}, function(err,resp,body) {
-	      assert.equal(resp.statusCode, 200);
-
-          var messages_json = JSON.parse(body);
-          assert.notEqual(messages_json.messages, undefined);
-	      done();
+            var messages_json = JSON.parse(body);
+            assert.notEqual(messages_json.messages, undefined);
+	        done();
 	    });
 	});
 
@@ -37,6 +35,7 @@ describe('messages endpoint', function() {
 		var client = new faye.Client(config.realtime_url);
 
 		client.subscribe('/messages', function(message_json) {
+            console.log("R: " + message_json);
             var message = JSON.parse(message_json);
 			assert.equal(message.body.reading, 5.1);
 			notification_passed = true;
@@ -52,7 +51,7 @@ describe('messages endpoint', function() {
 
 			request.post(config.base_url + '/messages',
 				{ json: [{ from: new mongoose.Types.ObjectId(),
-                           message_type: "custom",
+                           message_type: "_custom",
                            body: { reading: 5.1 } }] }, function(post_err, post_resp, post_body) {
 				  assert.equal(post_err, null);
 			      assert.equal(post_resp.statusCode, 200);

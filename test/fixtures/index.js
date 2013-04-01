@@ -24,7 +24,12 @@ exports.reset = function(callback) {
 
         services.principals.create(
             new models.Principal({principal_type: 'device', external_id: 'existing_device'}),
-            addToFixture('device')
+            function(err, device) {
+                if (err) throw err;
+                fixtures['device'] = device;
+
+                services.accessTokens.create(device, addToFixture('device_accessToken'));
+            }
         );
 
         services.principals.create(
