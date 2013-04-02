@@ -5,8 +5,8 @@ var assert = require('assert')
   , services = require("../../services");
 describe('principals service', function() {
 
+    var passwordFixture = "sEcReT44";
     it('can create and validate a user', function(done) {
-        var passwordFixture = "sEcReT44";
         var user = new models.Principal({ principal_type: "user",
                                           email: "user@gmail.com",
                                           password: passwordFixture });
@@ -55,6 +55,26 @@ describe('principals service', function() {
             assert.notEqual(principal, undefined);
             assert.notEqual(accessToken, undefined);
 
+            done();
+        });
+    });
+
+    it('should reject creating a user without an email', function(done) {
+        var user = new models.Principal({ principal_type: "user",
+            password: passwordFixture });
+
+        services.principals.create(user, function(err, user) {
+            assert.equal(!!err, true);
+            done();
+        });
+    });
+
+    it('should reject creating a user without a password', function(done) {
+        var user = new models.Principal({ principal_type: "user",
+            email: "user@server.org" });
+
+        services.principals.create(user, function(err, user) {
+            assert.equal(!!err, true);
             done();
         });
     });

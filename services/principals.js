@@ -51,6 +51,7 @@ var authenticateDevice = function(principalId, secret, callback) {
 var create = function(principal, callback) {
 
     createCredentials(principal, function(err, principal) {
+        if (err) return callback(err);
 
         principal.save(function(err, principal) {
             if (err) return callback(err, null);
@@ -66,6 +67,9 @@ var create = function(principal, callback) {
 
 var createCredentials = function(principal, callback) {
     if (principal.isUser()) {
+        if (!principal.email) return callback("user principal must have email");
+        if (!principal.password) return callback("user principal must have password");
+
         createUserCredentials(principal, callback);
     } else {
         createDeviceCredentials(principal, callback);
