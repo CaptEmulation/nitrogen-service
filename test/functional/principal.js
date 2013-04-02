@@ -13,7 +13,7 @@ describe('principal endpoint', function() {
 			get_passed = false,
 			started_post = false;
 
-		var client = new faye.Client(config.realtime_url);
+		var client = new faye.Client(config.realtime_endpoint);
 
 		client.subscribe('/principals', function(principal_json) {
             var principal = JSON.parse(principal_json);
@@ -30,7 +30,7 @@ describe('principal endpoint', function() {
 			if (started_post) return;
 			started_post = true;
 			
-			request.post(config.base_url + '/principals', 
+			request.post(config.principals_endpoint,
 				{ json: { principal_type: "device",
                           external_id: "subscription_test" } }, function(post_err, post_resp, post_body) {
 				  assert.ifError(post_err);
@@ -43,7 +43,7 @@ describe('principal endpoint', function() {
 
                   assert.equal(post_body.principal.id, post_body.accessToken.principal);
 
-			      request({ url: config.base_url + '/principals/' + post_body.principal.id, json: true,
+			      request({ url: config.principals_endpoint + '/' + post_body.principal.id, json: true,
                             headers: { Authorization: "Bearer " + post_body.accessToken.token } }, function(get_err, get_resp, get_body) {
 		                assert.equal(get_err, null);
 		                assert.equal(get_resp.statusCode, 200);
@@ -62,7 +62,7 @@ describe('principal endpoint', function() {
 	});
 
     it('should reject requests for a principal without access token', function(done) {
-        request({ url: config.base_url + '/principals/' + fixtures.models.device.id, json: true }, function(get_err, get_resp, get_body) {
+        request({ url: config.principals_endpoint + '/' + fixtures.models.device.id, json: true }, function(get_err, get_resp, get_body) {
             assert.equal(get_err, null);
             assert.equal(get_resp.statusCode, 401);
             done();
@@ -70,7 +70,7 @@ describe('principal endpoint', function() {
     })
 
 	it('should fetch all principals', function(done) {
-	    request.get({ url: config.base_url + '/principals',
+	    request.get({ url: config.principals_endpoint,
                       headers: { Authorization: fixtures.authHeaders.device } }, function(err, resp, body) {
 	      assert.equal(resp.statusCode, 200);
 	      done();
@@ -78,7 +78,7 @@ describe('principal endpoint', function() {
 	});
 
     it ('should reject requests for index without access token', function(done) {
-        request.get({ url: config.base_url + '/principals' }, function(err, resp, body) {
+        request.get({ url: config.principals_endpoint }, function(err, resp, body) {
             assert.equal(resp.statusCode, 401);
             done();
         });
@@ -89,7 +89,7 @@ describe('principal endpoint', function() {
         var externalId = fixtures.models.device.externa_id;
         var secret = fixtures.models.device.secret;
 
-        request.post(config.base_url + '/principals/auth',
+        request.post(config.principals_endpoint + '/auth',
             { json: { principal_type: 'device',
                       id: deviceId,
                       secret: secret} }, function(err, resp, body) {
@@ -99,7 +99,7 @@ describe('principal endpoint', function() {
     });
 
     it('should login user principal', function(done) {
-        request.post(config.base_url + '/principals/auth',
+        request.post(config.principals_endpoint + '/auth',
             { json: { principal_type: 'user',
                       email: 'user@server.org',
                       password: 'sEcReT44'} }, function(err, resp, body) {

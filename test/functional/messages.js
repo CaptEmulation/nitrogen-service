@@ -9,14 +9,14 @@ var app = require('../../server')
 describe('messages endpoint', function() {
 
     it('index should be not be accessible anonymously', function(done) {
-        request(config.base_url + '/messages', function(err, resp, body) {
+        request(config.messages_endpoint, function(err, resp, body) {
             assert.equal(resp.statusCode, 401);
             done();
         });
     });
 
 	it('index should return all messages json', function(done) {
-	    request({ url: config.base_url + '/messages',
+	    request({ url: config.messages_endpoint,
                   headers: { Authorization: fixtures.authHeaders.device } }, function(err,resp,body) {
 	        assert.equal(resp.statusCode, 200);
 
@@ -27,7 +27,7 @@ describe('messages endpoint', function() {
 	});
 
     it('index should not be accessible with a random accessToken', function(done) {
-        request({ url: config.base_url + '/messages',
+        request({ url: config.messages_endpoint,
             headers: { Authorization: "Bearer DEADBEEF" } }, function(err,resp,body) {
             assert.equal(resp.statusCode, 401);
             done();
@@ -35,14 +35,14 @@ describe('messages endpoint', function() {
     });
 
     it('show should be not be accessible without accessToken', function(done) {
-        request(config.base_url + '/messages/' + fixtures.models.deviceMessage.id, function(err, resp, body) {
+        request(config.messages_endpoint + '/' + fixtures.models.deviceMessage.id, function(err, resp, body) {
             assert.equal(resp.statusCode, 401);
             done();
         });
     });
 
     it('create should be not be accessible without accessToken', function(done) {
-        request.post(config.base_url + '/messages',
+        request.post(config.messages_endpoint,
             { json: [{ from: fixtures.models.device.id,
                        message_type: "_custom"}] }, function(err, resp, body) {
             assert.equal(err, null);
@@ -56,7 +56,7 @@ describe('messages endpoint', function() {
 			get_passed = false,
 			started_post = false;
 
-		var client = new faye.Client(config.realtime_url);
+		var client = new faye.Client(config.realtime_endpoint);
 
 		client.subscribe('/messages', function(message_json) {
             var message = JSON.parse(message_json);
@@ -74,7 +74,7 @@ describe('messages endpoint', function() {
 			if (started_post) return;
 			started_post = true;
 
-			request.post(config.base_url + '/messages',
+			request.post(config.messages_endpoint,
 				{ json: [{ from: fixtures.models.device.id,
                            message_type: "_messageSubscriptionTest",
                            body: { reading: 5.1 } }],
@@ -90,7 +90,7 @@ describe('messages endpoint', function() {
 
                   assert.notEqual(message_id, null);
 
-			      request({ url: config.base_url + '/messages/' + message_id, json: true,
+			      request({ url: config.messages_endpoint + '/' + message_id, json: true,
                           headers: { Authorization: fixtures.authHeaders.device } },
 					function(get_err, get_resp, get_body) {
 
@@ -109,5 +109,4 @@ describe('messages endpoint', function() {
 		    });
     	});
 	});
-
 });

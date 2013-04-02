@@ -8,7 +8,8 @@ exports.index = function(req, res) {
     res.send({ endpoints: {
                     blobs_endpoint: config.blobs_endpoint,
                     messages_endpoint: config.messages_endpoint,
-                    principals_endpoint: config.principals_endpoint
+                    principals_endpoint: config.principals_endpoint,
+                    realtime_endpoint: config.realtime_endpoint
                }
     });
 };

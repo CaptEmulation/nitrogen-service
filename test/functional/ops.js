@@ -5,7 +5,7 @@ var assert = require('assert')
 describe('ops endpoint', function() {
 
 	it('should have passing health', function(done) {
-		request({url: config.base_url + '/ops/health', json: true}, function(err, resp, body) {
+		request({url: config.ops_endpoint + '/health', json: true}, function(err, resp, body) {
 	      assert.equal(resp.statusCode, 200);
 	      assert.equal(body.status, "ok");
 	      done(); 

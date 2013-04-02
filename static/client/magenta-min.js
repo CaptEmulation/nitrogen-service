@@ -1,1 +1,1 @@
-../../../sdk/browser/magenta-min.js
+../../../client/browser/magenta-min.js

@@ -15,7 +15,7 @@ describe('blobs REST endpoint', function() {
 
 				fs.createReadStream(fixture_path).
 				pipe(
-					request.post({ url: config.base_url + '/blobs',
+					request.post({ url: config.blobs_endpoint,
 						           headers: { 'Content-Type': 'image/jpeg', 'Content-Length': stats.size,
                                               'Authorization': fixtures.authHeaders.device } },
                         function (err, resp, body) {
@@ -27,7 +27,7 @@ describe('blobs REST endpoint', function() {
                             assert.equal(body_json.blob._id, undefined);
 					        assert.notEqual(body_json.blob.id, undefined);
 
-					        var blob_url = config.base_url + '/blobs/' + body_json.blob.id;
+					        var blob_url = config.blobs_endpoint + '/' + body_json.blob.id;
 
   					        request.get(blob_url, { headers: { 'Authorization': fixtures.authHeaders.device } }, function(err,resp,body) {
   					      	    assert.ifError(err);
@@ -44,7 +44,7 @@ describe('blobs REST endpoint', function() {
     });
 
     it('should return 404 for unknown blobs', function(done) {
-    	request(config.base_url + '/blobs/51195d5f11600000deadbeef',
+    	request(config.blobs_endpoint + '/51195d5f11600000deadbeef',
                 { headers: { 'Authorization': fixtures.authHeaders.device } }, function(err,resp,body) {
 	    	  assert.equal(resp.statusCode, 404);
 
@@ -53,7 +53,7 @@ describe('blobs REST endpoint', function() {
     });
 
     it('should not allow unauthenticated access to blobs', function(done) {
-        request(config.base_url + '/blobs/51195d5f11600000deadbeef', function(err,resp,body) {
+        request(config.blobs_endpoint + '/51195d5f11600000deadbeef', function(err,resp,body) {
             assert.equal(resp.statusCode, 401);
 
             done();

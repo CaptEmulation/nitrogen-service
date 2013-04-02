@@ -6,6 +6,7 @@ console.log("CONFIG NODE_ENV: " + process.env.NODE_ENV);
 if (process.env.NODE_ENV == "production") {
     config = {
         host: process.env.HOST_NAME,
+        http_port: 80,
         protocol: "http"
     };
 } else if (process.env.NODE_ENV == "test") {
@@ -26,21 +27,29 @@ if (process.env.NODE_ENV == "production") {
     };
 }
 
-config.http_port = process.env.PORT || config.http_port || 3030;
+console.log("http port: " + config.http_port);
+
 config.mongodb_connection_string = config.mongodb_connection_string || process.env.MONGODB_CONNECTION_STRING;
 
 config.api_prefix = "/api/";
 config.path_prefix = config.api_prefix + "v1";
-config.base_url = config.protocol + "://" + config.host + ":" + config.http_port + config.path_prefix;
+
+config.base_url = config.protocol + "://" + config.host;
+
+if (config.http_port != 80)
+    config.base_url += ":" + config.http_port
+
+config.base_url += config.path_prefix;
 
 // NOTE:  cannot have a trailing slash on realtime_path below or faye client will fail.
 config.realtime_path = "/realtime";
-config.realtime_url = config.base_url + config.realtime_path;
+config.realtime_endpoint = config.base_url + config.realtime_path;
 config.realtime_endpoint_timeout = 90; // seconds
 
-config.blobs_endpoint = config.base_url + "/blobs/";
-config.messages_endpoint = config.base_url + "/messages/";
-config.principals_endpoint = config.base_url + "/principals/";
+config.blobs_endpoint = config.base_url + "/blobs";
+config.messages_endpoint = config.base_url + "/messages";
+config.principals_endpoint = config.base_url + "/principals";
+config.ops_endpoint = config.base_url + "/ops";
 
 config.password_hash_iterations = 10000;
 config.password_hash_length = 128;
