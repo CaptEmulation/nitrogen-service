@@ -26,6 +26,7 @@ if (process.env.NODE_ENV == "production") {
     };
 }
 
+config.http_port = process.env.PORT || config.http_port || 3030;
 config.mongodb_connection_string = config.mongodb_connection_string || process.env.MONGODB_CONNECTION_STRING;
 
 config.api_prefix = "/api/";
