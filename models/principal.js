@@ -36,6 +36,7 @@ var principalObjectTransform = function(doc, ret, options) {
 
     delete ret.salt;
     delete ret.secret_hash;
+    delete ret.password_hash;
 };
 
 principalSchema.set('toObject', { transform: principalObjectTransform });

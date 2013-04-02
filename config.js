@@ -35,12 +35,13 @@ config.base_url = config.protocol + "://" + config.host + ":" + config.http_port
 // NOTE:  cannot have a trailing slash on realtime_path below or faye client will fail.
 config.realtime_path = "/realtime";
 config.realtime_url = config.base_url + config.realtime_path;
+config.realtime_endpoint_timeout = 90; // seconds
 
 config.blobs_endpoint = config.base_url + "/blobs/";
 config.messages_endpoint = config.base_url + "/messages/";
 config.principals_endpoint = config.base_url + "/principals/";
 
-config.password_hash_iterations = 1;
+config.password_hash_iterations = 10000;
 config.password_hash_length = 128;
 config.salt_length_bytes = 64;
 

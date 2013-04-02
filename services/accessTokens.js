@@ -14,9 +14,6 @@ var create = function(principal, callback) {
     crypto.randomBytes(config.access_token_bytes, function(err, tokenBuf) {
         if (err) return callback(err);
 
-        console.log("creating access token for principal id: " + accessToken.principal.id +
-            " with expiration: " + accessToken.expires_at);
-
         accessToken.token = tokenBuf.toString('base64');
         accessToken.save(callback);
     });

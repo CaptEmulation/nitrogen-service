@@ -26,6 +26,14 @@ describe('messages endpoint', function() {
 	    });
 	});
 
+    it('index should not be accessible with a random accessToken', function(done) {
+        request({ url: config.base_url + '/messages',
+            headers: { Authorization: "Bearer DEADBEEF" } }, function(err,resp,body) {
+            assert.equal(resp.statusCode, 401);
+            done();
+        });
+    });
+
     it('show should be not be accessible without accessToken', function(done) {
         request(config.base_url + '/messages/' + fixtures.models.deviceMessage.id, function(err, resp, body) {
             assert.equal(resp.statusCode, 401);

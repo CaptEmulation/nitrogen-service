@@ -36,15 +36,15 @@ describe('principal endpoint', function() {
 				  assert.ifError(post_err);
 			      assert.equal(post_resp.statusCode, 200);
 
-                  assert.notEqual(post_body.principal.secret, undefined);
+                  assert.equal(!!post_body.principal.secret, true);
                   assert.equal(post_body.principal.secret_hash, undefined);
 			      assert.equal(post_body.principal.external_id, "subscription_test");
                   assert.ok(Date.now() < Date.parse(post_body.accessToken.expires_at));
 
                   assert.equal(post_body.principal.id, post_body.accessToken.principal);
 
-			      request({ url: config.base_url + '/principals/' + post_body.principal.id, json: true},
-			      	function(get_err, get_resp, get_body) {
+			      request({ url: config.base_url + '/principals/' + post_body.principal.id, json: true,
+                            headers: { Authorization: "Bearer " + post_body.accessToken.token } }, function(get_err, get_resp, get_body) {
 		                assert.equal(get_err, null);
 		                assert.equal(get_resp.statusCode, 200);
 
@@ -61,12 +61,28 @@ describe('principal endpoint', function() {
     	});
 	});
 
+    it('should reject requests for a principal without access token', function(done) {
+        request({ url: config.base_url + '/principals/' + fixtures.models.device.id, json: true }, function(get_err, get_resp, get_body) {
+            assert.equal(get_err, null);
+            assert.equal(get_resp.statusCode, 401);
+            done();
+        });
+    })
+
 	it('should fetch all principals', function(done) {
-	    request(config.base_url + '/principals', function(err, resp, body) {
+	    request.get({ url: config.base_url + '/principals',
+                      headers: { Authorization: fixtures.authHeaders.device } }, function(err, resp, body) {
 	      assert.equal(resp.statusCode, 200);
 	      done();
 	    });
 	});
+
+    it ('should reject requests for index without access token', function(done) {
+        request.get({ url: config.base_url + '/principals' }, function(err, resp, body) {
+            assert.equal(resp.statusCode, 401);
+            done();
+        });
+    });
 
     it('should login device principal', function (done) {
         var deviceId = fixtures.models.device.id;
