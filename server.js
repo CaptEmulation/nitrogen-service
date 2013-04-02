@@ -13,8 +13,8 @@ var express = require('express')
 console.log("connecting to mongodb instance: " + config.mongodb_connection_string);
 mongoose.connect(config.mongodb_connection_string);
 
-var port = process.env.PORT || config.http_port || 3030;
-var server = app.listen(port);
+config.http_port = process.env.PORT || config.http_port || 3030;
+var server = app.listen(config.http_port);
 console.log('listening for http connections on ' + config.base_url);
 
 app.use(express.bodyParser());
