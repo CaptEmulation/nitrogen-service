@@ -29,7 +29,6 @@ exports.show = function(req, res) {
 };
 
 exports.create = function(req, res) {
-    console.log("message.create: received " + req.body.length + " messages.");
     async.concat(req.body, function(message_object, callback) {
         var message = new models.Message(message_object);
 
@@ -38,7 +37,6 @@ exports.create = function(req, res) {
 
         callback(null, [message]);
     }, function (err, messages) {
-        console.log("message.create: creating " + req.body.length + " messages.");
         services.messages.createMany(messages, function(err, saved_messages) {
             if (err)
                 res.send(400, err);

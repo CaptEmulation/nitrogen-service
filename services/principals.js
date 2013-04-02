@@ -55,6 +55,7 @@ var create = function(principal, callback) {
         principal.save(function(err, principal) {
             if (err) return callback(err, null);
 
+            console.log("created " + principal.principal_type + " principal with id: " + principal.id);
             var principal_json = JSON.stringify(principal);
             global.bayeux.getClient().publish('/principals', principal_json);
 
