@@ -4,7 +4,7 @@ var config = require('../config')
 
 exports.authenticate = function(req, res) {
     services.principals.authenticate(req.body, function (err, principal, accessToken) {
-        if (err) return res.send(401, err);
+        if (err) return res.send(err);
 
         res.send({ "principal": principal, "accessToken": accessToken });
     });
@@ -15,10 +15,10 @@ exports.create = function(req, res) {
 	principal.last_ip = req.ip;
 
 	services.principals.create(principal, function(err, principal) {
-		if (err) return res.send(400, err);
+		if (err) return res.send(err);
 
         services.accessTokens.create(principal, function(err, accessToken) {
-            if (err) res.send(400, err);
+            if (err) res.send(err);
 
             var principalJSON = principal.toObject();
 

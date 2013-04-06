@@ -17,13 +17,13 @@ var authenticate = function(authBody, callback) {
 var authenticateUser = function(email, password, callback) {
     findByEmail(email, function(err, principal) {
         if (err) return callback(err);
-        if (!principal) return callback(404);
+        if (!principal) return callback(401);
 
         verifyPassword(password, principal, function(err) {
-            if (err) return callback(err, null);
+            if (err) return callback(err);
 
             services.accessTokens.findOrCreateToken(principal, function(err, accessToken) {
-                if (err) return callback(err, null);
+                if (err) return callback(err);
 
                 callback(null, principal, accessToken);
             });
