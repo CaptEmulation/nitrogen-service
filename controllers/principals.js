@@ -15,22 +15,20 @@ exports.create = function(req, res) {
 	principal.last_ip = req.ip;
 
 	services.principals.create(principal, function(err, principal) {
-		if (err) {
-			res.send(400, err);
-        } else {
-            services.accessTokens.create(principal, function(err, accessToken) {
-                if (err) res.send(400, err);
+		if (err) return res.send(400, err);
 
-                var principalJSON = principal.toObject();
+        services.accessTokens.create(principal, function(err, accessToken) {
+            if (err) res.send(400, err);
 
-                if (principal.isDevice()) {
-                    // for create (and create only) we want to pass back the secret to the device.
-                    principalJSON.secret = principal.secret;
-                }
+            var principalJSON = principal.toObject();
 
-                res.send({ "principal": principalJSON, "accessToken": accessToken });
-            });
-        }
+            if (principal.isDevice()) {
+                // for create (and create only) we want to pass back the secret to the device.
+                principalJSON.secret = principal.secret;
+            }
+
+            res.send({ "principal": principalJSON, "accessToken": accessToken });
+        });
 	});
 };
 

@@ -49,20 +49,33 @@ var authenticateDevice = function(principalId, secret, callback) {
 };
 
 var create = function(principal, callback) {
-
-    createCredentials(principal, function(err, principal) {
+    checkForExistingPrincipal(principal, function(err, foundPrincipal) {
         if (err) return callback(err);
+        if (foundPrincipal) return callback("Principal already exists");
 
-        principal.save(function(err, principal) {
-            if (err) return callback(err, null);
+        createCredentials(principal, function(err, principal) {
+            if (err) return callback(err);
 
-            console.log("created " + principal.principal_type + " principal with id: " + principal.id);
-            var principal_json = JSON.stringify(principal);
-            global.bayeux.getClient().publish('/principals', principal_json);
+            principal.save(function(err, principal) {
+                if (err) return callback(err, null);
 
-            callback(null, principal);
+                console.log("created " + principal.principal_type + " principal with id: " + principal.id);
+                var principal_json = JSON.stringify(principal);
+
+                global.bayeux.getClient().publish('/principals', principal_json);
+
+                callback(null, principal);
+            });
         });
     });
+};
+
+var checkForExistingPrincipal = function(principal, callback) {
+    if (principal.isUser()) {
+        findByEmail(principal.email, callback);
+    } else {
+        findById(principal.id, callback);
+    }
 };
 
 var createCredentials = function(principal, callback) {

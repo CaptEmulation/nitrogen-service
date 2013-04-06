@@ -6,6 +6,7 @@ var assert = require('assert')
 describe('principals service', function() {
 
     var passwordFixture = "sEcReT44";
+
     it('can create and validate a user', function(done) {
         var user = new models.Principal({ principal_type: "user",
                                           email: "user@gmail.com",
@@ -48,7 +49,7 @@ describe('principals service', function() {
     it('can authenticate a device', function(done) {
 
         var request = { id: fixtures.models.device.id,
-                        secret :fixtures.models.device.secret };
+                        secret: fixtures.models.device.secret };
 
         services.principals.authenticate(request, function(err, principal, accessToken) {
             assert.ifError(err);
@@ -61,7 +62,7 @@ describe('principals service', function() {
 
     it('should reject creating a user without an email', function(done) {
         var user = new models.Principal({ principal_type: "user",
-            password: passwordFixture });
+            password: fixtures.models.user.password });
 
         services.principals.create(user, function(err, user) {
             assert.equal(!!err, true);
@@ -71,7 +72,18 @@ describe('principals service', function() {
 
     it('should reject creating a user without a password', function(done) {
         var user = new models.Principal({ principal_type: "user",
-            email: "user@server.org" });
+            email: "newuser@gmail.com" });
+
+        services.principals.create(user, function(err, user) {
+            assert.equal(!!err, true);
+            done();
+        });
+    });
+
+    it ('should reject creating a if user that already exists', function(done) {
+        var user = new models.Principal({ principal_type: "user",
+                                          email: fixtures.models.user.email,
+                                          password: fixtures.models.user.password });
 
         services.principals.create(user, function(err, user) {
             assert.equal(!!err, true);
