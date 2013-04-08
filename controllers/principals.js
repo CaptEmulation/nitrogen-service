@@ -2,11 +2,16 @@ var config = require('../config')
   ,	models = require('../models')
   , services = require('../services');
 
+var sendAuthResponse = function(res, principal, accessToken) {
+    res.cookie('access_token', accessToken.token, { expires: accessToken.expires_at });
+    res.send({ 'principal': principal, 'accessToken': accessToken });
+};
+
 exports.authenticate = function(req, res) {
     services.principals.authenticate(req.body, function (err, principal, accessToken) {
         if (err) return res.send(err);
 
-        res.send({ "principal": principal, "accessToken": accessToken });
+        sendAuthResponse(res, principal, accessToken);
     });
 };
 
@@ -27,7 +32,7 @@ exports.create = function(req, res) {
                 principalJSON.secret = principal.secret;
             }
 
-            res.send({ "principal": principalJSON, "accessToken": accessToken });
+            sendAuthResponse(res, principalJSON, accessToken);
         });
 	});
 };

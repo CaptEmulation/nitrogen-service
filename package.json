@@ -12,7 +12,7 @@
     "mongodb": "1.x",
     "mongoose": "3.x",
     "passport": "0.1.x",
-    "passport-http-bearer": "*",
+    "magenta-passport-http-bearer": "0.2.x",
     "request": "2.x"
   },
   "devDependencies": {
