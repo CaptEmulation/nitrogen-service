@@ -26,7 +26,7 @@ describe('messages endpoint', function() {
 	    });
 	});
 
-    it('index should not be accessible with a random accessToken', function(done) {
+    it('index should not be accessible with an invalid accessToken', function(done) {
         request({ url: config.messages_endpoint,
             headers: { Authorization: "Bearer DEADBEEF" } }, function(err,resp,body) {
             assert.equal(resp.statusCode, 401);
