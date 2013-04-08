@@ -3,7 +3,6 @@ var config = require('../config')
   , services = require('../services');
 
 var sendAuthResponse = function(res, principal, accessToken) {
-    res.cookie('access_token', accessToken.token, { expires: accessToken.expires_at });
     res.send({ 'principal': principal, 'accessToken': accessToken });
 };
 
