@@ -22,6 +22,7 @@ app.use(passport.initialize());
 passport.use(new BearerStrategy({}, services.accessTokens.verify));
 
 app.use(middleware.crossOrigin);
+app.disable('x-powered-by');
 
 // only establish routing to endpoints
 mongoose.connection.once('open', function () {
