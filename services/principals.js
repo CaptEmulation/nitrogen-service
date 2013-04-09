@@ -25,6 +25,7 @@ var authenticateUser = function(email, password, callback) {
             services.accessTokens.findOrCreateToken(principal, function(err, accessToken) {
                 if (err) return callback(err);
 
+                console.log("authenticated user principal: " + principal.id);
                 callback(null, principal, accessToken);
             });
         });
@@ -42,6 +43,7 @@ var authenticateDevice = function(principalId, secret, callback) {
             services.accessTokens.findOrCreateToken(principal, function(err, accessToken) {
                 if (err) return callback(err, null);
 
+                console.log("authenticated device principal: " + principal.id);
                 callback(null, principal, accessToken);
             });
         });
@@ -59,7 +61,7 @@ var create = function(principal, callback) {
             principal.save(function(err, principal) {
                 if (err) return callback(err, null);
 
-                console.log("created " + principal.principal_type + " principal with id: " + principal.id);
+                console.log("created " + principal.principal_type + " principal: " + principal.id);
                 var principal_json = JSON.stringify(principal);
 
                 global.bayeux.getClient().publish('/principals', principal_json);
