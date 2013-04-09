@@ -10,7 +10,7 @@ exports.authenticate = function(req, res) {
     services.principals.authenticate(req.body, function (err, principal, accessToken) {
         if (err) return res.send(err);
 
-        services.principals.updateLastConnection(principal, req.ip);
+        services.principals.updateLastConnection(principal, req.connection.remoteAddress);
 
         sendAuthResponse(res, principal, accessToken);
     });
@@ -18,7 +18,7 @@ exports.authenticate = function(req, res) {
 
 exports.create = function(req, res) {
 	var principal = new models.Principal(req.body);
-	principal.last_ip = req.ip;
+	principal.last_ip = req.connection.remoteAddress;
 
 	services.principals.create(principal, function(err, principal) {
 		if (err) return res.send(err);

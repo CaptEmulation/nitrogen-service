@@ -58,6 +58,8 @@ describe('principal endpoint', function() {
 
                         assert.equal(get_body.principal.secret, undefined);
 		                assert.equal(get_body.principal.external_id, "subscription_test");
+                        assert.notEqual(get_body.principal.last_connection, undefined);
+                        assert.notEqual(get_body.principal.last_ip, undefined);
 
 		                get_passed = true;
 
@@ -94,7 +96,6 @@ describe('principal endpoint', function() {
 
     it('should login device principal', function (done) {
         var deviceId = fixtures.models.device.id;
-        var externalId = fixtures.models.device.externa_id;
         var secret = fixtures.models.device.secret;
 
         request.post(config.principals_endpoint + '/auth',
@@ -102,6 +103,10 @@ describe('principal endpoint', function() {
                       id: deviceId,
                       secret: secret} }, function(err, resp, body) {
                 assert.equal(resp.statusCode, 200);
+                assert.notEqual(body.accessToken.token, undefined);
+
+                assert.equal(Date.parse(body.principal.last_connection) > fixtures.models.device.last_connection.getTime(), true);
+                assert.notEqual(body.principal.last_ip, undefined);
                 done();
             });
     });
@@ -112,6 +117,11 @@ describe('principal endpoint', function() {
                       email: 'user@server.org',
                       password: 'sEcReT44'} }, function(err, resp, body) {
                 assert.equal(resp.statusCode, 200);
+                assert.notEqual(body.accessToken.token, undefined);
+
+                assert.equal(Date.parse(body.principal.last_connection) > fixtures.models.user.last_connection.getTime(), true);
+                assert.notEqual(body.principal.last_ip, undefined);
+
                 done();
             });
     });

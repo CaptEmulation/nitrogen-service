@@ -20,7 +20,7 @@ principalSchema.add({
 // user items
 
 	email: { type: String },
-	password_hash: { type: String },       // hashed and stored in base64
+	password_hash: { type: String },  // hashed and stored in base64
 	salt: { type: String }            // stored in base64
 });
 
