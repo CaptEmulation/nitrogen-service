@@ -58,6 +58,13 @@ describe('messages endpoint', function() {
 			started_post = false;
 
 		var client = new faye.Client(config.realtime_endpoint);
+        client.addExtension({
+            outgoing: function(message, callback) {
+                message.ext = message.ext || {};
+                message.ext.access_token = fixtures.models.deviceAccessToken.token;
+                callback(message);
+            }
+        });
 
 		client.subscribe('/messages', function(message_json) {
             var message = JSON.parse(message_json);

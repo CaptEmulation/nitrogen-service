@@ -15,6 +15,13 @@ describe('principal endpoint', function() {
 			started_post = false;
 
 		var client = new faye.Client(config.realtime_endpoint);
+        client.addExtension({
+            outgoing: function(message, callback) {
+                message.ext = message.ext || {};
+                message.ext.access_token = fixtures.models.deviceAccessToken.token;
+                callback(message);
+            }
+        });
 
 		client.subscribe('/principals', function(principal_json) {
             var principal = JSON.parse(principal_json);
