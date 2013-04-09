@@ -134,6 +134,18 @@ var findById = function(id, callback) {
     models.Principal.findOne({"_id": id}, callback);
 };
 
+var hashPassword = function(password, saltBuf, callback) {
+    crypto.pbkdf2(password, saltBuf,
+        config.password_hash_iterations, config.password_hash_length,
+        function(err, hash) {
+            if (err) return callback(err, null);
+
+            var hashBuf = new Buffer(hash, 'binary');
+            callback(null, hashBuf);
+        });
+};
+
+
 var hashSecret = function(secret, callback) {
     // have to create a buffer here because node's sha256 hash function expects binary encoding.
     var secretBuf = new Buffer(secret, 'base64');
@@ -142,6 +154,21 @@ var hashSecret = function(secret, callback) {
     sha256.update(secretBuf.toString('binary'), 'binary');
 
     callback(null, sha256.digest('base64'));
+};
+
+var update = function(principal, callback) {
+    principal.save(callback);
+};
+
+var verifyPassword = function(password, user, callback) {
+    var saltBuf = new Buffer(user.salt, 'base64');
+
+    hashPassword(password, saltBuf, function(err, hashedPasswordBuf) {
+        if (err) return callback(err);
+        if (user.password_hash != hashedPasswordBuf.toString('base64')) return callback(401);
+
+        callback(null);
+    });
 };
 
 var verifySecret = function(secret, principal, callback) {
@@ -156,33 +183,12 @@ var verifySecret = function(secret, principal, callback) {
     });
 };
 
-var hashPassword = function(password, saltBuf, callback) {
-    crypto.pbkdf2(password, saltBuf,
-                  config.password_hash_iterations, config.password_hash_length,
-                  function(err, hash) {
-        if (err) return callback(err, null);
-
-        var hashBuf = new Buffer(hash, 'binary');
-        callback(null, hashBuf);
-    });
-};
-
-var verifyPassword = function(password, user, callback) {
-    var saltBuf = new Buffer(user.salt, 'base64');
-
-    hashPassword(password, saltBuf, function(err, hashedPasswordBuf) {
-        if (err) return callback(err);
-        if (user.password_hash != hashedPasswordBuf.toString('base64')) return callback(401);
-
-        callback(null);
-    });
-};
-
 module.exports = {
     authenticate: authenticate,
     create: create,
     find: find,
     findById: findById,
+    update: update,
     verifySecret: verifySecret,
     verifyPassword: verifyPassword
 };

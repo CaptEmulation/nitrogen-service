@@ -16,16 +16,20 @@ mongoose.connect(config.mongodb_connection_string);
 var server = app.listen(process.env.PORT || config.http_port || 3030);
 console.log('listening for http connections on ' + config.base_url);
 
+app.use(express.logger());
 app.use(express.bodyParser());
 
 app.use(passport.initialize());
 passport.use(new BearerStrategy({}, services.accessTokens.verify));
 
 app.use(middleware.crossOrigin);
+
 app.disable('x-powered-by');
 
 // only establish routing to endpoints
 mongoose.connection.once('open', function () {
+    app.use(express.static(__dirname + '/static'));
+
     // REST endpoints
 
     app.get(config.api_prefix + 'v1/headwaiter',                                     controllers.headwaiter.index);
@@ -47,9 +51,6 @@ mongoose.connection.once('open', function () {
     app.get(config.api_prefix + 'v1/messages',       middleware.authenticateRequest, controllers.messages.index);
     app.post(config.api_prefix + 'v1/messages',      middleware.authenticateRequest, controllers.messages.create);
 
-    // static serving endpoint
-
-    app.use(express.static(__dirname + '/static'));
     services.realtime.attach(server, config);
 });
 
