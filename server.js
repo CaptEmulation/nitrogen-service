@@ -50,17 +50,8 @@ mongoose.connection.once('open', function () {
     // static serving endpoint
 
     app.use(express.static(__dirname + '/static'));
+    services.realtime.attach(server, config);
 });
-
-// Realtime endpoint setup
-
-global.bayeux = new faye.NodeAdapter({
-    mount: config.path_prefix + config.realtime_path,
-    timeout: config.realtime_endpoint_timeout
-});
-
-global.bayeux.attach(server);
-console.log('listening for realtime connections on ' + config.path_prefix + config.realtime_path);
 
 // TODO: log errors once we have real logging solution in place.
 //mongoose.connection.on('error', function(err) {

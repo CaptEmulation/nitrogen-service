@@ -64,7 +64,7 @@ var create = function(principal, callback) {
                 console.log("created " + principal.principal_type + " principal: " + principal.id);
                 var principal_json = JSON.stringify(principal);
 
-                global.bayeux.getClient().publish('/principals', principal_json);
+                services.realtime.publish('/principals', principal_json);
 
                 callback(null, principal);
             });

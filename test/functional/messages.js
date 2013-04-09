@@ -4,7 +4,8 @@ var app = require('../../server')
   ,	faye = require('faye')
   , fixtures = require('../fixtures')
   , mongoose = require('mongoose')
-  , request = require('request');
+  , request = require('request')
+  , services = require('../../services');
 
 describe('messages endpoint', function() {
 
@@ -70,7 +71,7 @@ describe('messages endpoint', function() {
 		    }
 		});
 
-        global.bayeux.bind('subscribe', function(clientId) {
+        services.realtime.bind('subscribe', function(clientId) {
 			if (started_post) return;
 			started_post = true;
 

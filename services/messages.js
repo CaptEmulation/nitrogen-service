@@ -20,8 +20,7 @@ var create = function(message, callback) {
 
             console.log("created message: " + message.id + ": " + client_json);
 
-            global.bayeux.getClient().publish('/messages', client_json);
-            global.bayeux.getClient().publish('/messages/type/' + message.message_type, client_json);
+            services.realtime.publish('/messages', client_json);
 
             callback(null, [message]);
         });
