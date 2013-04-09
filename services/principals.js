@@ -160,6 +160,13 @@ var update = function(principal, callback) {
     principal.save(callback);
 };
 
+var updateLastConnection = function(principal, ip) {
+    principal.last_connection = new Date();
+    principal.last_ip = ip;
+
+    services.principals.update(principal, function(err, principal) {});
+}
+
 var verifyPassword = function(password, user, callback) {
     var saltBuf = new Buffer(user.salt, 'base64');
 
@@ -189,6 +196,7 @@ module.exports = {
     find: find,
     findById: findById,
     update: update,
+    updateLastConnection: updateLastConnection,
     verifySecret: verifySecret,
     verifyPassword: verifyPassword
 };
