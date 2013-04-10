@@ -10,6 +10,8 @@ exports.health = function(req, res) {
         res.send({ status: status,
                    memory: process.memoryUsage(),
                    remoteAddress: utils.ipFromRequest(req),
+                   ips: req.ips,
+                   ip: req.ip,
                    pid: process.pid,
                    uptime: process.uptime() });
     });
