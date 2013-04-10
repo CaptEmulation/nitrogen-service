@@ -13,6 +13,7 @@ exports.health = function(req, res) {
                    ips: req.ips,
                    ip: req.ip,
                    headers: req.headers,
+                   test: "yo",
                    pid: process.pid,
                    uptime: process.uptime() });
     });
