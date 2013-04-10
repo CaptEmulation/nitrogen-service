@@ -12,6 +12,7 @@ exports.health = function(req, res) {
                    remoteAddress: utils.ipFromRequest(req),
                    ips: req.ips,
                    ip: req.ip,
+                   headers: req.headers,
                    pid: process.pid,
                    uptime: process.uptime() });
     });
