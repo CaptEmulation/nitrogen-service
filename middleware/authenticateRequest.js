@@ -7,7 +7,7 @@ module.exports = function(req, res, next) {
 
         // opportunistically update the last connection details for this principal.
         if (req.user) {
-            services.principals.updateLastConnection(req.user, req.connection.remoteAddress);
+            services.principals.updateLastConnection(req.user, req.ip);
         }
 
         next();

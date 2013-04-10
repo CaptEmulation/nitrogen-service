@@ -23,6 +23,7 @@ app.use(passport.initialize());
 passport.use(new BearerStrategy({}, services.accessTokens.verify));
 
 app.use(middleware.crossOrigin);
+app.use(middleware.remoteIp);
 
 app.disable('x-powered-by');
 

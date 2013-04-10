@@ -10,7 +10,7 @@ exports.authenticate = function(req, res) {
     services.principals.authenticate(req.body, function (err, principal, accessToken) {
         if (err) return res.send(err);
 
-        services.principals.updateLastConnection(principal, req.connection.remoteAddress);
+        services.principals.updateLastConnection(principal, req.ip);
 
         sendAuthResponse(res, principal, accessToken);
     });
@@ -18,7 +18,7 @@ exports.authenticate = function(req, res) {
 
 exports.create = function(req, res) {
 	var principal = new models.Principal(req.body);
-	principal.last_ip = req.connection.remoteAddress;
+	principal.last_ip = req.ip;
 
 	services.principals.create(principal, function(err, principal) {
 		if (err) return res.send(err);
@@ -39,7 +39,6 @@ exports.create = function(req, res) {
 };
 
 exports.index = function(req, res) {
-
 	// TODO: paging, move out to service
 	var start = 0;
  	var limit = 200;
