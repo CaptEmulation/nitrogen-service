@@ -25,6 +25,7 @@ var authenticateUser = function(email, password, callback) {
             services.accessTokens.findOrCreateToken(principal, function(err, accessToken) {
                 if (err) return callback(err);
 
+                console.log("authenticated user principal: " + principal.id);
                 callback(null, principal, accessToken);
             });
         });
@@ -42,6 +43,7 @@ var authenticateDevice = function(principalId, secret, callback) {
             services.accessTokens.findOrCreateToken(principal, function(err, accessToken) {
                 if (err) return callback(err, null);
 
+                console.log("authenticated device principal: " + principal.id);
                 callback(null, principal, accessToken);
             });
         });
@@ -59,10 +61,10 @@ var create = function(principal, callback) {
             principal.save(function(err, principal) {
                 if (err) return callback(err, null);
 
-                console.log("created " + principal.principal_type + " principal with id: " + principal.id);
+                console.log("created " + principal.principal_type + " principal: " + principal.id);
                 var principal_json = JSON.stringify(principal);
 
-                global.bayeux.getClient().publish('/principals', principal_json);
+                services.realtime.publish('/principals', principal_json);
 
                 callback(null, principal);
             });
@@ -132,6 +134,18 @@ var findById = function(id, callback) {
     models.Principal.findOne({"_id": id}, callback);
 };
 
+var hashPassword = function(password, saltBuf, callback) {
+    crypto.pbkdf2(password, saltBuf,
+        config.password_hash_iterations, config.password_hash_length,
+        function(err, hash) {
+            if (err) return callback(err, null);
+
+            var hashBuf = new Buffer(hash, 'binary');
+            callback(null, hashBuf);
+        });
+};
+
+
 var hashSecret = function(secret, callback) {
     // have to create a buffer here because node's sha256 hash function expects binary encoding.
     var secretBuf = new Buffer(secret, 'base64');
@@ -140,6 +154,28 @@ var hashSecret = function(secret, callback) {
     sha256.update(secretBuf.toString('binary'), 'binary');
 
     callback(null, sha256.digest('base64'));
+};
+
+var update = function(principal, callback) {
+    principal.save(callback);
+};
+
+var updateLastConnection = function(principal, ip) {
+    principal.last_connection = new Date();
+    principal.last_ip = ip;
+
+    services.principals.update(principal, function(err, principal) {});
+}
+
+var verifyPassword = function(password, user, callback) {
+    var saltBuf = new Buffer(user.salt, 'base64');
+
+    hashPassword(password, saltBuf, function(err, hashedPasswordBuf) {
+        if (err) return callback(err);
+        if (user.password_hash != hashedPasswordBuf.toString('base64')) return callback(401);
+
+        callback(null);
+    });
 };
 
 var verifySecret = function(secret, principal, callback) {
@@ -154,33 +190,13 @@ var verifySecret = function(secret, principal, callback) {
     });
 };
 
-var hashPassword = function(password, saltBuf, callback) {
-    crypto.pbkdf2(password, saltBuf,
-                  config.password_hash_iterations, config.password_hash_length,
-                  function(err, hash) {
-        if (err) return callback(err, null);
-
-        var hashBuf = new Buffer(hash, 'binary');
-        callback(null, hashBuf);
-    });
-};
-
-var verifyPassword = function(password, user, callback) {
-    var saltBuf = new Buffer(user.salt, 'base64');
-
-    hashPassword(password, saltBuf, function(err, hashedPasswordBuf) {
-        if (err) return callback(err);
-        if (user.password_hash != hashedPasswordBuf.toString('base64')) return callback(401);
-
-        callback(null);
-    });
-};
-
 module.exports = {
     authenticate: authenticate,
     create: create,
     find: find,
     findById: findById,
+    update: update,
+    updateLastConnection: updateLastConnection,
     verifySecret: verifySecret,
     verifyPassword: verifyPassword
 };

@@ -10,6 +10,8 @@ exports.authenticate = function(req, res) {
     services.principals.authenticate(req.body, function (err, principal, accessToken) {
         if (err) return res.send(err);
 
+        services.principals.updateLastConnection(principal, req.ip);
+
         sendAuthResponse(res, principal, accessToken);
     });
 };
