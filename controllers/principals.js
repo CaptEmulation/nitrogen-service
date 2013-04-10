@@ -1,6 +1,7 @@
 var config = require('../config')
-  ,	models = require('../models')
-  , services = require('../services');
+  , models = require('../models')
+  , services = require('../services')
+  , utils = require('../utils');
 
 var sendAuthResponse = function(res, principal, accessToken) {
     res.send({ 'principal': principal, 'accessToken': accessToken });
@@ -10,7 +11,7 @@ exports.authenticate = function(req, res) {
     services.principals.authenticate(req.body, function (err, principal, accessToken) {
         if (err) return res.send(err);
 
-        services.principals.updateLastConnection(principal, req.ip);
+        services.principals.updateLastConnection(principal, utils.ipFromRequest(req));
 
         sendAuthResponse(res, principal, accessToken);
     });
@@ -18,7 +19,7 @@ exports.authenticate = function(req, res) {
 
 exports.create = function(req, res) {
 	var principal = new models.Principal(req.body);
-	principal.last_ip = req.ip;
+	principal.last_ip = utils.ipFromRequest(req);
 
 	services.principals.create(principal, function(err, principal) {
 		if (err) return res.send(err);

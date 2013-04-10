@@ -23,8 +23,8 @@ app.use(passport.initialize());
 passport.use(new BearerStrategy({}, services.accessTokens.verify));
 
 app.use(middleware.crossOrigin);
-app.use(middleware.remoteIp);
 
+app.enable('trust proxy');
 app.disable('x-powered-by');
 
 // only establish routing to endpoints
