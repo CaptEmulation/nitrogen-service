@@ -8,7 +8,7 @@ exports.health = function(req, res) {
         if (err) status = "failing";
 
         res.send({ status: status,
-                   memory: process.memoryUsage(),
+                   memorya: process.memoryUsage(),
                    remoteAddress: utils.ipFromRequest(req),
                    ips: req.ips,
                    ip: req.ip,
