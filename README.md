@@ -1,8 +1,8 @@
 # Magenta
 
-Magenta makes it easy to build connected devices. Magenta provides authentication, authorization, event logging,
-device provisioning, and real time message passing so that you can focus on building your device.
+Magenta aims to make it easy to develop connected devices, agents that can react and direct these devices, and discover and tie devices from different creators together into coherent applications:  all using Javascript.
 
+Magenta provides the authentication, authorization, event logging, device provisioning, and real time message passing framework so that you can focus on the device and your application.
 
 ## Simple
 
