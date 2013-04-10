@@ -1,6 +1,6 @@
 # Magenta
 
-Magenta makes it easy to develop connected realtime devices, agents that can react and direct these devices, and to discover and compose devices from different creators together into coherent applications.  Magenta provides the authentication, authorization, event logging, device provisioning, and real time message passing framework so that you can focus on your device and/or your application.  All with a consistent development platform that leverages the ubiquity of Javascript.  Magenta is the internet of things made simple.
+Magenta makes it easy to develop connected realtime devices, agents that can react and direct these devices, and to discover and compose devices from different creators together into coherent applications.  Magenta provides the authentication, authorization, event logging, device provisioning, and real time message passing framework so that you can focus on your device and/or your application.  All with a consistent development platform that leverages the ubiquity of Javascript.
 
 ## Device Development Model
 
@@ -63,7 +63,7 @@ To get started with a Magenta service locally:
 2. Fetch and install its node.js dependencies: `npm install`
 3. Install mongodb locally (if necessary).
 4. Edit `config.js` to change defaults as necessary.
-5. Create an account on Windows Azure and a storage account.  Set the environmental variables AZURE_STORAGE_ACCOUNT and AZURE_STORAGE_KEY to your credentials respectively such that these are available at runtime.
+5. Create a Windows Azure account with a storage account.  Set the environmental variables AZURE_STORAGE_ACCOUNT and AZURE_STORAGE_KEY to your credentials.
 6. `node server.js`
 
 ## Running tests
@@ -79,8 +79,8 @@ To get started with a Magenta service locally:
 
 ## Other Projects
 
-Magenta has two other projects that you should have a look at as well.
+Magenta has three subprojects that you should have a look at as well.
 
 1. admin: An administrative tool that helps you manage devices and users.
 2. client: The client library for building Magenta devices and applications.
-3. chroma: A sample device application that uploads photos to the service from a device running the Debian package 'motion'.
+3. chroma: A sample device application that uploads images from a device running the Debian package 'motion'.
