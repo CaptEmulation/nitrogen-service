@@ -8,13 +8,15 @@ exports.health = function(req, res) {
         if (err) status = "failing";
 
         res.send({ status: status,
-                   memorya: process.memoryUsage(),
+                   memory: process.memoryUsage(),
                    remoteAddress: utils.ipFromRequest(req),
-                   ips: req.ips,
-                   ip: req.ip,
-                   headers: req.headers,
-                   test: "yo",
                    pid: process.pid,
                    uptime: process.uptime() });
     });
+};
+
+exports.ip = function(req, res) {
+    var ip = utils.ipFromRequest(req) || "NOIP";
+
+    res.send({ ip: ip });
 };
