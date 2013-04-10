@@ -9,14 +9,7 @@ exports.health = function(req, res) {
 
         res.send({ status: status,
                    memory: process.memoryUsage(),
-                   remoteAddress: utils.ipFromRequest(req),
                    pid: process.pid,
                    uptime: process.uptime() });
     });
-};
-
-exports.ip = function(req, res) {
-    var ip = utils.ipFromRequest(req) || "NOIP";
-
-    res.send({ ip: ip });
 };

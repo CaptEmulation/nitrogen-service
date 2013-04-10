@@ -39,7 +39,6 @@ mongoose.connection.once('open', function () {
     app.post(config.api_prefix + 'v1/blobs',         /*middleware.authenticateRequest,*/ controllers.blobs.create);
 
     app.get(config.api_prefix + 'v1/ops/health',                                     controllers.ops.health);
-    app.get(config.api_prefix + 'v1/ops/ip',                                         controllers.ops.ip);
 
     app.get(config.api_prefix + 'v1/principals/:id', middleware.authenticateRequest, controllers.principals.show);
     app.get(config.api_prefix + 'v1/principals',     middleware.authenticateRequest, controllers.principals.index);
