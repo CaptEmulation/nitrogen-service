@@ -80,7 +80,7 @@ describe('principals service', function() {
         });
     });
 
-    it ('should reject creating a if user that already exists', function(done) {
+    it('should reject creating a if user that already exists', function(done) {
         var user = new models.Principal({ principal_type: "user",
                                           email: fixtures.models.user.email,
                                           password: fixtures.models.user.password });

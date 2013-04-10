@@ -44,7 +44,7 @@ exports.index = function(req, res) {
 	var start = 0;
  	var limit = 200;
 
-    services.principals.find({}, start, limit, { last_connection: -1 }, function (err, principals) {
+    services.principals.find(req.query, start, limit, { last_connection: -1 }, function (err, principals) {
 		if (err) return res.send(400);
 
 		res.send({"principals": principals});

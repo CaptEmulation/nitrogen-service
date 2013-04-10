@@ -81,11 +81,29 @@ describe('principal endpoint', function() {
 
 	it('should fetch all principals', function(done) {
 	    request.get({ url: config.principals_endpoint,
-                      headers: { Authorization: fixtures.authHeaders.device } }, function(err, resp, body) {
+                      headers: { Authorization: fixtures.authHeaders.device },
+                      json: true }, function(err, resp, body) {
+
 	      assert.equal(resp.statusCode, 200);
+          assert.equal(body.principals.length > 0, true);
 	      done();
 	    });
 	});
+
+    it('should fetch only user principals', function(done) {
+        request.get({ url: config.principals_endpoint + "?principal_type=user",
+                      headers: { Authorization: fixtures.authHeaders.device },
+                      json: true }, function(err, resp, body) {
+            assert.equal(resp.statusCode, 200);
+            assert.equal(body.principals.length > 0, true);
+
+            body.principals.forEach(function(principal) {
+                assert.equal(principal.principal_type, 'user');
+            });
+
+            done();
+        });
+    });
 
     it ('should reject requests for index without access token', function(done) {
         request.get({ url: config.principals_endpoint }, function(err, resp, body) {

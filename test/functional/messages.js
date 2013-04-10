@@ -16,16 +16,36 @@ describe('messages endpoint', function() {
         });
     });
 
-	it('index should return all messages json', function(done) {
+	it('index should return all messages', function(done) {
 	    request({ url: config.messages_endpoint,
-                  headers: { Authorization: fixtures.authHeaders.device } }, function(err,resp,body) {
+                  headers: { Authorization: fixtures.authHeaders.device },
+                  json: true }, function(err,resp,body) {
 	        assert.equal(resp.statusCode, 200);
 
-            var messages_json = JSON.parse(body);
-            assert.notEqual(messages_json.messages, undefined);
+            console.log('messages: ' + JSON.stringify(body));
+            assert.notEqual(body.messages, undefined);
+            assert.equal(body.messages.length > 0, true);
 	        done();
 	    });
 	});
+
+    it('index query should return only those messages', function(done) {
+        request({ url: config.messages_endpoint + "?message_type=image",
+                  headers: { Authorization: fixtures.authHeaders.device },
+                  json: true }, function(err,resp,body) {
+
+            assert.equal(resp.statusCode, 200);
+
+            assert.notEqual(body.messages, undefined);
+            assert.equal(body.messages.length > 0, true);
+
+            body.messages.forEach(function(message) {
+                assert.equal(message.message_type, 'image');
+            });
+
+            done();
+        });
+    });
 
     it('index should not be accessible with an invalid accessToken', function(done) {
         request({ url: config.messages_endpoint,
