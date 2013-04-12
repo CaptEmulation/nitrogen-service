@@ -29,7 +29,6 @@ app.disable('x-powered-by');
 
 // only establish routing to endpoints
 mongoose.connection.once('open', function () {
-    app.use(express.static(__dirname + '/static'));
 
     // REST endpoints
 
@@ -51,6 +50,8 @@ mongoose.connection.once('open', function () {
     app.get(config.api_prefix + 'v1/messages/:id',   middleware.authenticateRequest, controllers.messages.show);
     app.get(config.api_prefix + 'v1/messages',       middleware.authenticateRequest, controllers.messages.index);
     app.post(config.api_prefix + 'v1/messages',      middleware.authenticateRequest, controllers.messages.create);
+
+    app.use(express.static(__dirname + '/static'));
 
     services.realtime.attach(server, config);
 });

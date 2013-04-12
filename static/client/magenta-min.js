@@ -1,1 +1,0 @@
-../../../client/browser/magenta-min.js

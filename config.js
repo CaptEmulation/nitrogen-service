@@ -15,7 +15,7 @@ if (process.env.NODE_ENV == "production") {
         http_port: 3050,
         protocol: "http",
 
-        mongodb_connection_string: "mongodb://localhost/magenta_test"
+        mongodb_connection_string: "mongodb://localhost/nitrogen_test"
     };
 } else {
     config = {
@@ -23,7 +23,7 @@ if (process.env.NODE_ENV == "production") {
         http_port: 3030,
         protocol: "http",
 
-        mongodb_connection_string: "mongodb://localhost/magenta_dev"
+        mongodb_connection_string: "mongodb://localhost/nitrogen_dev"
     };
 }
 
