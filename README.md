@@ -1,26 +1,24 @@
-# Magenta
+# Nitrogen Service
 
-Magenta makes it easy to develop connected realtime devices, agents that can react and direct these devices, and to discover and compose devices from different creators together into coherent applications.  Magenta provides the authentication, authorization, event logging, device provisioning, and real time message passing framework so that you can focus on your device and/or your application.  All with a consistent development platform that leverages the ubiquity of Javascript.
+Nitrogen is a platform for building connected devices and the applications that use them.  Nitrogen provides the authentication, authorization, event logging, device provisioning, discovery services, and real time message passing framework so that you can focus on your device and application.  All with a consistent development platform that leverages the ubiquity of Javascript.
 
 ## Device Development Model
 
-Magenta at its heart uses messaging between principals (devices, applications, users).  Principals in
-the system can create and consume messages.  Messages can follow a well known schema to enable interoperability between
-applications or use their own private custom message types.
+Nitrogen at its heart uses messaging between principals (devices and users).  Principals in the system can create and consume messages.  Messages can follow a well known schema to enable interoperability between applications or use their own private custom message types.
 
-For example, a thermometer that measures temperature once every 15 minutes could be implemented in Magenta like this:
+For example, a thermometer that measures temperature once every 15 minutes could be implemented in Nitrogen like this:
 
 ``` javascript
-var thermometer = new magenta.Device({ local_id: "thermometer",
+var thermometer = new nitrogen.Device({ local_id: "thermometer",
                                        capabilities: [ "thermometer" ] });
 
-var service = new magenta.Service(config);
+var service = new nitrogen.Service(config);
 service.connect(thermometer, function(err, session, thermometer) {
 
 	// take temperature every 15 minutes.
 
     setInterval(function() {
-        var message = new magenta.Message();
+        var message = new nitrogen.Message();
         message.from = session.principal.id;
         message.message_type = "temperature";
         message.body.temperature = getTemp();
@@ -31,15 +29,15 @@ service.connect(thermometer, function(err, session, thermometer) {
 });
 ```
 
-You can find a complete example for a device application of Magenta in the `chroma` project.
+You can find a complete example for a device application of Nitrogen in the `chroma` project.
 
 ## Application Development Model
 
-Let's say that we wanted to build a web application that displays these temperatures in real time as they are received.  You could do that with something like this:
+The development model for applications is similiar.   A web application that displays these temperatures in real time as they are received would look like this:
 
-var user = new magenta.User();
+var user = new nitrogen.User();
 
-var service = new magenta.Service(config);
+var service = new nitrogen.Service(config);
 service.connect(user, function(err, session, user) {
 
     session.onMessage(function(message) {
@@ -53,13 +51,13 @@ service.connect(user, function(err, session, user) {
     });
 });
 
-A great example for understanding the Magenta application model is the `admin` project.
+A great example for understanding the Nitrogen application model is the `admin` project.
 
 ## Getting Started
 
-To get started with a Magenta service locally:
+To get started with a Nitrogen service locally:
 
-1. Clone or fork this repo: `https://github.com/magentajs/service`
+1. Clone or fork this repo: `https://github.com/nitrogenjs/service`
 2. Fetch and install its node.js dependencies: `npm install`
 3. Install mongodb locally (if necessary).
 4. Edit `config.js` to change defaults as necessary.
@@ -73,14 +71,14 @@ To get started with a Magenta service locally:
 
 ## How to contribute
 
-1.  Feedback:  We'd love feedback on where you ran into sharp edges, dead ends, and what problems you are trying to solve with Magenta.   Drop me a message at timfpark@gmail.com or file an issue with us above.
-2.  Pull requests:  If you'd like to tackle an issue, fork the repo, create a clean commit for the fix or enhancement with tests if necessary, and send us a pull request.   This is also the path to becoming a core committer for the project for folks that are interested in contributing in more depth.
-3.  Documentation:  Teaching people how to use and run the service is incredibly important.  We'd love to have more help and this is one of the most valuable contributions you can make.
+1.  Feedback:  We'd love feedback on what problems you are using Nitrogen to solve.  Obviously, we'd also like to hear about where you ran into sharp edges and dead ends.   Drop me a message at timfpark@gmail.com or file an issue with us above.
+2.  Pull requests:  If you'd like to tackle an issue, fork the repo, create a clean commit for the fix or enhancement with tests if necessary, and send us a pull request. This is also the path to becoming a core committer for the project for folks that are interested in contributing in more depth.
+3.  Documentation:  Better technical documentation is key to broadening the use of the platform.   We'd love to have more help and this is one of the most valuable contributions you can make.
 
 ## Other Projects
 
-Magenta has three subprojects that you should have a look at as well.
+Nitrogen has three subprojects that you should have a look at as well.
 
-1. admin: An administrative tool that helps you manage devices and users.
-2. client: The client library for building Magenta devices and applications.
-3. chroma: A sample device application that uploads images from a device running the Debian package 'motion'.
+1. [client](https://github.com/nitrogenjs/client): The client library for building Nitrogen devices and applications.
+2. [admin](https://github.com/nitrogenjs/admin): An administrative tool for managing the Nitrogen service.
+3. [chroma](https://github.com/nitrogenjs/chroma): A sample device application that connects a camera to the Nitrogen service.
