@@ -6,6 +6,7 @@ exports.index = function(req, res) {
     // But use static routing to API endpoints for now.
 
     res.send({ endpoints: {
+                    agents_endpoint: config.agents_endpoint,
                     blobs_endpoint: config.blobs_endpoint,
                     messages_endpoint: config.messages_endpoint,
                     principals_endpoint: config.principals_endpoint,

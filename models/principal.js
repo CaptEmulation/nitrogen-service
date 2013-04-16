@@ -48,7 +48,7 @@ principalSchema.path('principal_type').validate(function (value) {
     if (!value)
         invalid = true;
 
-    if (value != "user" && value != "device")
+    if (value != "device" && value != "system" && value != "user")
         invalid = true;
 
     return !invalid;

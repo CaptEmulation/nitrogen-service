@@ -27,33 +27,40 @@ app.use(middleware.crossOrigin);
 app.enable('trust proxy');
 app.disable('x-powered-by');
 
-// only establish routing to endpoints
+// only establish routing to endpoints when we have a connection to MongoDB.
 mongoose.connection.once('open', function () {
 
-    // REST endpoints
+    services.initialize(function(err) {
+        if (err) return console.log("Nitrogen service failed to initialize: " + err);
 
-    app.get(config.api_prefix + 'v1/headwaiter',                                     controllers.headwaiter.index);
+        // REST endpoints
 
-    app.get(config.api_prefix + 'v1/blobs/:id',      middleware.authenticateRequest, controllers.blobs.show);
-    app.post(config.api_prefix + 'v1/blobs',         /*middleware.authenticateRequest,*/ controllers.blobs.create);
+        app.get(config.api_prefix + 'v1/headwaiter',                                     controllers.headwaiter.index);
 
-    app.get(config.api_prefix + 'v1/ops/health',                                     controllers.ops.health);
+        app.get(config.api_prefix + 'v1/agents',         middleware.authenticateRequest, controllers.agents.index);
 
-    app.get(config.api_prefix + 'v1/principals/:id', middleware.authenticateRequest, controllers.principals.show);
-    app.get(config.api_prefix + 'v1/principals',     middleware.authenticateRequest, controllers.principals.index);
-    app.post(config.api_prefix + 'v1/principals',                                    controllers.principals.create);
-    app.post(config.api_prefix + 'v1/principals/auth',                               controllers.principals.authenticate);
+        app.get(config.api_prefix + 'v1/blobs/:id',      middleware.authenticateRequest, controllers.blobs.show);
+        app.post(config.api_prefix + 'v1/blobs',         /*middleware.authenticateRequest,*/ controllers.blobs.create);
 
-    //app.put(config.api_prefix + 'v1/principals/:id',   /* authenticateRequest, */ controllers.principals.update);
-    //app.delete(config.api_prefix + 'v1/principals/:id',   /* authenticateRequest, */ controllers.principals.update);
+        app.get(config.api_prefix + 'v1/ops/health',                                     controllers.ops.health);
 
-    app.get(config.api_prefix + 'v1/messages/:id',   middleware.authenticateRequest, controllers.messages.show);
-    app.get(config.api_prefix + 'v1/messages',       middleware.authenticateRequest, controllers.messages.index);
-    app.post(config.api_prefix + 'v1/messages',      middleware.authenticateRequest, controllers.messages.create);
+        app.get(config.api_prefix + 'v1/principals/:id', middleware.authenticateRequest, controllers.principals.show);
+        app.get(config.api_prefix + 'v1/principals',     middleware.authenticateRequest, controllers.principals.index);
+        app.post(config.api_prefix + 'v1/principals',                                    controllers.principals.create);
+        app.post(config.api_prefix + 'v1/principals/auth',                               controllers.principals.authenticate);
 
-    app.use(express.static(__dirname + '/static'));
+        //app.put(config.api_prefix + 'v1/principals/:id',   /* authenticateRequest, */ controllers.principals.update);
+        //app.delete(config.api_prefix + 'v1/principals/:id',   /* authenticateRequest, */ controllers.principals.update);
 
-    services.realtime.attach(server, config);
+        app.get(config.api_prefix + 'v1/messages/:id',   middleware.authenticateRequest, controllers.messages.show);
+        app.get(config.api_prefix + 'v1/messages',       middleware.authenticateRequest, controllers.messages.index);
+        app.post(config.api_prefix + 'v1/messages',      middleware.authenticateRequest, controllers.messages.create);
+
+        app.use(express.static(__dirname + '/static'));
+
+        services.realtime.attach(server, config);
+    });
+
 });
 
 // TODO: log errors once we have real logging solution in place.

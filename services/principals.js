@@ -87,11 +87,11 @@ var createCredentials = function(principal, callback) {
 
         createUserCredentials(principal, callback);
     } else {
-        createDeviceCredentials(principal, callback);
+        createSecretCredentials(principal, callback);
     }
 };
 
-var createDeviceCredentials = function(principal, callback) {
+var createSecretCredentials = function(principal, callback) {
     crypto.randomBytes(config.device_secret_bytes, function(err, secretBuf) {
         if (err) return callback(err, null);
 
@@ -156,6 +156,20 @@ var hashSecret = function(secret, callback) {
     callback(null, sha256.digest('base64'));
 };
 
+var initialize = function(callback) {
+
+    find({ principal_type: "system" }, 0, 1, {}, function(err, principals) {
+        if (err) return callback(err);
+
+        if (principals.length == 0) {
+            var systemPrincipal = new models.Principal({ principal_type: "system" });
+            create(systemPrincipal, callback);
+        } else {
+            callback(null, principals[0]);
+        }
+    });
+};
+
 var update = function(principal, callback) {
     principal.save(callback);
 };
@@ -164,7 +178,7 @@ var updateLastConnection = function(principal, ip) {
     principal.last_connection = new Date();
     principal.last_ip = ip;
 
-    services.principals.update(principal, function(err, principal) {});
+    services.principals.update(principal);
 }
 
 var verifyPassword = function(password, user, callback) {
@@ -195,6 +209,7 @@ module.exports = {
     create: create,
     find: find,
     findById: findById,
+    initialize: initialize,
     update: update,
     updateLastConnection: updateLastConnection,
     verifySecret: verifySecret,

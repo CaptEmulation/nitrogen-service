@@ -22,7 +22,6 @@ describe('messages endpoint', function() {
                   json: true }, function(err,resp,body) {
 	        assert.equal(resp.statusCode, 200);
 
-            console.log('messages: ' + JSON.stringify(body));
             assert.notEqual(body.messages, undefined);
             assert.equal(body.messages.length > 0, true);
 	        done();
