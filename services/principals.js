@@ -187,8 +187,21 @@ var update = function(principal, callback) {
 };
 
 var updateLastConnection = function(principal, ip) {
+
+    // emit a ip message each time ip changes for principal.
+    if (principal.last_ip != ip) {
+        principal.last_ip = ip;
+
+        var ipMessage = new models.Message({ "message_type": "ip" });
+        ipMessage.from = principal;
+        ipMessage.body.ip = ip;
+
+        services.messages.create(ipMessage, function(err, message) {
+            if (err) console.log("creating ip message failed: " + err);
+        });
+    }
+
     principal.last_connection = new Date();
-    principal.last_ip = ip;
 
     services.principals.update(principal);
 }

@@ -13,7 +13,7 @@ messageSchema.add({
 	to: { type: Schema.Types.ObjectId, ref: 'Principal' },  	  // message target (if any)
     response_to: { type: Schema.Types.ObjectId, ref: 'Message' }, // message this is in response to (if any)
 
-	body: { type: Schema.Types.Mixed }
+	body: { type: Schema.Types.Mixed, default: {} }
 });
 
 messageSchema.index({ timestamp: 1, type: -1 });

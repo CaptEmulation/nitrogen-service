@@ -1,13 +1,11 @@
 var providers = require('./providers');
 var config = null;
 
-console.log("CONFIG NODE_ENV: " + process.env.NODE_ENV);
-
 if (process.env.NODE_ENV == "production") {
     config = {
         host: process.env.HOST_NAME,
-        http_port: 80,
-        protocol: "http"
+        http_port: 443,
+        protocol: "https"
     };
 } else if (process.env.NODE_ENV == "test") {
     config = {
@@ -41,7 +39,7 @@ if (config.http_port != 80)
 
 config.base_url += config.path_prefix;
 
-// NOTE:  cannot have a trailing slash on realtime_path below or faye client will fail.
+// NOTE:  realtime_path below cannot have trailing slash or faye client will fail.
 config.realtime_path = "/realtime";
 config.realtime_endpoint = config.base_url + config.realtime_path;
 config.realtime_endpoint_timeout = 90; // seconds
