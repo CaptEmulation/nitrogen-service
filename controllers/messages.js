@@ -5,13 +5,7 @@ var async = require('async'),
 	services = require('../services');
 
 exports.index = function(req, res) {
-
-    // TODO: add paging
-    var start = 0;
-    var limit = 25;
-    var sort = { timestamp: -1 };
-
-    services.messages.find(req.query, start, limit, sort, function(err, messages) {
+    services.messages.find(req.query, { limit: 100, sort: { timestamp: -1 } }, function(err, messages) {
         if (err) return res.send(400, err);
 
         res.send({"messages": messages});

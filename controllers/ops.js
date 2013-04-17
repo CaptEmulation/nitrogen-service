@@ -4,7 +4,7 @@ var config = require('../config')
 
 exports.health = function(req, res) {
     var status = "ok";
-    services.messages.find({}, 0, 1, null, function(err, messages) {
+    services.messages.find({}, {}, function(err, messages) {
         if (err) status = "failing";
 
         res.send({ status: status,

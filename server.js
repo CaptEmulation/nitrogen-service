@@ -14,7 +14,6 @@ console.log("connecting to mongodb instance: " + config.mongodb_connection_strin
 mongoose.connect(config.mongodb_connection_string);
 
 var server = app.listen(process.env.PORT || config.http_port || 3030);
-console.log('listening for http connections on ' + config.base_url);
 
 app.use(express.logger());
 app.use(express.bodyParser());
@@ -29,9 +28,12 @@ app.disable('x-powered-by');
 
 // only establish routing to endpoints when we have a connection to MongoDB.
 mongoose.connection.once('open', function () {
+    console.log("service has connected to mongodb.");
 
     services.initialize(function(err) {
         if (err) return console.log("Nitrogen service failed to initialize: " + err);
+
+        console.log("service has initialized itself, exposing api at: " + config.base_url);
 
         // REST endpoints
 
@@ -48,9 +50,6 @@ mongoose.connection.once('open', function () {
         app.get(config.api_prefix + 'v1/principals',     middleware.authenticateRequest, controllers.principals.index);
         app.post(config.api_prefix + 'v1/principals',                                    controllers.principals.create);
         app.post(config.api_prefix + 'v1/principals/auth',                               controllers.principals.authenticate);
-
-        //app.put(config.api_prefix + 'v1/principals/:id',   /* authenticateRequest, */ controllers.principals.update);
-        //app.delete(config.api_prefix + 'v1/principals/:id',   /* authenticateRequest, */ controllers.principals.update);
 
         app.get(config.api_prefix + 'v1/messages/:id',   middleware.authenticateRequest, controllers.messages.show);
         app.get(config.api_prefix + 'v1/messages',       middleware.authenticateRequest, controllers.messages.index);

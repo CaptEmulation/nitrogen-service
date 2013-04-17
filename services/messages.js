@@ -46,12 +46,8 @@ var createMany = function(messages, callback) {
     });
 };
 
-var find = function(filter, start, limit, sort, callback) {
-    models.Message.find(filter, null, {
-        skip: start,
-        limit: limit,
-        sort: sort
-    }, callback);
+var find = function(filter, options, callback) {
+    models.Message.find(filter, null, options, callback);
 };
 
 var findById = function(messageId, callback) {

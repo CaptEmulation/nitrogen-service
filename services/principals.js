@@ -118,12 +118,8 @@ var createUserCredentials = function(principal, callback) {
     });
 };
 
-var find = function(filter, start, limit, sort, callback) {
-    models.Principal.find(filter, null, {
-        skip: start,
-        limit: limit,
-        sort: sort
-    }, callback);
+var find = function(filter, options, callback) {
+    models.Principal.find(filter, null, options, callback);
 };
 
 var findByEmail = function(email, callback) {
@@ -158,7 +154,7 @@ var hashSecret = function(secret, callback) {
 
 var initialize = function(callback) {
 
-    find({ principal_type: "system" }, 0, 1, {}, function(err, principals) {
+    find({ principal_type: "system" }, {}, function(err, principals) {
         if (err) return callback(err);
 
         if (principals.length == 0) {

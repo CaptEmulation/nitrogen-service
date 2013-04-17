@@ -40,11 +40,7 @@ exports.create = function(req, res) {
 };
 
 exports.index = function(req, res) {
-	// TODO: paging, move out to service
-	var start = 0;
- 	var limit = 200;
-
-    services.principals.find(req.query, start, limit, { last_connection: -1 }, function (err, principals) {
+    services.principals.find(req.query, { sort: { last_connection: -1 } }, function (err, principals) {
 		if (err) return res.send(400);
 
 		res.send({"principals": principals});
