@@ -3,30 +3,24 @@ var config = null;
 
 if (process.env.NODE_ENV == "production") {
     config = {
-        host: process.env.HOST_NAME,
         http_port: 443,
         protocol: "https"
     };
 } else if (process.env.NODE_ENV == "test") {
     config = {
-        host: "localhost",
         http_port: 3050,
-        protocol: "http",
-
         mongodb_connection_string: "mongodb://localhost/nitrogen_test"
     };
 } else {
     config = {
-        host: "localhost",
         http_port: 3030,
-        protocol: "http",
-
         mongodb_connection_string: "mongodb://localhost/nitrogen_dev"
     };
 }
 
-console.log("http port: " + config.http_port);
-
+config.protocol = process.env.PROTOCOL || config.protocol || "http";
+config.host = process.env.HOST_NAME || config.host || "localhost";
+config.http_port = process.env.HTTP_PORT || config.http_port || 3030;
 config.mongodb_connection_string = config.mongodb_connection_string || process.env.MONGODB_CONNECTION_STRING;
 
 config.api_prefix = "/api/";
