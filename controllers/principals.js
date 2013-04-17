@@ -39,6 +39,14 @@ exports.create = function(req, res) {
 	});
 };
 
+exports.impersonate = function(req, res) {
+    services.principals.impersonate(req.user, req.body.id, function (err, impersonatedPrincipal, accessToken) {
+        if (err) return res.send(err);
+
+        sendAuthResponse(res, impersonatedPrincipal, accessToken);
+    });
+};
+
 exports.index = function(req, res) {
     services.principals.find(req.query, { sort: { last_connection: -1 } }, function (err, principals) {
 		if (err) return res.send(400);

@@ -26,29 +26,43 @@ exports.reset = function(callback) {
     async.each(modelTypes, removeAll, function(err) {
         if (err) throw err;
 
-        services.principals.create(
-            new models.Principal({principal_type: 'device', external_id: 'existing_device'}),
-            function(err, device) {
+        services.initialize(function(err) {
+
+            services.principals.create(
+                new models.Principal({principal_type: 'device', external_id: 'existing_device'}),
+                function(err, device) {
+                    if (err) throw err;
+                    fixtures['device'] = device;
+
+                    services.accessTokens.create(device, function(err, accessToken) {
+                        fixtures['deviceAccessToken'] = accessToken;
+                        exports.authHeaders.device = authHeaderFromToken(accessToken);
+                    });
+
+                    var message = new models.Message({ from: device.id,
+                        message_type: "image",
+                        body: { url: "http://127.0.0.1/photo.jpg" } });
+
+                    services.messages.create(message, addToFixture('deviceMessage'));
+                }
+            );
+
+            services.principals.create(
+                new models.Principal({principal_type: 'user', email: 'user@server.org', password: 'sEcReT44'}),
+                addToFixture('user')
+            );
+
+            services.principals.find({ "principal_type": "system" }, {}, function (err, principals) {
                 if (err) throw err;
-                fixtures['device'] = device;
 
-                services.accessTokens.create(device, function(err, accessToken) {
-                    fixtures['deviceAccessToken'] = accessToken;
-                    exports.authHeaders.device = authHeaderFromToken(accessToken);
+                fixtures['system'] = principals[0];
+                services.accessTokens.findOrCreateToken(fixtures['system'], function(err, accessToken) {
+                    if (err) throw err;
+                    fixtures['systemAccessToken'] = accessToken;
+                    exports.authHeaders.system = authHeaderFromToken(accessToken);
                 });
-
-                var message = new models.Message({ from: device.id,
-                    message_type: "image",
-                    body: { url: "http://127.0.0.1/photo.jpg" } });
-
-                services.messages.create(message, addToFixture('deviceMessage'));
-            }
-        );
-
-        services.principals.create(
-            new models.Principal({principal_type: 'user', email: 'user@server.org', password: 'sEcReT44'}),
-            addToFixture('user')
-        );
+            });
+        });
     });
 
 };

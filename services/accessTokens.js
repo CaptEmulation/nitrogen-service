@@ -20,7 +20,7 @@ var create = function(principal, callback) {
 };
 
 var findOrCreateToken = function(principal, callback) {
-    models.AccessToken.find({"principal": principal.id}, null, {sort: { expires_at: -1 } }, function(err, tokens) {
+    models.AccessToken.find({ "principal": principal.id }, null, {sort: { expires_at: -1 } }, function(err, tokens) {
         if (err) return callback(err);
 
         if (tokens && tokens.length > 0 && !tokens[0].expired()) {

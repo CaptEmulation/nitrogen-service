@@ -144,4 +144,15 @@ describe('principal endpoint', function() {
             });
     });
 
+    it('should allow system to impersonate user principal', function(done) {
+        request.post(config.principals_endpoint + '/impersonate',
+            { headers: { Authorization: fixtures.authHeaders.system },
+              json: fixtures.models.user }, function(err, resp, body) {
+                assert.equal(resp.statusCode, 200);
+                assert.notEqual(body.accessToken.token, undefined);
+
+                done();
+            });
+    });
+
 });

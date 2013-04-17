@@ -152,6 +152,22 @@ var hashSecret = function(secret, callback) {
     callback(null, sha256.digest('base64'));
 };
 
+var impersonate = function(principal, impersonatedPrincipalId, callback) {
+    if (principal.principal_type != "system" && principal.id != impersonatedPrincipalId) return callback(401);
+
+    findById(impersonatedPrincipalId, function(err, impersonatedPrincipal) {
+        if (err) return callback(err, null);
+        if (!principal) return callback(404, null);
+
+        services.accessTokens.findOrCreateToken(impersonatedPrincipal, function(err, accessToken) {
+            if (err) return callback(err, null);
+
+            console.log("impersonated device principal: " + impersonatedPrincipal.id);
+            callback(null, impersonatedPrincipal, accessToken);
+        });
+    });
+};
+
 var initialize = function(callback) {
 
     find({ principal_type: "system" }, {}, function(err, principals) {
@@ -205,6 +221,7 @@ module.exports = {
     create: create,
     find: find,
     findById: findById,
+    impersonate: impersonate,
     initialize: initialize,
     update: update,
     updateLastConnection: updateLastConnection,

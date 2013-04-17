@@ -50,6 +50,7 @@ mongoose.connection.once('open', function () {
         app.get(config.api_prefix + 'v1/principals',     middleware.authenticateRequest, controllers.principals.index);
         app.post(config.api_prefix + 'v1/principals',                                    controllers.principals.create);
         app.post(config.api_prefix + 'v1/principals/auth',                               controllers.principals.authenticate);
+        app.post(config.api_prefix + 'v1/principals/impersonate', middleware.authenticateRequest, controllers.principals.impersonate);
 
         app.get(config.api_prefix + 'v1/messages/:id',   middleware.authenticateRequest, controllers.messages.show);
         app.get(config.api_prefix + 'v1/messages',       middleware.authenticateRequest, controllers.messages.index);
@@ -61,8 +62,3 @@ mongoose.connection.once('open', function () {
     });
 
 });
-
-// TODO: log errors once we have real logging solution in place.
-//mongoose.connection.on('error', function(err) {
-//    console.error('MongoDB error: %s', err);
-//});
