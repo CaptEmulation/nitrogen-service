@@ -9,7 +9,7 @@ var sendAuthResponse = function(res, principal, accessToken) {
 
 exports.authenticate = function(req, res) {
     services.principals.authenticate(req.body, function (err, principal, accessToken) {
-        if (err) return res.send(err);
+        if (err) return res.send(400, err);
 
         services.principals.updateLastConnection(principal, utils.ipFromRequest(req));
 
@@ -22,10 +22,10 @@ exports.create = function(req, res) {
 	principal.last_ip = utils.ipFromRequest(req);
 
 	services.principals.create(principal, function(err, principal) {
-		if (err) return res.send(err);
+		if (err) return res.send(400, err);
 
         services.accessTokens.create(principal, function(err, accessToken) {
-            if (err) res.send(err);
+            if (err) res.send(400, err);
 
             var principalJSON = principal.toObject();
 
@@ -41,7 +41,7 @@ exports.create = function(req, res) {
 
 exports.impersonate = function(req, res) {
     services.principals.impersonate(req.user, req.body.id, function (err, impersonatedPrincipal, accessToken) {
-        if (err) return res.send(err);
+        if (err) return res.send(400, err);
 
         sendAuthResponse(res, impersonatedPrincipal, accessToken);
     });
@@ -49,7 +49,7 @@ exports.impersonate = function(req, res) {
 
 exports.index = function(req, res) {
     services.principals.find(req.query, { sort: { last_connection: -1 } }, function (err, principals) {
-		if (err) return res.send(400);
+		if (err) return res.send(400, err);
 
 		res.send({"principals": principals});
 	});
