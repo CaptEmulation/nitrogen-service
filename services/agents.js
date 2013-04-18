@@ -26,9 +26,9 @@ var initialize = function(system, callback) {
         if (agents.length == 0) {
             // create system device matching agent.
 
-            var deviceMatchingAgent = new models.Agent({ execute_as: system.id, name: "deviceMatching" });
-            deviceMatchingAgent.filter = load("device_matching/filter.js");
-            deviceMatchingAgent.action = load("device_matching/action.js");
+            var deviceMatchingAgent = new models.Agent({ execute_as: system.id,
+                                                         name: "deviceMatching",
+                                                         action: load("deviceMatching.js") });
 
             deviceMatchingAgent.save(callback);
         } else {
