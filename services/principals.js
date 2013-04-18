@@ -157,7 +157,7 @@ var impersonate = function(principal, impersonatedPrincipalId, callback) {
 
     findById(impersonatedPrincipalId, function(err, impersonatedPrincipal) {
         if (err) return callback(err, null);
-        if (!principal) return callback(404, null);
+        if (!impersonatedPrincipal) return callback(404, null);
 
         services.accessTokens.findOrCreateToken(impersonatedPrincipal, function(err, accessToken) {
             if (err) return callback(err, null);
