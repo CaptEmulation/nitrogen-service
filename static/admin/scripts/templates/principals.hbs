@@ -1,0 +1,21 @@
+<table class="table">
+    <tr>
+        <th>ID</th>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Last Connection</th>
+        <th>Last IP</th>
+    </tr>
+
+    {{#each principal in controller}}
+    <tr>
+        <td>{{principal.id}}</td>
+        <td>{{principal.principal_type}}</td>
+        <td>{{principal.name}}</td>
+        <td>{{principal.lastConnectionString}}</td>
+        <td>{{principal.last_ip}}</td>
+    </tr>
+    {{/each}}
+
+</table>
+

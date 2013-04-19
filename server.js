@@ -42,8 +42,8 @@ mongoose.connection.once('open', function () {
         app.get(config.api_prefix + 'v1/agents',         middleware.authenticateRequest, controllers.agents.index);
 
         if (config.blob_provider) {
-            app.get(config.api_prefix + 'v1/blobs/:id',      middleware.authenticateRequest, controllers.blobs.show);
-            app.post(config.api_prefix + 'v1/blobs',         /*middleware.authenticateRequest,*/ controllers.blobs.create);
+            app.get(config.api_prefix + 'v1/blobs/:id',  middleware.authenticateRequest, controllers.blobs.show);
+            app.post(config.api_prefix + 'v1/blobs',     /*middleware.authenticateRequest,*/ controllers.blobs.create);
         } else {
             console.log("WARNING: Not exposing blob endpoints because no blob provider is configured.");
         }
@@ -60,9 +60,9 @@ mongoose.connection.once('open', function () {
         app.get(config.api_prefix + 'v1/messages',       middleware.authenticateRequest, controllers.messages.index);
         app.post(config.api_prefix + 'v1/messages',      middleware.authenticateRequest, controllers.messages.create);
 
-        app.use(express.static(__dirname + '/static'));
-
         services.realtime.attach(server, config);
+
+        app.use(express.static(__dirname + '/static'));
     });
 
 });

@@ -1,0 +1,33 @@
+<table class="table">
+    <tr>
+        <th>Timestamp</th>
+        <th>From</th>
+        <th>Type</th>
+        <th>Body</th>
+    </tr>
+
+    {{#each message in controller}}
+
+    <tr>
+        <td>
+            {{message.timestampString}}
+        </td>
+        <td>
+            {{message.from}}
+        </td>
+        <td>
+            {{message.message_type}}
+        </td>
+        <td>
+            {{#if message.isImage}}
+                <img {{bindAttr src="message.bodyUrlWithAccessToken"}} width="320" height="240" />
+            {{/if}}
+            {{#if message.isLog}}
+                {{message.body.severity}}: {{message.body.message}}
+            {{/if}}
+        </td>
+    </tr>
+
+    {{/each}}
+
+</table>

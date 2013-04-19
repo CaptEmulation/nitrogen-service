@@ -1,0 +1,40 @@
+# DEBUG: ------------------------------- (undefined, #undefined)
+# DEBUG: Ember.VERSION : 1.0.0-rc.2 (undefined, #undefined)
+# DEBUG: Handlebars.VERSION : 1.0.0-rc.3 (undefined, #undefined)
+# DEBUG: jQuery.VERSION : 1.8.0 (undefined, #undefined)
+# DEBUG: ------------------------------- (undefined, #undefined)
+ReferenceError: Can't find variable: nitrogen
+
+  http://localhost:3501/js/720257ea.script.js:1
+CACHE MANIFEST
+
+# Time: Fri Apr 19 2013 10:37:57 GMT-0700 (PDT)
+# This manifest was created by confess.js, http://github.com/jamesgpearce/confess
+#
+# Retrieved URL: http://localhost:3501/
+# User-agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.12 Safari/535.11
+#
+# Config:
+#  task: appcache
+#  userAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.12 Safari/535.11
+#  wait: 0
+#  consolePrefix: #
+#  verbose: true
+#  appcache:
+#   urlsFromDocument: true
+#   urlsFromRequests: false
+#   cacheFilter: .*
+#   networkFilter: null
+#  url: http://localhost:3501
+#  configFile: /usr/local/share/npm/lib/node_modules/yeoman/lib/support/confess.json
+
+CACHE:
+/client/nitrogen.js
+css/3e34ab81.style.css
+http://localhost:3501/img/glyphicons-halflings-white.png
+http://localhost:3501/img/glyphicons-halflings.png
+js/720257ea.script.js
+js/vendor/2cb056b9.modernizr.min.js
+
+NETWORK:
+*

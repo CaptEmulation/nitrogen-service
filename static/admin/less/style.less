@@ -1,0 +1,33 @@
+/*!
+ *   Name:
+ * Author: 
+ *
+ * Includes :
+ *   - bootstrap main css
+ *   - bootstrap responsive css
+ *   - custom css
+ *
+ */
+
+//
+// Twitter Bootstrap framwork
+// --------------------------------------------------
+
+@import 'bootstrap/bootstrap.less';
+@import 'bootstrap/responsive.less';
+
+/*!
+ * App css
+ */
+
+/* Fix up bootstrap navbar underflow issues */
+
+body {
+  padding-top: 60px;
+}
+
+@media (max-width: 979px) {
+  body {
+    padding-top: 0px;
+  }
+}
