@@ -9,7 +9,6 @@ describe('headwaiter endpoint', function() {
             assert.equal(resp.statusCode, 200);
 
             assert.notEqual(body.endpoints, undefined);
-            assert.equal(utils.stringEndsWith(body.endpoints.blobs_endpoint, "/blobs"), true);
             assert.equal(utils.stringEndsWith(body.endpoints.messages_endpoint, "/messages"), true);
             assert.equal(utils.stringEndsWith(body.endpoints.principals_endpoint, "/principals"), true);
 

@@ -51,6 +51,8 @@ config.salt_length_bytes = 64;
 config.access_token_bytes = 128;
 config.device_secret_bytes = 128;
 
-config.blob_provider = new providers.azure.AzureBlobProvider(config);
+if (process.env.AZURE_STORAGE_ACCOUNT && process.env.AZURE_STORAGE_KEY) {
+    config.blob_provider = new providers.azure.AzureBlobProvider(config);
+}
 
 module.exports = config;

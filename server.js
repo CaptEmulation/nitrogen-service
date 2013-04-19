@@ -41,8 +41,12 @@ mongoose.connection.once('open', function () {
 
         app.get(config.api_prefix + 'v1/agents',         middleware.authenticateRequest, controllers.agents.index);
 
-        app.get(config.api_prefix + 'v1/blobs/:id',      middleware.authenticateRequest, controllers.blobs.show);
-        app.post(config.api_prefix + 'v1/blobs',         /*middleware.authenticateRequest,*/ controllers.blobs.create);
+        if (config.blob_provider) {
+            app.get(config.api_prefix + 'v1/blobs/:id',      middleware.authenticateRequest, controllers.blobs.show);
+            app.post(config.api_prefix + 'v1/blobs',         /*middleware.authenticateRequest,*/ controllers.blobs.create);
+        } else {
+            console.log("WARNING: Not exposing blob endpoints because no blob provider is configured.");
+        }
 
         app.get(config.api_prefix + 'v1/ops/health',                                     controllers.ops.health);
 
