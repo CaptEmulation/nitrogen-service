@@ -19,7 +19,7 @@ if (config.blob_provider) {
                     pipe(
                         request.post({ url: config.blobs_endpoint,
                                        headers: { 'Content-Type': 'image/jpeg', 'Content-Length': stats.size,
-                                                  'Authorization': fixtures.authHeaders.device } },
+                                                  'Authorization': fixtures.models.accessTokens.device.toAuthHeader() } },
                             function (err, resp, body) {
                                 assert.ifError(err);
 
@@ -31,7 +31,7 @@ if (config.blob_provider) {
 
                                 var blob_url = config.blobs_endpoint + '/' + body_json.blob.id;
 
-                                request.get(blob_url, { headers: { 'Authorization': fixtures.authHeaders.device } }, function(err,resp,body) {
+                                request.get(blob_url, { headers: { 'Authorization': fixtures.models.accessTokens.device.toAuthHeader() } }, function(err,resp,body) {
                                     assert.ifError(err);
                                     assert.equal(resp.statusCode, 200);
                                     assert.equal(resp.body.length, 28014);
@@ -47,7 +47,7 @@ if (config.blob_provider) {
 
         it('should return 404 for unknown blobs', function(done) {
             request(config.blobs_endpoint + '/51195d5f11600000deadbeef',
-                    { headers: { 'Authorization': fixtures.authHeaders.device } }, function(err,resp,body) {
+                    { headers: { 'Authorization': fixtures.models.accessTokens.device.toAuthHeader() } }, function(err,resp,body) {
                   assert.equal(resp.statusCode, 404);
 
                   done();
