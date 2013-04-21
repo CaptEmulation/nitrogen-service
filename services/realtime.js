@@ -15,7 +15,6 @@ var attach = function(server, config) {
                 message.error = "Access token required for realtime endpoint";
                 callback(message);
             } else {
-                console.log("verifying access token for realtime endpoint: " + message.ext.access_token);
                 services.accessTokens.verify(message.ext.access_token, function(err, principal) {
                     if (err) message.error = "Verification of access token failed";
                     if (!principal) message.error = "Access token is invalid";

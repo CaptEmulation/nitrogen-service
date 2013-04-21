@@ -21,4 +21,8 @@ AccessToken.prototype.expired = function() {
     return Date.now() > this.expires_at.getTime();
 };
 
+AccessToken.prototype.toAuthHeader = function() {
+    return "Bearer " + this.token;
+};
+
 module.exports = AccessToken;

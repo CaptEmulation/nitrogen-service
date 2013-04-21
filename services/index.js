@@ -6,9 +6,5 @@ exports.principals = require('./principals');
 exports.realtime = require('./realtime');
 
 exports.initialize = function(callback) {
-    exports.principals.initialize(function(err, system) {
-        if (err) return callback(err);
-
-        exports.agents.initialize(system, callback);
-    })
+    exports.principals.initialize(callback);
 };

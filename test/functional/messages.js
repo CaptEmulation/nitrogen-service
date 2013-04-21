@@ -18,19 +18,20 @@ describe('messages endpoint', function() {
 
 	it('index should return all messages', function(done) {
 	    request({ url: config.messages_endpoint,
-                  headers: { Authorization: fixtures.authHeaders.device },
+                  headers: { Authorization: fixtures.models.accessTokens.device.toAuthHeader() },
                   json: true }, function(err,resp,body) {
 	        assert.equal(resp.statusCode, 200);
 
             assert.notEqual(body.messages, undefined);
             assert.equal(body.messages.length > 0, true);
+
 	        done();
 	    });
 	});
 
     it('index query should return only those messages', function(done) {
-        request({ url: config.messages_endpoint + "?message_type=image",
-                  headers: { Authorization: fixtures.authHeaders.device },
+        request({ url: config.messages_endpoint + "?message_type=ip",
+                  headers: { Authorization: fixtures.models.accessTokens.device.toAuthHeader() },
                   json: true }, function(err,resp,body) {
 
             assert.equal(resp.statusCode, 200);
@@ -39,7 +40,7 @@ describe('messages endpoint', function() {
             assert.equal(body.messages.length > 0, true);
 
             body.messages.forEach(function(message) {
-                assert.equal(message.message_type, 'image');
+                assert.equal(message.message_type, 'ip');
             });
 
             done();
@@ -55,7 +56,7 @@ describe('messages endpoint', function() {
     });
 
     it('show should be not be accessible without accessToken', function(done) {
-        request(config.messages_endpoint + '/' + fixtures.models.deviceMessage.id, function(err, resp, body) {
+        request(config.messages_endpoint + '/' + fixtures.models.messages.deviceIp.id, function(err, resp, body) {
             assert.equal(resp.statusCode, 401);
             done();
         });
@@ -63,7 +64,7 @@ describe('messages endpoint', function() {
 
     it('create should be not be accessible without accessToken', function(done) {
         request.post(config.messages_endpoint,
-            { json: [{ from: fixtures.models.device.id,
+            { json: [{ from: fixtures.models.principals.device.id,
                        message_type: "_custom"}] }, function(err, resp, body) {
             assert.equal(err, null);
             assert.equal(resp.statusCode, 401);
@@ -80,7 +81,7 @@ describe('messages endpoint', function() {
         client.addExtension({
             outgoing: function(message, callback) {
                 message.ext = message.ext || {};
-                message.ext.access_token = fixtures.models.deviceAccessToken.token;
+                message.ext.access_token = fixtures.models.accessTokens.device.token;
                 callback(message);
             }
         });
@@ -102,10 +103,10 @@ describe('messages endpoint', function() {
 			started_post = true;
 
 			request.post(config.messages_endpoint,
-				{ json: [{ from: fixtures.models.device.id,
+				{ json: [{ from: fixtures.models.principals.device.id,
                            message_type: "_messageSubscriptionTest",
                            body: { reading: 5.1 } }],
-                    headers: { Authorization: fixtures.authHeaders.device } }, function(post_err, post_resp, post_body) {
+                  headers: { Authorization: fixtures.models.accessTokens.device.toAuthHeader() } }, function(post_err, post_resp, post_body) {
 				  assert.equal(post_err, null);
 			      assert.equal(post_resp.statusCode, 200);
 
@@ -118,7 +119,7 @@ describe('messages endpoint', function() {
                   assert.notEqual(message_id, null);
 
 			      request({ url: config.messages_endpoint + '/' + message_id, json: true,
-                          headers: { Authorization: fixtures.authHeaders.device } },
+                          headers: { Authorization: fixtures.models.accessTokens.device.toAuthHeader() } },
 					function(get_err, get_resp, get_body) {
 
 		                assert.equal(get_err, null);

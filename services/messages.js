@@ -11,13 +11,12 @@ var create = function(message, callback) {
     }
 
     validate(message, function(err) {
-        if (err) return callback(err, []);
+        if (err) return callback(err);
 
         message.save(function(err, message) {
-            if (err) return callback(err, []);
+            if (err) return callback(err);
 
             var client_json = JSON.stringify(message);
-
             console.log("created message: " + message.id + ": " + client_json);
 
             services.realtime.publish('/messages', client_json);

@@ -8,16 +8,108 @@ var removeAll = function (modelType, callback) {
     modelType.remove({}, callback);
 };
 
-var addToFixture = function(fixtureId) {
-    return function(err, model) {
+var createDeviceFixtures = function(callback) {
+    var device = new models.Principal({ principal_type: 'device',
+                                        name: 'existing_device' });
+
+    services.principals.create(device, function(err, device) {
         if (err) throw err;
-//        console.log("adding model with fixtureId: " + fixtureId + " and mongo id: " + model.id + " to fixtures.  external_id: " + model.external_id + " email: " + model.email);
-        fixtures[fixtureId] = model;
-    };
+        fixtures.principals.device = device;
+
+        services.accessTokens.create(device, function(err, accessToken) {
+            if (err) throw err;
+
+            fixtures.accessTokens.device = accessToken;
+            callback();
+
+        });
+    });
+
 };
 
-function authHeaderFromToken(accessToken) {
-    return "Bearer " + accessToken.token;
+var createSystemUserFixtures = function(callback) {
+
+    services.principals.find({ principal_type: "system" }, {}, function(err, principals) {
+        if (err) throw err;
+        if (principals.length != 1) throw err;
+
+        fixtures.principals.system = principals[0];
+
+        services.accessTokens.findOrCreateToken(fixtures.principals.system, function(err, accessToken) {
+            if (err) throw err;
+
+            fixtures.accessTokens.system = accessToken;
+            callback();
+        });
+    });
+
+};
+
+var createDeviceIpMessageFixture = function(callback) {
+    var message = new models.Message({ from: fixtures.principals.device.id,
+                                       message_type: "ip",
+                                       body: { ip_address: "127.0.0.1" } });
+
+    services.messages.create(message, function (err, message) {
+        if (err) throw err;
+
+        fixtures.messages.deviceIp = message;
+        callback();
+    });
+};
+
+var createUserIpMessageFixture = function(callback) {
+    var message = new models.Message({ from: fixtures.principals.user.id,
+                                       message_type: "ip",
+                                       body: { ip_address: "127.0.0.1" } });
+
+    services.messages.create(message, function (err, messages) {
+        if (err) throw err;
+
+        fixtures.messages.userIp = messages[0];
+        callback();
+    });
+};
+
+var createAgentFixtures = function(callback) {
+    var agent = new models.Agent({
+        action: "",
+        execute_as: fixtures.principals.user.id,
+        name: "nop"
+    });
+
+    services.agents.create(agent, function(err, agent) {
+        if (err) throw err;
+
+        fixtures.agents.nop = agent;
+        callback();
+    })
+};
+
+var createUserFixture = function(callback) {
+    var user = new models.Principal({ principal_type: 'user',
+                                      email: 'user@server.org',
+                                      password: 'sEcReT44' });
+
+    services.principals.create(user, function(err, user) {
+        if (err) throw err;
+
+        fixtures.principals.user = user;
+        callback();
+    });
+};
+
+var createDeviceIpMessageFixture = function(callback) {
+    var message = new models.Message({ from: fixtures.principals.device.id,
+                                       message_type: "ip",
+                                       body: { ip_address: "127.0.0.1" } });
+
+    services.messages.create(message, function (err, messages) {
+        if (err) throw err;
+
+        fixtures.messages.deviceIp = messages[0];
+        callback();
+    });
 };
 
 exports.reset = function(callback) {
@@ -26,47 +118,24 @@ exports.reset = function(callback) {
     async.each(modelTypes, removeAll, function(err) {
         if (err) throw err;
 
-        services.initialize(function(err) {
+        async.series([
+            createUserFixture,
+            createDeviceFixtures,
+            createAgentFixtures,
+            createDeviceIpMessageFixture,
+            createUserIpMessageFixture,
+            createSystemUserFixtures
+        ], callback);
 
-            services.principals.create(
-                new models.Principal({principal_type: 'device', external_id: 'existing_device'}),
-                function(err, device) {
-                    if (err) throw err;
-                    fixtures['device'] = device;
-
-                    services.accessTokens.create(device, function(err, accessToken) {
-                        fixtures['deviceAccessToken'] = accessToken;
-                        exports.authHeaders.device = authHeaderFromToken(accessToken);
-                    });
-
-                    var message = new models.Message({ from: device.id,
-                        message_type: "image",
-                        body: { url: "http://127.0.0.1/photo.jpg" } });
-
-                    services.messages.create(message, addToFixture('deviceMessage'));
-                }
-            );
-
-            services.principals.create(
-                new models.Principal({principal_type: 'user', email: 'user@server.org', password: 'sEcReT44'}),
-                addToFixture('user')
-            );
-
-            services.principals.find({ "principal_type": "system" }, {}, function (err, principals) {
-                if (err) throw err;
-
-                fixtures['system'] = principals[0];
-                services.accessTokens.findOrCreateToken(fixtures['system'], function(err, accessToken) {
-                    if (err) throw err;
-                    fixtures['systemAccessToken'] = accessToken;
-                    exports.authHeaders.system = authHeaderFromToken(accessToken);
-                });
-            });
-        });
     });
 
 };
 
-exports.models = fixtures;
-exports.authHeaders = {};
+var fixtures = {
+    accessTokens: {},
+    agents: {},
+    messages: {},
+    principals: {}
+};
 
+exports.models = fixtures;

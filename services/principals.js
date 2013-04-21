@@ -34,14 +34,14 @@ var authenticateUser = function(email, password, callback) {
 
 var authenticateDevice = function(principalId, secret, callback) {
     findById(principalId, function(err, principal) {
-        if (err) return callback(err, null);
-        if (!principal) return callback(404, null);
+        if (err) return callback(err);
+        if (!principal) return callback(401);
 
         verifySecret(secret, principal, function(err) {
-            if (err) return callback(err, null);
+            if (err) return callback(err);
 
             services.accessTokens.findOrCreateToken(principal, function(err, accessToken) {
-                if (err) return callback(err, null);
+                if (err) return callback(err);
 
                 console.log("authenticated device principal: " + principal.id);
                 callback(null, principal, accessToken);
@@ -59,7 +59,7 @@ var create = function(principal, callback) {
             if (err) return callback(err);
 
             principal.save(function(err, principal) {
-                if (err) return callback(err, null);
+                if (err) return callback(err);
 
                 console.log("created " + principal.principal_type + " principal: " + principal.id);
                 var principal_json = JSON.stringify(principal);
@@ -170,14 +170,21 @@ var impersonate = function(principal, impersonatedPrincipalId, callback) {
 
 var initialize = function(callback) {
 
+    console.log("searching for system principal");
     find({ principal_type: "system" }, {}, function(err, principals) {
         if (err) return callback(err);
 
+        console.log("found " + principals.length + " system principals");
+
         if (principals.length == 0) {
+            console.log("creating system principal");
             var systemPrincipal = new models.Principal({ principal_type: "system" });
-            create(systemPrincipal, callback);
+            create(systemPrincipal, function(err, system) {
+                console.log("system principal created: " + err);
+                return callback(err, system);
+            });
         } else {
-            callback(null, principals[0]);
+            return callback(null, principals[0]);
         }
     });
 };
@@ -194,7 +201,7 @@ var updateLastConnection = function(principal, ip) {
 
         var ipMessage = new models.Message({ "message_type": "ip" });
         ipMessage.from = principal;
-        ipMessage.body.ip = ip;
+        ipMessage.body.ip_address = ip;
 
         services.messages.create(ipMessage, function(err, message) {
             if (err) console.log("creating ip message failed: " + err);

@@ -10,15 +10,14 @@ describe('messages service', function() {
 
     it('can create and delete a message', function(done) {
 
-        var message = new models.Message({ from: fixtures.models.device.id,
-                                           message_type: "image",
-                                           body: { url: "http://127.0.0.1/photo.jpg" } });
+        var message = new models.Message({ from: fixtures.models.principals.device.id,
+                                           message_type: "_test" });
 
-        services.messages.create(message, function(err, saved_messages) {
+        services.messages.create(message, function(err, savedMessages) {
           assert.ifError(err);
-          assert.notEqual(saved_messages[0].id, null);
+          assert.notEqual(savedMessages[0].id, null);
 
-          services.messages.remove(saved_messages[0], function(err) {
+          services.messages.remove(savedMessages[0], function(err) {
             assert.equal(err, null);
             done();
           });
@@ -27,34 +26,28 @@ describe('messages service', function() {
 
     it ('rejects message with invalid principal in from', function(done) {
         var message = new models.Message({ from: new mongoose.Types.ObjectId(),
-                                           message_type: "image",
-                                           body: { url: "http://127.0.0.1/photo.jpg" } });
+                                           message_type: "_test" });
 
-        services.messages.create(message, function(err, saved_messages) {
+        services.messages.create(message, function(err, savedMessages) {
             assert.notEqual(err, null);
-            assert.equal(saved_messages.length, 0);
             done();
         });
     });
 
     it ('rejects message without message_type', function(done) {
-        var message = new models.Message({ from: fixtures.models.device.id,
-                                           body: { url: "http://127.0.0.1/photo.jpg" } });
+        var message = new models.Message({ from: fixtures.models.principals.device.id });
 
-        services.messages.create(message, function(err, saved_messages) {
+        services.messages.create(message, function(err, savedMessages) {
             assert.notEqual(err, null);
-            assert.equal(saved_messages.length, 0);
             done();
         });
     });
 
     it ('rejects message without from', function(done) {
-        var message = new models.Message({ message_type: "image",
-                                           body: { url: "http://127.0.0.1/photo.jpg" } });
+        var message = new models.Message({ message_type: "_test" });
 
-        services.messages.create(message, function(err, saved_messages) {
+        services.messages.create(message, function(err, savedMessages) {
             assert.notEqual(err, null);
-            assert.equal(saved_messages.length, 0);
             done();
         });
     });

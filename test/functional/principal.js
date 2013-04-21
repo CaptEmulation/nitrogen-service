@@ -18,7 +18,7 @@ describe('principal endpoint', function() {
         client.addExtension({
             outgoing: function(message, callback) {
                 message.ext = message.ext || {};
-                message.ext.access_token = fixtures.models.deviceAccessToken.token;
+                message.ext.access_token = fixtures.models.accessTokens.device.token;
                 callback(message);
             }
         });
@@ -26,7 +26,7 @@ describe('principal endpoint', function() {
 		client.subscribe('/principals', function(principal_json) {
             var principal = JSON.parse(principal_json);
             if (principal.principal_type != "device") return;
-            if (principal.external_id != "subscription_test") return;
+            if (principal.name != "subscription_test") return;
 
 			notification_passed = true;
 		    if (notification_passed && get_passed) {
@@ -40,13 +40,13 @@ describe('principal endpoint', function() {
 			
 			request.post(config.principals_endpoint,
 				{ json: { principal_type: "device",
-                          external_id: "subscription_test" } }, function(post_err, post_resp, post_body) {
+                          name: "subscription_test" } }, function(post_err, post_resp, post_body) {
 				  assert.ifError(post_err);
 			      assert.equal(post_resp.statusCode, 200);
 
                   assert.equal(!!post_body.principal.secret, true);
                   assert.equal(post_body.principal.secret_hash, undefined);
-			      assert.equal(post_body.principal.external_id, "subscription_test");
+			      assert.equal(post_body.principal.name, "subscription_test");
                   assert.ok(Date.now() < Date.parse(post_body.accessToken.expires_at));
 
                   assert.equal(post_body.principal.id, post_body.accessToken.principal);
@@ -57,7 +57,7 @@ describe('principal endpoint', function() {
 		                assert.equal(get_resp.statusCode, 200);
 
                         assert.equal(get_body.principal.secret, undefined);
-		                assert.equal(get_body.principal.external_id, "subscription_test");
+		                assert.equal(get_body.principal.name, "subscription_test");
                         assert.notEqual(get_body.principal.last_connection, undefined);
                         assert.notEqual(get_body.principal.last_ip, undefined);
 
@@ -72,7 +72,7 @@ describe('principal endpoint', function() {
 	});
 
     it('should reject requests for a principal without access token', function(done) {
-        request({ url: config.principals_endpoint + '/' + fixtures.models.device.id, json: true }, function(get_err, get_resp, get_body) {
+        request({ url: config.principals_endpoint + '/' + fixtures.models.principals.device.id, json: true }, function(get_err, get_resp, get_body) {
             assert.equal(get_err, null);
             assert.equal(get_resp.statusCode, 401);
             done();
@@ -81,7 +81,7 @@ describe('principal endpoint', function() {
 
 	it('should fetch all principals', function(done) {
 	    request.get({ url: config.principals_endpoint,
-                      headers: { Authorization: fixtures.authHeaders.device },
+                      headers: { Authorization: fixtures.models.accessTokens.device.toAuthHeader() },
                       json: true }, function(err, resp, body) {
 
 	      assert.equal(resp.statusCode, 200);
@@ -92,7 +92,7 @@ describe('principal endpoint', function() {
 
     it('should fetch only user principals', function(done) {
         request.get({ url: config.principals_endpoint + "?principal_type=user",
-                      headers: { Authorization: fixtures.authHeaders.device },
+                      headers: { Authorization: fixtures.models.accessTokens.device.toAuthHeader() },
                       json: true }, function(err, resp, body) {
             assert.equal(resp.statusCode, 200);
             assert.equal(body.principals.length > 0, true);
@@ -113,8 +113,8 @@ describe('principal endpoint', function() {
     });
 
     it('should login device principal', function (done) {
-        var deviceId = fixtures.models.device.id;
-        var secret = fixtures.models.device.secret;
+        var deviceId = fixtures.models.principals.device.id;
+        var secret = fixtures.models.principals.device.secret;
 
         request.post(config.principals_endpoint + '/auth',
             { json: { principal_type: 'device',
@@ -123,7 +123,7 @@ describe('principal endpoint', function() {
                 assert.equal(resp.statusCode, 200);
                 assert.notEqual(body.accessToken.token, undefined);
 
-                assert.equal(Date.parse(body.principal.last_connection) > fixtures.models.device.last_connection.getTime(), true);
+                assert.equal(Date.parse(body.principal.last_connection) > fixtures.models.principals.device.last_connection.getTime(), true);
                 assert.notEqual(body.principal.last_ip, undefined);
                 done();
             });
@@ -137,7 +137,7 @@ describe('principal endpoint', function() {
                 assert.equal(resp.statusCode, 200);
                 assert.notEqual(body.accessToken.token, undefined);
 
-                assert.equal(Date.parse(body.principal.last_connection) > fixtures.models.user.last_connection.getTime(), true);
+                assert.equal(Date.parse(body.principal.last_connection) > fixtures.models.principals.user.last_connection.getTime(), true);
                 assert.notEqual(body.principal.last_ip, undefined);
 
                 done();
@@ -146,8 +146,8 @@ describe('principal endpoint', function() {
 
     it('should allow system to impersonate user principal', function(done) {
         request.post(config.principals_endpoint + '/impersonate',
-            { headers: { Authorization: fixtures.authHeaders.system },
-              json: fixtures.models.user }, function(err, resp, body) {
+            { headers: { Authorization: fixtures.models.accessTokens.system.toAuthHeader() },
+              json: fixtures.models.principals.user }, function(err, resp, body) {
                 assert.equal(resp.statusCode, 200);
                 assert.notEqual(body.accessToken.token, undefined);
 

@@ -11,6 +11,7 @@
     "faye": "0.8.x",
     "mongodb": "1.x",
     "mongoose": "3.x",
+    "nitrogen": "0.0.x",
     "passport": "0.1.x",
     "passport-http-bearer": "0.2.x",
     "request": "2.x"

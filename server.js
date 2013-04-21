@@ -28,7 +28,7 @@ app.disable('x-powered-by');
 
 // only establish routing to endpoints when we have a connection to MongoDB.
 mongoose.connection.once('open', function () {
-    console.log("service has connected to mongodb.");
+    console.log("service connected to mongodb.");
 
     services.initialize(function(err) {
         if (err) return console.log("Nitrogen service failed to initialize: " + err);
@@ -63,6 +63,11 @@ mongoose.connection.once('open', function () {
         services.realtime.attach(server, config);
 
         app.use(express.static(__dirname + '/static'));
+
+        // TODO: make starting this and API endpoint configurable to enable single vs. horizontally scaled deployments
+        services.agents.start(config, function(err) {
+            console.log("agent service failed to start: " + err);
+        });
     });
 
 });
