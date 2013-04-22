@@ -13,6 +13,9 @@ var create = function(message, callback) {
     validate(message, function(err) {
         if (err) return callback(err);
 
+        message.visible_to = [message.from];
+        if (message.to) message.visible_to.push(message.to);
+
         message.save(function(err, message) {
             if (err) return callback(err);
 
@@ -45,12 +48,26 @@ var createMany = function(messages, callback) {
     });
 };
 
-var find = function(filter, options, callback) {
-    models.Message.find(filter, null, options, callback);
+var find = function(principal, filter, options, callback) {
+    filter['$or'] = [ { public: true }, { visible_to: principal._id } ];
+
+    models.Message.find(filter, null, options, function(err, messages) {
+        if (err) return callback(err);
+
+        return callback(null, messages);
+    });
 };
 
-var findById = function(messageId, callback) {
-    models.Message.findOne({"_id": messageId}, callback);
+var findById = function(principal, messageId, callback) {
+    var filter = { "_id": messageId,
+                   "$or": [ { public: true }, { visible_to: principal._id } ] };
+
+    models.Message.findOne(filter, function(err, message) {
+        if (err) return callback(err);
+        if (!message) return callback(404);
+
+        return callback(null, message);
+    });
 };
 
 var remove = function(message, callback) {

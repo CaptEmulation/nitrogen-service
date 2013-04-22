@@ -13,8 +13,6 @@ var express = require('express')
 console.log("connecting to mongodb instance: " + config.mongodb_connection_string);
 mongoose.connect(config.mongodb_connection_string);
 
-var server = app.listen(process.env.PORT || config.http_port || 3030);
-
 app.use(express.logger());
 app.use(express.bodyParser());
 
@@ -34,6 +32,9 @@ mongoose.connection.once('open', function () {
         if (err) return console.log("Nitrogen service failed to initialize: " + err);
 
         console.log("service has initialized itself, exposing api at: " + config.base_url);
+
+        var port = process.env.PORT || config.http_port || 3030;
+        var server = app.listen(port);
 
         // REST endpoints
 
@@ -71,3 +72,9 @@ mongoose.connection.once('open', function () {
     });
 
 });
+
+if (process.env.NODE_ENV != "production") {
+    mongoose.connection.on('error', function(err) {
+        console.error('MongoDB error: %s', err);
+    });
+}

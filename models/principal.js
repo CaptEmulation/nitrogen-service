@@ -7,6 +7,8 @@ principalSchema.add({
 	principal_type: { type: String },        // user, device
     name: { type: String },                  // user friendly name for this principal
 
+    public: { type: Boolean, default: false },
+
 	last_ip: { type: String },
 	last_connection: { type: Date, default: Date.now },
 
@@ -24,8 +26,9 @@ principalSchema.add({
 	salt: { type: String }            // stored in base64
 });
 
-principalSchema.index({ email: 1, type: 1 });
-principalSchema.index({ principal_type: 1, type: 1 });
+principalSchema.index({ email: 1 });
+principalSchema.index({ last_ip: 1 });
+principalSchema.index({ principal_type: 1 });
 
 principalSchema.virtual('secret').set(function(value) { this._secret = value; });
 principalSchema.virtual('secret').get(function() { return this._secret; });

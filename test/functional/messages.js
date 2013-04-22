@@ -105,6 +105,7 @@ describe('messages endpoint', function() {
 			request.post(config.messages_endpoint,
 				{ json: [{ from: fixtures.models.principals.device.id,
                            message_type: "_messageSubscriptionTest",
+                           public: false,
                            body: { reading: 5.1 } }],
                   headers: { Authorization: fixtures.models.accessTokens.device.toAuthHeader() } }, function(post_err, post_resp, post_body) {
 				  assert.equal(post_err, null);

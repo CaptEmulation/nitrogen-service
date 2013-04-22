@@ -83,12 +83,13 @@ var createAgentFixtures = function(callback) {
 
         fixtures.agents.nop = agent;
         callback();
-    })
+    });
 };
 
 var createUserFixture = function(callback) {
     var user = new models.Principal({ principal_type: 'user',
                                       email: 'user@server.org',
+                                      public: true,
                                       password: 'sEcReT44' });
 
     services.principals.create(user, function(err, user) {
@@ -102,6 +103,7 @@ var createUserFixture = function(callback) {
 var createDeviceIpMessageFixture = function(callback) {
     var message = new models.Message({ from: fixtures.principals.device.id,
                                        message_type: "ip",
+                                       public: true,
                                        body: { ip_address: "127.0.0.1" } });
 
     services.messages.create(message, function (err, messages) {

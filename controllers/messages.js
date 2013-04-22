@@ -5,7 +5,7 @@ var async = require('async'),
 	services = require('../services');
 
 exports.index = function(req, res) {
-    services.messages.find(req.query, { limit: 400, sort: { timestamp: -1 } }, function(err, messages) {
+    services.messages.find(req.user, req.query, { limit: 400, sort: { timestamp: -1 } }, function(err, messages) {
         if (err) return res.send(400, err);
 
         res.send({"messages": messages});
@@ -13,7 +13,7 @@ exports.index = function(req, res) {
 };
 
 exports.show = function(req, res) {
-    services.messages.findById(req.params.id, function(err, message) {
+    services.messages.findById(req.user, req.params.id, function(err, message) {
 		if (err) return res.send(400, err);
 		if (!message) return res.send(404);
 
