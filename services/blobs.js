@@ -1,5 +1,6 @@
-var config = require('../config'),
-    models = require('../models');
+var config = require('../config')
+  , models = require('../models')
+  , services = require('../services');
 
 var stream = function(blobId, stream, callback) {
     models.Blob.findOne({"_id": blobId}, function (err, blob) {
