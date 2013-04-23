@@ -17,7 +17,7 @@ describe('messages service', function() {
           assert.ifError(err);
           assert.notEqual(savedMessages[0].id, null);
 
-          services.messages.remove(savedMessages[0], function(err) {
+          services.messages.remove(services.principals.systemPrincipal, savedMessages[0], function(err) {
             assert.equal(err, null);
             done();
           });

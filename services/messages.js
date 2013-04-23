@@ -48,10 +48,19 @@ var createMany = function(messages, callback) {
     });
 };
 
-var find = function(principal, filter, options, callback) {
-    filter['$or'] = [ { public: true }, { visible_to: principal._id } ];
+var filterForPrincipal = function(principal, filter) {
+    var visibilityFilter = [ { public: true }];
+    if (principal) {
+        visibilityFilter.push( { visible_to: principal._id } );
+    }
 
-    models.Message.find(filter, null, options, function(err, messages) {
+    filter["$or"] = visibilityFilter;
+    return filter;
+
+};
+
+var find = function(principal, filter, options, callback) {
+    models.Message.find(filterForPrincipal(principal, filter), null, options, function(err, messages) {
         if (err) return callback(err);
 
         return callback(null, messages);
@@ -59,10 +68,7 @@ var find = function(principal, filter, options, callback) {
 };
 
 var findById = function(principal, messageId, callback) {
-    var filter = { "_id": messageId,
-                   "$or": [ { public: true }, { visible_to: principal._id } ] };
-
-    models.Message.findOne(filter, function(err, message) {
+    models.Message.findOne(filterForPrincipal(principal, { "_id": messageId }), function(err, message) {
         if (err) return callback(err);
         if (!message) return callback(404);
 
@@ -70,7 +76,9 @@ var findById = function(principal, messageId, callback) {
     });
 };
 
-var remove = function(message, callback) {
+var remove = function(principal, message, callback) {
+    if (!principal || !principal.isSystem()) return callback("Only system can delete messages");
+
     models.Message.remove({"_id": message.id}, callback);
 };
 

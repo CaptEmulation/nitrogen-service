@@ -53,25 +53,17 @@ var loadAgents = function(system, callback) {
 };
 
 var buildSystemClientSession = function(config, callback) {
+    if (!services.principals.systemPrincipal) return callback("System principal not available.");
 
-    services.principals.find({ principal_type: "system" }, {}, function(err, principals) {
-
+    services.accessTokens.findOrCreateToken(services.principals.systemPrincipal, function(err, accessToken) {
         if (err) return callback(err);
-        if (principals.length != 1) return callback("Found more than one system principal!");
 
-        var system = principals[0];
+        var service = new nitrogen.Service(config);
+        var clientPrincipal = new nitrogen.Principal(services.principals.systemPrincipal);
 
-        services.accessTokens.findOrCreateToken(system, function(err, accessToken) {
-            if (err) return callback(err);
+        var session = new nitrogen.Session(service, clientPrincipal, accessToken);
 
-            var service = new nitrogen.Service(config);
-
-            var clientPrincipal = new nitrogen.Principal(system);
-
-            var session = new nitrogen.Session(service, clientPrincipal, accessToken);
-
-            return callback(err, system, session);
-        });
+        return callback(err, session);
     });
 };
 
@@ -88,10 +80,10 @@ var prepareAgents = function(session, agents, callback) {
 
 var initialize = function(config, callback) {
 
-    buildSystemClientSession(config, function(err, system, session) {
+    buildSystemClientSession(config, function(err, session) {
         if (err) return callback("build system client session failed: " + err);
 
-        loadAgents(system, function (err, agents) {
+        loadAgents(services.principals.systemPrincipal, function (err, agents) {
             if (err) return callback("agent fetch failed: " + err);
 
             prepareAgents(session, agents, function(err, preparedAgents) {

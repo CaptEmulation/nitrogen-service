@@ -17,6 +17,7 @@ describe('agents endpoint', function() {
         request({ url: config.agents_endpoint,
                   headers: { Authorization: fixtures.models.accessTokens.device.toAuthHeader() },
                              json: true }, function(err,resp,body) {
+            assert.ifError(err);
             assert.equal(resp.statusCode, 200);
 
             assert.notEqual(body.agents, undefined);

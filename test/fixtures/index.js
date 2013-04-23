@@ -10,7 +10,8 @@ var removeAll = function (modelType, callback) {
 
 var createDeviceFixtures = function(callback) {
     var device = new models.Principal({ principal_type: 'device',
-                                        name: 'existing_device' });
+                                        name: 'existing_device',
+                                        owner: fixtures.principals.user });
 
     services.principals.create(device, function(err, device) {
         if (err) throw err;

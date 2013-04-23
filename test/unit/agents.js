@@ -7,9 +7,9 @@ var assert = require('assert')
 describe('agent service', function() {
 
     it('matches 1 user and 1 device', function(done) {
-        services.principals.initialize(function(err, system) {
+        services.principals.initialize(function(err) {
             assert.ifError(err);
-            assert.notEqual(system, undefined);
+            assert.notEqual(services.principals.systemPrincipal, null);
 
             services.agents.initialize(config, function(err, session, compiledAgents) {
                 assert.ifError(err);

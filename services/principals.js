@@ -179,12 +179,14 @@ var initialize = function(callback) {
         if (principals.length == 0) {
             console.log("creating system principal");
             var systemPrincipal = new models.Principal({ principal_type: "system" });
-            create(systemPrincipal, function(err, system) {
+            create(systemPrincipal, function(err, systemPrincipal) {
                 console.log("system principal created: " + err);
-                return callback(err, system);
+                services.principals.systemPrincipal = systemPrincipal;
+                return callback(err);
             });
         } else {
-            return callback(null, principals[0]);
+            services.principals.systemPrincipal = principals[0];
+            return callback();
         }
     });
 };
@@ -246,5 +248,7 @@ module.exports = {
     update: update,
     updateLastConnection: updateLastConnection,
     verifySecret: verifySecret,
-    verifyPassword: verifyPassword
+    verifyPassword: verifyPassword,
+
+    systemPrincipal: null
 };

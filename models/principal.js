@@ -8,12 +8,12 @@ principalSchema.add({
     name: { type: String },                  // user friendly name for this principal
 
     public: { type: Boolean, default: false },
+    owner: { type: Schema.Types.ObjectId, ref: 'Principal' },
 
 	last_ip: { type: String },
 	last_connection: { type: Date, default: Date.now },
 
     capabilities: { type: Array },
-    external_id: { type: String },
 
 // device items
 
@@ -26,12 +26,16 @@ principalSchema.add({
 	salt: { type: String }            // stored in base64
 });
 
+principalSchema.index({ capabilities: 1 });
 principalSchema.index({ email: 1 });
 principalSchema.index({ last_ip: 1 });
+principalSchema.index({ owner: 1 });
+principalSchema.index({ public: 1 });
 principalSchema.index({ principal_type: 1 });
 
 principalSchema.virtual('secret').set(function(value) { this._secret = value; });
 principalSchema.virtual('secret').get(function() { return this._secret; });
+
 principalSchema.virtual('password').set(function(value) { this._password = value; });
 principalSchema.virtual('password').get(function() { return this._password; });
 
@@ -60,12 +64,16 @@ principalSchema.path('principal_type').validate(function (value) {
 
 var Principal = mongoose.model('Principal', principalSchema);
 
-Principal.prototype.isUser = function() {
-    return this.principal_type == "user";
-};
-
 Principal.prototype.isDevice = function() {
     return this.principal_type == "device";
+};
+
+Principal.prototype.isSystem = function() {
+    return this.principal_type == "system";
+};
+
+Principal.prototype.isUser = function() {
+    return this.principal_type == "user";
 };
 
 module.exports = Principal;

@@ -30,6 +30,7 @@ mongoose.connection.once('open', function () {
 
     services.initialize(function(err) {
         if (err) return console.log("Nitrogen service failed to initialize: " + err);
+        if (!services.principals.systemPrincipal) return console.log("System principal not available after initialize.");
 
         console.log("service has initialized itself, exposing api at: " + config.base_url);
 
