@@ -15,7 +15,7 @@ var authenticate = function(authBody, callback) {
 };
 
 var authenticateUser = function(email, password, callback) {
-    findByEmail(email, function(err, principal) {
+    findByEmail(services.principals.systemPrincipal, email, function(err, principal) {
         if (err) return callback(err);
         if (!principal) return callback(401);
 
@@ -33,7 +33,7 @@ var authenticateUser = function(email, password, callback) {
 };
 
 var authenticateDevice = function(principalId, secret, callback) {
-    findById(principalId, function(err, principal) {
+    findById(services.principals.systemPrincipal, principalId, function(err, principal) {
         if (err) return callback(err);
         if (!principal) return callback(401);
 
@@ -73,10 +73,12 @@ var create = function(principal, callback) {
 };
 
 var checkForExistingPrincipal = function(principal, callback) {
+    if (!services.principals.systemPrincipal) return callback(null, null);
+
     if (principal.isUser()) {
-        findByEmail(principal.email, callback);
+        findByEmail(services.principals.systemPrincipal, principal.email, callback);
     } else {
-        findById(principal.id, callback);
+        findById(services.principals.systemPrincipal, principal.id, callback);
     }
 };
 
@@ -118,16 +120,30 @@ var createUserCredentials = function(principal, callback) {
     });
 };
 
-var find = function(filter, options, callback) {
-    models.Principal.find(filter, null, options, callback);
+var filterForPrincipal = function(principal, filter) {
+    if (principal && principal.isSystem()) return filter;
+
+    var visibilityFilter = [ { public: true }];
+    if (principal) {
+        visibilityFilter.push( { owner: principal._id } );
+        visibilityFilter.push( { "_id": principal._id } );
+    }
+
+    filter["$or"] = visibilityFilter;
+    return filter;
+
 };
 
-var findByEmail = function(email, callback) {
-    models.Principal.findOne({"email": email}, callback);
+var find = function(principal, filter, options, callback) {
+    models.Principal.find(filterForPrincipal(principal, filter), null, options, callback);
 };
 
-var findById = function(id, callback) {
-    models.Principal.findOne({"_id": id}, callback);
+var findByEmail = function(principal, email, callback) {
+    models.Principal.findOne(filterForPrincipal(principal, { "email": email }), callback);
+};
+
+var findById = function(principal, id, callback) {
+    models.Principal.findOne(filterForPrincipal(principal, { "_id": id }), callback);
 };
 
 var hashPassword = function(password, saltBuf, callback) {
@@ -155,7 +171,7 @@ var hashSecret = function(secret, callback) {
 var impersonate = function(principal, impersonatedPrincipalId, callback) {
     if (principal.principal_type != "system" && principal.id != impersonatedPrincipalId) return callback(401);
 
-    findById(impersonatedPrincipalId, function(err, impersonatedPrincipal) {
+    findById(services.principals.systemPrincipal, impersonatedPrincipalId, function(err, impersonatedPrincipal) {
         if (err) return callback(err, null);
         if (!impersonatedPrincipal) return callback(404, null);
 
@@ -170,8 +186,7 @@ var impersonate = function(principal, impersonatedPrincipalId, callback) {
 
 var initialize = function(callback) {
 
-    console.log("searching for system principal");
-    find({ principal_type: "system" }, {}, function(err, principals) {
+    find(services.principals.systemPrincipal, { principal_type: "system" }, {}, function(err, principals) {
         if (err) return callback(err);
 
         console.log("found " + principals.length + " system principals");

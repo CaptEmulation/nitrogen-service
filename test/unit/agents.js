@@ -19,7 +19,7 @@ describe('agent service', function() {
                     assert.ifError(err);
 
                     setTimeout(function() {
-                        services.messages.find({ message_type: "ip_match" }, {}, function(err, messages) {
+                        services.messages.find(services.principals.systemPrincipal, { message_type: "ip_match" }, {}, function(err, messages) {
                             assert.ifError(err);
                             assert.equal(messages.length > 0, true);
                             done();

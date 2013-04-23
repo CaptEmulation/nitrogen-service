@@ -49,6 +49,8 @@ var createMany = function(messages, callback) {
 };
 
 var filterForPrincipal = function(principal, filter) {
+    if (principal && principal.isSystem()) return filter;
+
     var visibilityFilter = [ { public: true }];
     if (principal) {
         visibilityFilter.push( { visible_to: principal._id } );
@@ -92,7 +94,7 @@ var validate = function(message, callback) {
     // TODO: do validation of message_type values if they are not custom prefixed
     // TODO: schema validation of messages
 
-    services.principals.findById(message.from, function(err, principal) {
+    services.principals.findById(services.principals.systemPrincipal, message.from, function(err, principal) {
         if (err) return callback(err);
         if (!principal) return callback("Message must have an existing from principal.");
 

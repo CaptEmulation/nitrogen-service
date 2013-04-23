@@ -30,18 +30,11 @@ var createDeviceFixtures = function(callback) {
 
 var createSystemUserFixtures = function(callback) {
 
-    services.principals.find({ principal_type: "system" }, {}, function(err, principals) {
+    services.accessTokens.findOrCreateToken(services.principals.systemPrincipal, function(err, accessToken) {
         if (err) throw err;
-        if (principals.length != 1) throw err;
 
-        fixtures.principals.system = principals[0];
-
-        services.accessTokens.findOrCreateToken(fixtures.principals.system, function(err, accessToken) {
-            if (err) throw err;
-
-            fixtures.accessTokens.system = accessToken;
-            callback();
-        });
+        fixtures.accessTokens.system = accessToken;
+        callback();
     });
 
 };

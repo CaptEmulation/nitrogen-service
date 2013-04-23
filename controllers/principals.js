@@ -48,7 +48,7 @@ exports.impersonate = function(req, res) {
 };
 
 exports.index = function(req, res) {
-    services.principals.find(req.query, { sort: { last_connection: -1 } }, function (err, principals) {
+    services.principals.find(req.user, req.query, { sort: { last_connection: -1 } }, function (err, principals) {
 		if (err) return res.send(400, err);
 
 		res.send({"principals": principals});
@@ -56,7 +56,7 @@ exports.index = function(req, res) {
 };
 
 exports.show = function(req, res) {
-	services.principals.findById(req.params.id, function (err, principal) {
+	services.principals.findById(req.user, req.params.id, function (err, principal) {
 		if (err) return res.send(400, err);
 		if (!principal) return res.send(404);
 
