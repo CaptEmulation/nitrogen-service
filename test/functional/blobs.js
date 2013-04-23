@@ -23,7 +23,6 @@ if (config.blob_provider) {
                             function (err, resp, body) {
                                 assert.ifError(err);
 
-                                console.log("body: " + body);
                                 var body_json = JSON.parse(body);
                                 assert.equal(resp.statusCode, 200);
                                 assert.equal(body_json.blob._id, undefined);

@@ -22,7 +22,7 @@ var create = function(blob, stream, callback) {
         blob.save(function(err, blob) {
             if (err) return callback(err, null);
 
-            console.log('created blob with id: ' + blob._id);
+            services.log.info('created blob with id: ' + blob._id);
             callback(null, blob);
         });
 

@@ -6,7 +6,6 @@ var assert = require('assert')
 describe('agents endpoint', function() {
 
     it('index should be not be accessible anonymously', function(done) {
-        console.log("agent endpoint: " + config.agents_endpoint);
         request(config.agents_endpoint, function(err, resp, body) {
             assert.equal(resp.statusCode, 401);
             done();

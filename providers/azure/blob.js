@@ -6,7 +6,7 @@ function AzureBlobProvider(config) {
     var azure_storage_endpoint = azure_storage_account + ".blob.core.windows.net";
 
     if (!azure_storage_account || !azure_storage_key) {
-        console.log("WARNING: Azure storage account or key not configured correctly.  Set AZURE_STORAGE_ACCOUNT and AZURE_STORAGE_KEY as environment variables to configure the azure blob provider.");
+        services.log.warn("WARNING: Azure storage account or key not configured.  Set AZURE_STORAGE_ACCOUNT and AZURE_STORAGE_KEY as environment variables to configure the azure blob provider.");
         return;
     }
 
@@ -15,8 +15,8 @@ function AzureBlobProvider(config) {
 
     this.azureBlobService.createContainerIfNotExists(
         "blobs",
-        function(error) {
-            if (error) console.log("Azure Blob Provider: Not able to create/confirm blob container: " + error);
+        function(err) {
+            if (err) services.log.error("Azure Blob Provider: Not able to create/confirm blob container: " + error);
         }
     );
 }

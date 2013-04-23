@@ -20,7 +20,7 @@ var create = function(message, callback) {
             if (err) return callback(err);
 
             var client_json = JSON.stringify(message);
-            console.log("created message: " + message.id + ": " + client_json);
+            services.log.info("created message: " + message.id + ": " + client_json);
 
             services.realtime.publish('/messages', client_json);
 
@@ -37,7 +37,7 @@ var createMany = function(messages, callback) {
             if (err) {
                 // rollback any already saved_messages
                 async.each(saved_messages, remove, function(err2) {
-                    console.log("error during rollback: " + err2);
+                    services.log.error("error during rollback: " + err2);
                     return callback(err, []);
                 });
             }

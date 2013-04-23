@@ -1,4 +1,6 @@
 var providers = require('./providers');
+var winston = require('winston');
+
 var config = null;
 
 if (process.env.NODE_ENV == "production") {
@@ -53,6 +55,17 @@ config.device_secret_bytes = 128;
 
 if (process.env.AZURE_STORAGE_ACCOUNT && process.env.AZURE_STORAGE_KEY) {
     config.blob_provider = new providers.azure.AzureBlobProvider(config);
+}
+
+if (process.env.LOGGLY_SUBDOMAIN) {
+    config.loggly = {
+        "subdomain": process.env.LOGGLY_SUBDOMAIN,
+        "inputToken": process.env.LOGGLY_INPUT_TOKEN,
+        "auth": {
+            "username": process.env.LOGGLY_USERNAME,
+            "password": process.env.LOGGLY_PASSWORD
+        }
+    }
 }
 
 module.exports = config;

@@ -14,7 +14,9 @@
     "nitrogen": "0.0.x",
     "passport": "0.1.x",
     "passport-http-bearer": "0.2.x",
-    "request": "2.x"
+    "request": "2.x",
+    "winston": "0.7.x",
+    "winston-loggly": "0.6.x"
   },
   "devDependencies": {
     "mocha": "1.x"

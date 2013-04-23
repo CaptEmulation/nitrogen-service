@@ -44,7 +44,7 @@ var loadAgents = function(system, callback) {
                     callback();
                 });
             }, function (err) {
-                console.log("total agents: " + agents.length);
+                services.log.info("total agents: " + agents.length);
                 return callback(err, agents);
             });
 
@@ -104,9 +104,9 @@ var start = function(system, callback) {
         // NOTE: onMessage here should only event messages that are visible for the session the agent is executing under.
 
         session.onMessage(function(message) {
-            console.log("message received for agent processing: " + JSON.stringify(message));
+            services.log.debug("message received for agent processing: " + JSON.stringify(message));
             execute(compiledAgents, message, function(err) {
-                console.log("agent execution failed with error: " + err);
+                if (err) services.log.error("agent execution failed with error: " + err);
             });
         });
     });
@@ -114,7 +114,7 @@ var start = function(system, callback) {
 
 var execute = function(agents, message, callback) {
     agents.forEach(function(agent) {
-        var context = { console: console, message: message, nitrogen: nitrogen, session: agent.session };
+        var context = { log: services.log, message: message, nitrogen: nitrogen, session: agent.session };
         agent.compiledAction.runInNewContext(context);
     });
 
