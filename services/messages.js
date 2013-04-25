@@ -78,10 +78,37 @@ var findById = function(principal, messageId, callback) {
     });
 };
 
-var remove = function(principal, message, callback) {
+var remove = function(principal, query, callback) {
+    // TODO: will need more complicated authorization mechanism for non system users.
+    if (!principal || !principal.isSystem()) return callback(403);
+
+    models.Message.find(principal, query, function (err, messages) {
+        // delete linked resources.
+        // TODO: what is an appropriate max parallelism here.
+        async.eachLimit(messages, 20, removeLinkedResources, function(err) {
+            if (err) return callback(err);
+
+            models.Message.remove(query, callback);
+        });
+    });
+};
+
+var removeLinkedResources = function(message, callback) {
+    if (message.link) {
+        services.blobs.remove(principal, { link: message.link }, callback);
+    } else {
+        callback();
+    }
+};
+
+var removeOne = function(principal, message, callback) {
     if (!principal || !principal.isSystem()) return callback("Only system can delete messages");
 
-    models.Message.remove({"_id": message.id}, callback);
+    removeLinkedResources(message, function(err) {
+        if (err) return callback(err);
+
+        models.Message.remove({"_id": message.id}, callback);
+    });
 };
 
 var validate = function(message, callback) {
@@ -112,6 +139,7 @@ module.exports = {
     find: find,
     findById: findById,
     remove: remove,
+    removeOne: removeOne,
     validate: validate,
     validateAll: validateAll
 };

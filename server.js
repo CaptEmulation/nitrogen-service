@@ -61,6 +61,7 @@ mongoose.connection.once('open', function () {
         app.get(config.api_prefix + 'v1/messages/:id',   middleware.authenticateRequest, controllers.messages.show);
         app.get(config.api_prefix + 'v1/messages',       middleware.authenticateRequest, controllers.messages.index);
         app.post(config.api_prefix + 'v1/messages',      middleware.authenticateRequest, controllers.messages.create);
+        app.delete(config.api_prefix + 'v1/messages',    middleware.authenticateRequest, controllers.messages.remove);
 
         services.realtime.attach(server, config);
 

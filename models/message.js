@@ -5,10 +5,13 @@ var async = require('async')
 
 var messageSchema = new BaseSchema();
 messageSchema.add({
+    message_type: { type: String },
+    schema_version: { type: Number },
+
+    // a link ties this message to another resource.
+    link: { type: Schema.Types.ObjectId },
 	timestamp: { type: Date, default: Date.now },
 	expires: { type: Date },
-	message_type: { type: String },
-	schema_version: { type: Number },
 
     public: { type: Boolean, default: false },
     visible_to: [{ type: Schema.Types.ObjectId, ref: 'Principal' }],
@@ -18,10 +21,12 @@ messageSchema.add({
     response_to: { type: Schema.Types.ObjectId, ref: 'Message' }, // message this is in response to (if any)
 
 	body: { type: Schema.Types.Mixed, default: {} }
+
 });
 
 messageSchema.index({ expires: 1 });
 messageSchema.index({ from: 1 });
+messageSchema.index({ link: 1 });
 messageSchema.index({ message_type: 1 });
 messageSchema.index({ public: 1 });
 messageSchema.index({ timestamp: 1, type: -1 });

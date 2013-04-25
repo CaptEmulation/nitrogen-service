@@ -72,6 +72,22 @@ describe('messages endpoint', function() {
         });
     });
 
+    it ('delete should be only accessible to system principal', function(done) {
+        request.del({ url: config.messages_endpoint,
+                json: { id: fixtures.models.messages.deviceIp.id },
+                headers: { Authorization: fixtures.models.accessTokens.device.toAuthHeader() } },
+
+            function(del_err, del_resp, del_body) {
+
+                assert.equal(del_err, null);
+                assert.equal(del_resp.statusCode, 403);
+
+                done();
+            }
+        );
+
+    });
+
     it('should create and fetch a message', function(done) {
 		var notification_passed = false,
 			get_passed = false,
@@ -129,11 +145,21 @@ describe('messages endpoint', function() {
 		                assert.equal(get_body.message.body.reading, 5.1);
 		                assert.notEqual(get_body.message.created_at, 5.1);
 
-		                get_passed = true;
-		                if (notification_passed && get_passed) {
-							client.unsubscribe('/messages');
-							done();
-		                }
+                        request.del({ url: config.messages_endpoint,
+                                      json: { id: message_id },
+                                      headers: { Authorization: fixtures.models.accessTokens.system.toAuthHeader() } },
+                            function(del_err, del_resp, del_body) {
+
+                                assert.equal(del_err, null);
+                                assert.equal(del_resp.statusCode, 200);
+
+                                get_passed = true;
+                                if (notification_passed && get_passed) {
+                                    client.unsubscribe('/messages');
+                                    done();
+                                }
+                            }
+                        );
 	              });
 		    });
     	});

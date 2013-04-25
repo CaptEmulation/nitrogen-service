@@ -99,26 +99,27 @@ var start = function(system, callback) {
     initialize(system, function(err, session, compiledAgents) {
         if (err) return callback(err);
 
-        // TODO: use queuing and not realtime to ensure that every message is processed?
-        // TODO: split agent execution between multiple worker nodes to scale?
-        // NOTE: onMessage here should only event messages that are visible for the session the agent is executing under.
+        // TODO: use queuing to split agent execution between nodes to scale?
 
-        session.onMessage(function(message) {
-            services.log.debug("message received for agent processing: " + JSON.stringify(message));
-            execute(compiledAgents, message, function(err) {
-                if (err) services.log.error("agent execution failed with error: " + err);
-            });
+        execute(compiledAgents, function(err) {
+            if (err) services.log.error("agent execution failed with error: " + err);
         });
     });
 };
 
-var execute = function(agents, message, callback) {
-    agents.forEach(function(agent) {
-        var context = { log: services.log, message: message, nitrogen: nitrogen, session: agent.session };
-        agent.compiledAction.runInNewContext(context);
-    });
+var execute = function(agents, callback) {
+    // TODO: this limits us to 1 machine since each instance will load all agents.  break agents out to their own role type and then enable automatically dividing agents between instances of that role.
+    async.each(agents, function(agent, callback) {
+        var context = { async: async,
+                        log: services.log,
+                        nitrogen: nitrogen,
+                        session: agent.session,
+                        setInterval: setInterval,
+                        setTimeout: setTimeout };
 
-    callback(null, []);
+        agent.compiledAction.runInNewContext(context);
+        callback();
+    }, callback);
 };
 
 module.exports = {

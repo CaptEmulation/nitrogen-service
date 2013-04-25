@@ -1,4 +1,5 @@
-var azure = require('azure');
+var azure = require('azure'),
+    services = require('../../services');
 
 function AzureBlobProvider(config) {
     var azure_storage_account = config.azure_storage_account || process.env.AZURE_STORAGE_ACCOUNT;
@@ -16,7 +17,7 @@ function AzureBlobProvider(config) {
     this.azureBlobService.createContainerIfNotExists(
         "blobs",
         function(err) {
-            if (err) services.log.error("Azure Blob Provider: Not able to create/confirm blob container: " + error);
+            if (err) services.log.error("Azure Blob Provider: Not able to create/confirm blob container: " + err);
         }
     );
 }

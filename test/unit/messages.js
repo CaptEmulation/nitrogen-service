@@ -8,19 +8,39 @@ var app = require('../../server')
 
 describe('messages service', function() {
 
-    it('can create and delete a message', function(done) {
+    it('can create and removeOne a message', function(done) {
 
         var message = new models.Message({ from: fixtures.models.principals.device.id,
-                                           message_type: "_test" });
+            message_type: "_test" });
 
         services.messages.create(message, function(err, savedMessages) {
           assert.ifError(err);
           assert.notEqual(savedMessages[0].id, null);
 
-          services.messages.remove(services.principals.systemPrincipal, savedMessages[0], function(err) {
+          services.messages.removeOne(services.principals.systemPrincipal, savedMessages[0], function(err) {
             assert.equal(err, null);
             done();
           });
+        });
+    });
+
+    it('can remove messages with a query', function(done) {
+        var message = new models.Message({ from: fixtures.models.principals.device.id,
+            message_type: "_test" });
+
+        services.messages.create(message, function(err, savedMessages) {
+            assert.ifError(err);
+            assert.notEqual(savedMessages[0].id, null);
+
+            services.messages.remove(services.principals.systemPrincipal, { message_type: "_test" }, function(err) {
+                assert.equal(err, null);
+
+                services.messages.find(services.principals.systemPrincipal, { message_type: "_test" }, function(err, messages) {
+                    assert.equal(err, null);
+                    assert.equal(messages.length, 0);
+                    done();
+                });
+            });
         });
     });
 
