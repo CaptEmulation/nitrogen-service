@@ -1,6 +1,7 @@
 var async = require("async")
   , config = require('../config')
   , crypto = require("crypto")
+  , log = require('../log')
   , models = require("../models")
   , services = require("../services");
 
@@ -10,7 +11,7 @@ var authenticate = function(authBody, callback) {
     } else if (authBody.id && authBody.secret) {
         authenticateDevice(authBody.id, authBody.secret, callback);
     } else {
-        callback("Request body did not follow expected format.");
+        callback(400);
     }
 };
 
@@ -25,7 +26,7 @@ var authenticateUser = function(email, password, callback) {
             services.accessTokens.findOrCreateToken(principal, function(err, accessToken) {
                 if (err) return callback(err);
 
-                services.log.info("authenticated user principal: " + principal.id);
+                log.info("authenticated user principal: " + principal.id);
                 callback(null, principal, accessToken);
             });
         });
@@ -43,7 +44,7 @@ var authenticateDevice = function(principalId, secret, callback) {
             services.accessTokens.findOrCreateToken(principal, function(err, accessToken) {
                 if (err) return callback(err);
 
-                services.log.info("authenticated device principal: " + principal.id);
+                log.info("authenticated device principal: " + principal.id);
                 callback(null, principal, accessToken);
             });
         });
@@ -61,7 +62,7 @@ var create = function(principal, callback) {
             principal.save(function(err, principal) {
                 if (err) return callback(err);
 
-                services.log.info("created " + principal.principal_type + " principal: " + principal.id);
+                log.info("created " + principal.principal_type + " principal: " + principal.id);
                 var principal_json = JSON.stringify(principal);
 
                 services.realtime.publish('/principals', principal_json);
@@ -94,6 +95,8 @@ var createCredentials = function(principal, callback) {
 };
 
 var createSecretCredentials = function(principal, callback) {
+    if (!config.device_secret_bytes) return callback("config missing required device_secret_bytes element.");
+
     crypto.randomBytes(config.device_secret_bytes, function(err, secretBuf) {
         if (err) return callback(err, null);
 
@@ -178,7 +181,7 @@ var impersonate = function(principal, impersonatedPrincipalId, callback) {
         services.accessTokens.findOrCreateToken(impersonatedPrincipal, function(err, accessToken) {
             if (err) return callback(err, null);
 
-            services.log.info("impersonated device principal: " + impersonatedPrincipal.id);
+            log.info("impersonated device principal: " + impersonatedPrincipal.id);
             callback(null, impersonatedPrincipal, accessToken);
         });
     });
@@ -186,16 +189,20 @@ var impersonate = function(principal, impersonatedPrincipalId, callback) {
 
 var initialize = function(callback) {
 
-    find(services.principals.systemPrincipal, { principal_type: "system" }, {}, function(err, principals) {
+    // we don't use services find() here because it is a chicken and an egg visibility problem.
+    // we aren't system so we can't find system. :)
+
+    models.Principal.find({ principal_type: "system" }, null, {}, function(err, principals) {
         if (err) return callback(err);
 
-        services.log.info("found " + principals.length + " system principals");
+        log.info("found " + principals.length + " system principals");
 
         if (principals.length == 0) {
-            services.log.info("creating system principal");
+            log.info("creating system principal");
             var systemPrincipal = new models.Principal({ principal_type: "system" });
             create(systemPrincipal, function(err, systemPrincipal) {
-                services.log.info("system principal created: " + err);
+                if (err) return callback(err);
+
                 services.principals.systemPrincipal = systemPrincipal;
                 return callback(err);
             });
@@ -221,7 +228,7 @@ var updateLastConnection = function(principal, ip) {
         ipMessage.body.ip_address = ip;
 
         services.messages.create(ipMessage, function(err, message) {
-            if (err) services.log.info("creating ip message failed: " + err);
+            if (err) log.info("creating ip message failed: " + err);
         });
     }
 
@@ -245,7 +252,7 @@ var verifySecret = function(secret, principal, callback) {
     hashSecret(secret, function(err, hashedSecret) {
         if (err) return callback(err);
         if (hashedSecret != principal.secret_hash) {
-            services.log.info("verification of secret for principal: " + principal.id + " failed");
+            log.info("verification of secret for principal: " + principal.id + " failed");
             return callback(401);
         }
 

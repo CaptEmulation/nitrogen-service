@@ -1,4 +1,4 @@
-var config = require('../config')
+var config = require('./config')
   , Loggly = require('winston-loggly').Loggly
   , winston = require('winston');
 

@@ -4,13 +4,14 @@ var express = require('express')
   , config = require('./config')
   , controllers = require('./controllers')
   , faye = require('faye')
+  , log = require('./log')
   , middleware = require('./middleware')
   , models = require('./models')
   , mongoose = require('mongoose')
   , passport = require('passport')
   , services = require('./services');
 
-console.log("connecting to mongodb instance: " + config.mongodb_connection_string);
+log.info("connecting to mongodb instance: " + config.mongodb_connection_string);
 mongoose.connect(config.mongodb_connection_string);
 
 app.use(express.logger());
@@ -26,13 +27,13 @@ app.disable('x-powered-by');
 
 // only establish routing to endpoints when we have a connection to MongoDB.
 mongoose.connection.once('open', function () {
-    console.log("service connected to mongodb.");
+    log.info("service connected to mongodb.");
 
     services.initialize(function(err) {
-        if (err) return console.log("Nitrogen service failed to initialize: " + err);
-        if (!services.principals.systemPrincipal) return console.log("System principal not available after initialize.");
+        if (err) return log.error("service failed to initialize: " + err);
+        if (!services.principals.systemPrincipal) return log.error("system principal not available after initialize.");
 
-        console.log("service has initialized itself, exposing api at: " + config.base_url);
+        log.info("service has initialized itself, exposing api at: " + config.base_url);
 
         var port = process.env.PORT || config.http_port || 3030;
         var server = app.listen(port);
@@ -47,7 +48,7 @@ mongoose.connection.once('open', function () {
             app.get(config.api_prefix + 'v1/blobs/:id',  middleware.authenticateRequest, controllers.blobs.show);
             app.post(config.api_prefix + 'v1/blobs',     /*middleware.authenticateRequest,*/ controllers.blobs.create);
         } else {
-            console.log("WARNING: Not exposing blob endpoints because no blob provider is configured.");
+            log.warn("not exposing blob endpoints because no blob provider configured (see config.js).");
         }
 
         app.get(config.api_prefix + 'v1/ops/health',                                     controllers.ops.health);
@@ -67,16 +68,17 @@ mongoose.connection.once('open', function () {
 
         app.use(express.static(__dirname + '/static'));
 
+        log.info("service has initialized endpoints");
+
         // TODO: make starting this and API endpoint configurable to enable single vs. horizontally scaled deployments
         services.agents.start(config, function(err) {
-            console.log("agent service failed to start: " + err);
+            if (err) log.error("agent service failed to start: " + err);
+        });
+
+        mongoose.connection.on('error', function(err) {
+            log.error('mongodb error: ' + err);
         });
     });
 
 });
 
-if (process.env.NODE_ENV != "production") {
-    mongoose.connection.on('error', function(err) {
-        console.error('MongoDB error: %s', err);
-    });
-}

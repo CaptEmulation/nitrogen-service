@@ -1,6 +1,7 @@
 var bayeux = null
   , faye = require('faye')
-  , services = require("../services");
+  , log = require('../log')
+  , services = require('../services');
 
 var attach = function(server, config) {
     bayeux = new faye.NodeAdapter({
@@ -19,7 +20,7 @@ var attach = function(server, config) {
                     if (err) message.error = "Verification of access token failed";
                     if (!principal) message.error = "Access token is invalid";
 
-                    if (message.error) services.log.error("verification of access token failed: " + message.error);
+                    if (message.error) log.error("verification of access token failed: " + message.error);
 
                     // TODO: authorization for particular channel
 
@@ -31,7 +32,7 @@ var attach = function(server, config) {
 
     bayeux.attach(server);
 
-    services.log.info('listening for realtime connections on ' + config.path_prefix + config.realtime_path);
+    log.info('listening for realtime connections on ' + config.path_prefix + config.realtime_path);
 };
 
 var bind = function(event, f) {

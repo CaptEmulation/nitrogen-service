@@ -1,5 +1,6 @@
 var async = require('async')
   , fs = require('fs')
+  , log = require('../log')
   , models = require('../models')
   , nitrogen = require('nitrogen')
   , path = require('path')
@@ -44,7 +45,7 @@ var loadAgents = function(system, callback) {
                     callback();
                 });
             }, function (err) {
-                services.log.info("total agents: " + agents.length);
+                log.info("total agents: " + agents.length);
                 return callback(err, agents);
             });
 
@@ -102,7 +103,7 @@ var start = function(system, callback) {
         // TODO: use queuing to split agent execution between nodes to scale?
 
         execute(compiledAgents, function(err) {
-            if (err) services.log.error("agent execution failed with error: " + err);
+            if (err) log.error("agent execution failed with error: " + err);
         });
     });
 };
@@ -111,13 +112,15 @@ var execute = function(agents, callback) {
     // TODO: this limits us to 1 machine since each instance will load all agents.  break agents out to their own role type and then enable automatically dividing agents between instances of that role.
     async.each(agents, function(agent, callback) {
         var context = { async: async,
-                        log: services.log,
+                        log: log,
                         nitrogen: nitrogen,
                         session: agent.session,
                         setInterval: setInterval,
                         setTimeout: setTimeout };
 
         agent.compiledAction.runInNewContext(context);
+        log.info("Agent " + agent.name + " started.");
+
         callback();
     }, callback);
 };

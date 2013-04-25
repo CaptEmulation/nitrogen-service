@@ -14,10 +14,8 @@ exports.create = function(req, res) {
         callback(null, [message]);
     }, function (err, messages) {
         services.messages.createMany(messages, function(err, saved_messages) {
-            if (err)
-                res.send(400, err);
-            else
-                res.send({ "messages": saved_messages });
+            if (err) return res.send(err);
+            res.send({ "messages": saved_messages });
         });
     });
 };
@@ -27,7 +25,7 @@ exports.index = function(req, res) {
     var options = parseOptions(req);
 
     services.messages.find(req.user, query, options, function(err, messages) {
-        if (err) return res.send(400, err);
+        if (err) return res.send(err);
 
         res.send({ "messages": messages });
     });
@@ -67,7 +65,7 @@ exports.remove = function(req, res) {
 
 exports.show = function(req, res) {
     services.messages.findById(req.user, req.params.id, function(err, message) {
-        if (err) return res.send(400, err);
+        if (err) return res.send(err);
         if (!message) return res.send(404);
 
         res.send({ "message": message });

@@ -1,4 +1,5 @@
 var config = require('../config')
+  , log = require('../log')
   , models = require('../models')
   , services = require('../services');
 
@@ -23,7 +24,7 @@ var create = function(blob, stream, callback) {
         blob.save(function(err, blob) {
             if (err) return callback(err, null);
 
-            services.log.info('created blob with id: ' + blob._id);
+            log.info('created blob with id: ' + blob._id);
             callback(null, blob);
         });
 

@@ -1,5 +1,3 @@
-log.info("deviceMatching agent starting");
-
 function createIpMatchMessage(session, user, device, callback) {
     var matchMessage = new nitrogen.Message({ message_type: "ip_match" });
     matchMessage.from = device.id;
@@ -60,5 +58,3 @@ session.onMessage(function(message) {
     }
 
 });
-
-log.info("deviceMatching agent started");
