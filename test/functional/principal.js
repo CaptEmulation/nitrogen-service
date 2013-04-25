@@ -91,7 +91,8 @@ describe('principal endpoint', function() {
 	});
 
     it('should fetch only user principals', function(done) {
-        request.get({ url: config.principals_endpoint + "?principal_type=user",
+        request.get({ url: config.principals_endpoint,
+                      qs: { q: JSON.stringify({ principal_type: "user" }) },
                       headers: { Authorization: fixtures.models.accessTokens.device.toAuthHeader() },
                       json: true }, function(err, resp, body) {
             assert.equal(resp.statusCode, 200);

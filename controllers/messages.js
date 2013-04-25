@@ -2,7 +2,8 @@ var async = require('async')
   , config = require('../config')
   , faye = require('faye')
   , models = require('../models')
-  ,	services = require('../services');
+  ,	services = require('../services')
+  , utils = require('../utils');
 
 exports.create = function(req, res) {
     async.concat(req.body, function(message_object, callback) {
@@ -21,8 +22,10 @@ exports.create = function(req, res) {
 };
 
 exports.index = function(req, res) {
-    var query = parseQuery(req);
-    var options = parseOptions(req);
+    var query = utils.parseQuery(req);
+    var options = utils.parseOptions(req);
+
+    if (!options.sort) options.sort = { timestamp: -1 };
 
     services.messages.find(req.user, query, options, function(err, messages) {
         if (err) return res.send(err);
@@ -31,30 +34,8 @@ exports.index = function(req, res) {
     });
 };
 
-var parseQuery = function(req) {
-    var query = {};
-    if (req.query.q) {
-        query = JSON.parse(req.query.q);
-    }
-
-    return query;
-};
-
-var parseOptions = function(req) {
-    var options = {};
-
-    if (req.query.options) {
-        options = JSON.parse(req.query.options);
-    }
-
-    if (!options.limit || options.limit > 1000) options.limit = 1000;
-    if (!options.sort) options.sort = { timestamp: -1 };
-
-    return options;
-}
-
 exports.remove = function(req, res) {
-    var query = parseQuery(req);
+    var query = utils.parseQuery(req);
 
     services.messages.remove(req.user, query, function(err, removed) {
         if (err) return res.send(err);

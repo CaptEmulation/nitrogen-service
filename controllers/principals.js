@@ -48,7 +48,12 @@ exports.impersonate = function(req, res) {
 };
 
 exports.index = function(req, res) {
-    services.principals.find(req.user, req.query, { sort: { last_connection: -1 } }, function (err, principals) {
+    var query = utils.parseQuery(req);
+    var options = utils.parseOptions(req);
+
+    if (!options.sort) options.sort = { last_connection: -1 };
+
+    services.principals.find(req.user, query, options, function (err, principals) {
 		if (err) return res.send(400, err);
 
 		res.send({"principals": principals});
