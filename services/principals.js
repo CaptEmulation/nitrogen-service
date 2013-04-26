@@ -54,7 +54,7 @@ var authenticateDevice = function(principalId, secret, callback) {
 var create = function(principal, callback) {
     checkForExistingPrincipal(principal, function(err, foundPrincipal) {
         if (err) return callback(err);
-        if (foundPrincipal) return callback("Principal already exists");
+        if (foundPrincipal) return callback(400);
 
         createCredentials(principal, function(err, principal) {
             if (err) return callback(err);
@@ -175,11 +175,11 @@ var impersonate = function(principal, impersonatedPrincipalId, callback) {
     if (principal.principal_type != "system" && principal.id != impersonatedPrincipalId) return callback(401);
 
     findById(services.principals.systemPrincipal, impersonatedPrincipalId, function(err, impersonatedPrincipal) {
-        if (err) return callback(err, null);
-        if (!impersonatedPrincipal) return callback(404, null);
+        if (err) return callback(err);
+        if (!impersonatedPrincipal) return callback(401);
 
         services.accessTokens.findOrCreateToken(impersonatedPrincipal, function(err, accessToken) {
-            if (err) return callback(err, null);
+            if (err) return callback(err);
 
             log.info("impersonated device principal: " + impersonatedPrincipal.id);
             callback(null, impersonatedPrincipal, accessToken);

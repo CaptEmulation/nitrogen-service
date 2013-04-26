@@ -9,7 +9,7 @@ var sendAuthResponse = function(res, principal, accessToken) {
 
 exports.authenticate = function(req, res) {
     services.principals.authenticate(req.body, function (err, principal, accessToken) {
-        if (err) return res.send(400, err);
+        if (err) return utils.handleError(res, err);
 
         services.principals.updateLastConnection(principal, utils.ipFromRequest(req));
 
@@ -22,10 +22,10 @@ exports.create = function(req, res) {
 	principal.last_ip = utils.ipFromRequest(req);
 
 	services.principals.create(principal, function(err, principal) {
-		if (err) return res.send(400, err);
+		if (err) return utils.handleError(res, err);
 
         services.accessTokens.create(principal, function(err, accessToken) {
-            if (err) res.send(400, err);
+            if (err) return utils.handleError(res, err);
 
             var principalJSON = principal.toObject();
 
@@ -41,7 +41,7 @@ exports.create = function(req, res) {
 
 exports.impersonate = function(req, res) {
     services.principals.impersonate(req.user, req.body.id, function (err, impersonatedPrincipal, accessToken) {
-        if (err) return res.send(400, err);
+        if (err) return utils.handleError(res, err);
 
         sendAuthResponse(res, impersonatedPrincipal, accessToken);
     });
@@ -54,17 +54,17 @@ exports.index = function(req, res) {
     if (!options.sort) options.sort = { last_connection: -1 };
 
     services.principals.find(req.user, query, options, function (err, principals) {
-		if (err) return res.send(400, err);
+        if (err) return utils.handleError(res, err);
 
-		res.send({"principals": principals});
+		res.send({ principals: principals });
 	});
 };
 
 exports.show = function(req, res) {
 	services.principals.findById(req.user, req.params.id, function (err, principal) {
-		if (err) return res.send(400, err);
-		if (!principal) return res.send(404);
+		if (err) return utils.handleError(res, err);
+		if (!principal) return utils.sendFailedResponse(res, 403, "Can't show requested principal.");
 
-		res.send({"principal": principal});
+		res.send({ principal: principal });
 	});
 };

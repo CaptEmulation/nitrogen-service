@@ -73,11 +73,10 @@ describe('messages endpoint', function() {
     });
 
     it ('delete should be only accessible to system principal', function(done) {
-        request.del({ url: config.messages_endpoint,
-                json: { id: fixtures.models.messages.deviceIp.id },
-                headers: { Authorization: fixtures.models.accessTokens.device.toAuthHeader() } },
-
-            function(del_err, del_resp, del_body) {
+        var query = encodeURIComponent(JSON.stringify({ "_id" : fixtures.models.messages.deviceIp.id }));
+        request.del({ url: config.messages_endpoint + "?q=" + query,
+                      json: true,
+                      headers: { Authorization: fixtures.models.accessTokens.device.toAuthHeader() } }, function(del_err, del_resp, del_body) {
 
                 assert.equal(del_err, null);
                 assert.equal(del_resp.statusCode, 403);
@@ -145,8 +144,9 @@ describe('messages endpoint', function() {
 		                assert.equal(get_body.message.body.reading, 5.1);
 		                assert.notEqual(get_body.message.created_at, 5.1);
 
-                        request.del({ url: config.messages_endpoint,
-                                      json: { id: message_id },
+                        var query = encodeURIComponent(JSON.stringify({ "_id" : message_id }));
+                        request.del({ url: config.messages_endpoint + "?q=" + query,
+                                      json: true,
                                       headers: { Authorization: fixtures.models.accessTokens.system.toAuthHeader() } },
                             function(del_err, del_resp, del_body) {
 

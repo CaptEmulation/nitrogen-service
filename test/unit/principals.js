@@ -86,7 +86,7 @@ describe('principals service', function() {
                                           password: fixtures.models.principals.user.password });
 
         services.principals.create(user, function(err, user) {
-            assert.equal(!!err, true);
+            assert.equal(!err, false);
             done();
         });
     });
