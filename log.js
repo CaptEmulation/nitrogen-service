@@ -9,7 +9,7 @@ if (config.loggly) {
 }
 
 if (process.env.NODE_ENV != "production") {
-    log.add(winston.transports.Console);
+    log.add(winston.transports.Console, { colorize: true, timestamp: true });
 }
 
 module.exports = log;

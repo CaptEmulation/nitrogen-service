@@ -112,6 +112,7 @@ var execute = function(agents, callback) {
     // TODO: this limits us to 1 machine since each instance will load all agents.  break agents out to their own role type and then enable automatically dividing agents between instances of that role.
     async.each(agents, function(agent, callback) {
         var context = { async: async,
+                        cron: cron,
                         log: log,
                         nitrogen: nitrogen,
                         session: agent.session,

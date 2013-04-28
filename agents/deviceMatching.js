@@ -1,7 +1,8 @@
 function createIpMatchMessage(session, user, device, callback) {
-    var matchMessage = new nitrogen.Message({ message_type: "ip_match" });
-    matchMessage.from = device.id;
-    matchMessage.to = user.id;
+    var matchMessage = new nitrogen.Message({ message_type: "ip_match",
+                                              from: device.id,
+                                              to: user.id
+    });
 
     matchMessage.save(session, callback);
 }
