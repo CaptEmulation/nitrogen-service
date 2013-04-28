@@ -4,7 +4,13 @@ function createIpMatchMessage(session, user, device, callback) {
                                               to: user.id
     });
 
-    matchMessage.save(session, callback);
+    crypto.randomBytes(10, function(err, secretBuf) {
+        if (err) return callback(err, null);
+
+        matchMessage.body.key = secretBuf.toString('base64');
+
+        matchMessage.save(session, callback);
+    });
 }
 
 function completionCallback(err) {

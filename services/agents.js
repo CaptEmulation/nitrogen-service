@@ -1,4 +1,6 @@
 var async = require('async')
+  , cron = require('cron')
+  , crypto = require('crypto')
   , fs = require('fs')
   , log = require('../log')
   , models = require('../models')
@@ -113,6 +115,7 @@ var execute = function(agents, callback) {
     async.each(agents, function(agent, callback) {
         var context = { async: async,
                         cron: cron,
+                        crypto: crypto,
                         log: log,
                         nitrogen: nitrogen,
                         session: agent.session,
