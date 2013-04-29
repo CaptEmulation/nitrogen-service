@@ -15,6 +15,4 @@ setInterval(function() {
         log.info("janitor removed " + removed + " messages");
     });
 
-}, 10 * 1000);
-
-log.info("janitor agent started");
+}, 61 * 1000);
