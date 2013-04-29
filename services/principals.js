@@ -52,22 +52,26 @@ var authenticateDevice = function(principalId, secret, callback) {
 };
 
 var create = function(principal, callback) {
-    checkForExistingPrincipal(principal, function(err, foundPrincipal) {
+    validate(principal, function(err) {
         if (err) return callback(err);
-        if (foundPrincipal) return callback(400);
 
-        createCredentials(principal, function(err, principal) {
+        checkForExistingPrincipal(principal, function(err, foundPrincipal) {
             if (err) return callback(err);
+            if (foundPrincipal) return callback(400);
 
-            principal.save(function(err, principal) {
+            createCredentials(principal, function(err, principal) {
                 if (err) return callback(err);
 
-                log.info("created " + principal.principal_type + " principal: " + principal.id);
-                var principal_json = JSON.stringify(principal);
+                principal.save(function(err, principal) {
+                    if (err) return callback(err);
 
-                services.realtime.publish('/principals', principal_json);
+                    log.info("created " + principal.principal_type + " principal: " + principal.id);
+                    var principal_json = JSON.stringify(principal);
 
-                callback(null, principal);
+                    services.realtime.publish('/principals', principal_json);
+
+                    callback(null, principal);
+                });
             });
         });
     });
@@ -85,9 +89,6 @@ var checkForExistingPrincipal = function(principal, callback) {
 
 var createCredentials = function(principal, callback) {
     if (principal.isUser()) {
-        if (!principal.email) return callback("user principal must have email");
-        if (!principal.password) return callback("user principal must have password");
-
         createUserCredentials(principal, callback);
     } else {
         createSecretCredentials(principal, callback);
@@ -235,7 +236,19 @@ var updateLastConnection = function(principal, ip) {
     principal.last_connection = new Date();
 
     services.principals.update(principal);
-}
+};
+
+var validate = function(principal, callback) {
+    if (principal.principal_type !== "device" && principal.principal_type !== "user" && principal.principal_type !== "system")
+        return callback("Principal type must be one of device, user, or system.");
+
+    if (principal.isUser()) {
+        if (!principal.email) return callback("user principal must have email");
+        if (!principal.password) return callback("user principal must have password");        
+    }
+
+    callback(null);
+};
 
 var verifyPassword = function(password, user, callback) {
     var saltBuf = new Buffer(user.salt, 'base64');
