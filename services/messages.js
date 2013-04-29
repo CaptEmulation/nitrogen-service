@@ -128,14 +128,25 @@ var validate = function(message, callback) {
         return callback("Message must have a message type.");
 
     // TODO: do validation of message_type values if they are not custom prefixed
+    if (!message.message_type in ["claim", "heartbeat", "image", "ip_match", "reject"] && !message_message_type[0] === "_") {
+        return callback("Message type not recognized.  Custom message types must be prefixed by _");
+    }
+
     // TODO: schema validation of messages
-
-    services.principals.findById(services.principals.systemPrincipal, message.from, function(err, principal) {
+    validateSchema(message, function(err) {
         if (err) return callback(err);
-        if (!principal) return callback("Message must have an existing from principal.");
 
-        callback(null);
+        services.principals.findById(services.principals.systemPrincipal, message.from, function(err, principal) {
+            if (err) return callback(err);
+            if (!principal) return callback("Message must have an existing from principal.");
+
+            callback(null);
+        });
     });
+};
+
+var validateSchema = function(message, callback) {
+    callback(null);
 };
 
 var validateAll = function(messages, callback) {
