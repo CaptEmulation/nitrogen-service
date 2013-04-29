@@ -1,14 +1,20 @@
 var async = require('async')
   , log = require('../log')
   , models = require('../models')
-  , services = require('../services');
+  , services = require('../services')
+  , utils = require('../utils');
 
 var create = function(message, callback) {
     if (!message.expires) {
-        var defaultExpirationDate = new Date();
-        defaultExpirationDate.setDate(new Date().getDate() + 30);
+        message.expires = utils.dateDaysFromNow(5);
+    }
 
-        message.expires = defaultExpirationDate;
+    if (message.expires === 'never') {
+        message.expires = null;
+    }
+
+    if (message.to === 'system') {
+        message.to = services.principals.systemPrincipal.id;
     }
 
     validate(message, function(err) {
@@ -52,14 +58,13 @@ var createMany = function(messages, callback) {
 var filterForPrincipal = function(principal, filter) {
     if (principal && principal.isSystem()) return filter;
 
-    var visibilityFilter = [ { public: true }];
+    var visibilityFilter = [ { public: true } ];
     if (principal) {
         visibilityFilter.push( { visible_to: principal._id } );
     }
 
     filter["$or"] = visibilityFilter;
     return filter;
-
 };
 
 var find = function(principal, filter, options, callback) {
@@ -83,10 +88,11 @@ var remove = function(principal, query, callback) {
     // TODO: will need more complicated authorization mechanism for non system users.
     if (!principal || !principal.isSystem()) return callback(403);
 
-    models.Message.find(principal, query, function (err, messages) {
-        // delete linked resources.
+    models.Message.find(filterForPrincipal(principal, query), function (err, messages) {
+
+        // delete linked resources and then the message itself.
         // TODO: what is an appropriate max parallelism here.
-        async.eachLimit(messages, 20, removeLinkedResources, function(err) {
+        async.eachLimit(messages, 50, removeLinkedResources, function(err) {
             if (err) return callback(err);
 
             models.Message.remove(query, callback);
@@ -95,11 +101,9 @@ var remove = function(principal, query, callback) {
 };
 
 var removeLinkedResources = function(message, callback) {
-    if (message.link) {
-        services.blobs.remove(principal, { link: message.link }, callback);
-    } else {
-        callback();
-    }
+    if (!message.link) return callback();
+
+    services.blobs.remove(services.principals.systemPrincipal, { link: message.link }, callback);
 };
 
 var removeOne = function(principal, message, callback) {

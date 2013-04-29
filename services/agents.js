@@ -113,6 +113,9 @@ var start = function(system, callback) {
 var execute = function(agents, callback) {
     // TODO: this limits us to 1 machine since each instance will load all agents.  break agents out to their own role type and then enable automatically dividing agents between instances of that role.
     async.each(agents, function(agent, callback) {
+
+        // TODO: should some of these only be available to system agents?
+
         var context = { async: async,
                         cron: cron,
                         crypto: crypto,

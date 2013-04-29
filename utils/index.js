@@ -1,3 +1,10 @@
+var dateDaysFromNow = function(days) {
+    var date = new Date();
+    date.setDate(new Date().getDate() + days);
+
+    return date;
+};
+
 var ipFromRequest = function(req) {
     var ipParts = req.ip.split(":");
     if (ipParts.length)
@@ -43,6 +50,7 @@ var stringEndsWith = function(s, suffix) {
 };
 
 module.exports = {
+    dateDaysFromNow: dateDaysFromNow,
     ipFromRequest: ipFromRequest,
     parseQuery: parseQuery,
     parseOptions: parseOptions,
