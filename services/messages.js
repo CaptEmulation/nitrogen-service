@@ -23,6 +23,9 @@ var create = function(message, callback) {
         message.visible_to = [message.from];
         if (message.to) message.visible_to.push(message.to);
 
+        if (message.message_type === "log") 
+            log.log(message.body.severity, message.body.message, { principal: message.from.toString() });
+
         message.save(function(err, message) {
             if (err) return callback(err);
 

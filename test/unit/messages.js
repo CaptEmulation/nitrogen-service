@@ -72,4 +72,20 @@ describe('messages service', function() {
         });
     });
 
+    it ('handles log message by creating log entry', function(done) {
+        var message = new models.Message({
+            from: fixtures.models.principals.device.id,
+            message_type: "log",
+            body: {
+                severity: "error",
+                message: "something terrible happened"
+            }
+        });
+
+        services.messages.create(message, function(err, savedMessages) {
+            assert.equal(err, null);
+            done();
+        });
+    });
+
 });
