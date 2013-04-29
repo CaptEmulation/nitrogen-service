@@ -9,6 +9,7 @@ var create = function(message, callback) {
         message.expires = utils.dateDaysFromNow(5);
     }
 
+    // map special case constants 
     if (message.expires === 'never') {
         message.expires = null;
     }

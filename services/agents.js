@@ -111,7 +111,11 @@ var start = function(system, callback) {
 };
 
 var execute = function(agents, callback) {
-    // TODO: this limits us to 1 machine since each instance will load all agents.  break agents out to their own role type and then enable automatically dividing agents between instances of that role.
+
+    // TODO: this limits us to 1 machine since each instance will load all agents.
+    // Break agents out to their own role type and then enable automatically dividing
+    // agents between instances of that role.
+
     async.each(agents, function(agent, callback) {
 
         // TODO: should some of these only be available to system agents?
@@ -125,8 +129,12 @@ var execute = function(agents, callback) {
                         setInterval: setInterval,
                         setTimeout: setTimeout };
 
-        agent.compiledAction.runInNewContext(context);
-        log.info("Agent " + agent.name + " started.");
+        try {
+            agent.compiledAction.runInNewContext(context);
+            log.info("Agent " + agent.name + " started.");
+        } catch (e) {
+            log.error("Agent" + agent.name + " quit after throwing exception: " + e.toString());
+        }
 
         callback();
     }, callback);
