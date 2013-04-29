@@ -2,6 +2,7 @@ var async = require('async')
   , config = require('../config')
   , log = require('../log')
   , models = require('../models')
+  , mongoose = require('mongoose')
   , services = require('../services');
 
 var create = function(blob, stream, callback) {
@@ -10,6 +11,8 @@ var create = function(blob, stream, callback) {
 
     config.blob_provider.create(blob, stream, function(err) {
         if (err) return callback(err, null);
+
+        blob.link = mongoose.Schema.Types.ObjectId();
 
         blob.save(function(err, blob) {
             if (err) return callback(err, null);
