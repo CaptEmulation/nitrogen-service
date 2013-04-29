@@ -1,19 +1,21 @@
 function createIpMatchMessage(session, user, device, callback) {
-    log.info("deviceMatch: creating ip_match message for device: " + device.id);
+    nitrogen.Message.find(session, { 
+        from: user.id,
+        to: session.principal.id,
+        message_type: "reject" 
+    }, function(err, messages) {
+        if (err) return callback(err);
+        if (messages.length > 0) return callback(null, null);
 
-    // ip match messages should be only visible to the device and the user
-    // so that only the user can claim the device.
-    var matchMessage = new nitrogen.Message({ message_type: "ip_match",
-                                              from: device.id,
-                                              to: user.id,
-                                              public: false
-    });
+        log.info("deviceMatch: creating ip_match message for device: " + device.id);
 
-    var IPMATCH_KEY_BYTES = 10;
-    crypto.randomBytes(IPMATCH_KEY_BYTES, function(err, secretBuf) {
-        if (err) return callback(err, null);
-
-        matchMessage.body.key = secretBuf.toString('base64');
+        // ip match messages should be only visible to the device and the user
+        // so that only the user can claim the device.
+        var matchMessage = new nitrogen.Message({ message_type: "ip_match",
+                                                  from: device.id,
+                                                  to: user.id,
+                                                  public: false
+        });
 
         matchMessage.save(session, callback);
     });

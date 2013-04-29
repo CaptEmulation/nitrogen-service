@@ -1,11 +1,8 @@
-log.info("janitor agent starting");
-
 setInterval(function() {
 
     log.info("janitor agent running");
 
     var expiredMessagesQuery = { expires: { $lt: new Date() } };
-    log.info("expired query: " + JSON.stringify(expiredMessagesQuery));
 
     // Nitrogen service will automatically remove linked resources (eg. blobs).
 

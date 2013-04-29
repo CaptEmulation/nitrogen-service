@@ -5,31 +5,30 @@ session.onMessage(function(message) {
         nitrogen.Message.find(session, { _id: message.response_to }, function(err, ipMatches) {
 
             if (err || ipMatches.length == 0) {
-                log.error("claimAgent: couldn't find ip_match claim was in response to: " + err);
+                log.error("claimAgent: couldn't find ip_match claim was in response to, ignoring request.");
                 return;
             }
 
-            // should only be one
-            ipMatches.forEach(function(ipMatch) {
-                if (ipMatch.body.key !== message.body.key) {
-                    log.error("claimAgent: key does not match ip match message, ignoring.");
+            var ipMatch = ipMatches[0];
+
+            if (ipMatch.to !== message.from) {
+                log.error("claimAgent: user trying to claim principal does not match ip match message, ignoring.");
+                return;
+            }
+
+            nitrogen.Message.find(session, { _id: message.body.principal }, function(err, claimedPrincipal) {
+                if (err || !claimedPrincipal) {
+                    log.error("claimAgent: couldn't find message claim was in response to: " + err);
                     return;
                 }
 
-                nitrogen.Message.find(session, { _id: message.body.principal }, function(err, claimedPrincipal) {
-                    if (err || !claimedPrincipal) {
-                        log.error("claimAgent: couldn't find message claim was in response to: " + err);
-                        return;
-                    }
+                if (claimedPrincipal.owner) {
+                    log.warn("claimAgent: principal " + claimPrincipal.id + " is already owned by " + claimPrincipal.owner + ": ignoring claim request.");
+                    return;
+                }
 
-                    if (claimedPrincipal.owner) {
-                        log.warn("claimAgent: principal " + claimPrincipal.id + " is already owned by " + claimPrincipal.owner + ": ignoring claim request.");
-                        return;
-                    }
-
-                    claimedPrincipal.owner = message.from;
-                    claimedPrincipal.save(session);
-                });
+                claimedPrincipal.owner = message.from;
+                claimedPrincipal.save(session);
             });
         });
     }

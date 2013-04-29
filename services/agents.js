@@ -1,6 +1,5 @@
 var async = require('async')
   , cron = require('cron')
-  , crypto = require('crypto')
   , fs = require('fs')
   , log = require('../log')
   , models = require('../models')
@@ -117,12 +116,9 @@ var execute = function(agents, callback) {
     // agents between instances of that role.
 
     async.each(agents, function(agent, callback) {
-
-        // TODO: should some of these only be available to system agents?
-
+        
         var context = { async: async,
                         cron: cron,
-                        crypto: crypto,
                         log: log,
                         nitrogen: nitrogen,
                         session: agent.session,
