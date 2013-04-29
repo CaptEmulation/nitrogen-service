@@ -1,23 +1,36 @@
 function createIpMatchMessage(session, user, device, callback) {
     nitrogen.Message.find(session, { 
         from: user.id,
-        to: session.principal.id,
-        message_type: "reject" 
+        message_type: "reject",
+        body: { principal: device.id } 
     }, function(err, messages) {
         if (err) return callback(err);
-        if (messages.length > 0) return callback(null, null);
+        if (messages.length > 0) {
+            log.info("deviceMatch: reject message exists for user: " + user.id + " and device: " + device.id + " not creating ip_match");
+            return callback(null, null);
+        }
 
-        log.info("deviceMatch: creating ip_match message for device: " + device.id);
+        nitrogen.Message.find(session, { 
+            from: device.id,
+            message_type: "ip_match"
+        }, function(err, messages) {
+            if (err) return callback(err);
+            if (messages.length > 0) {
+                log.info("deviceMatch: ip_match message exists for device: " + device.id + " not creating ip_match");
+                return callback(null, null);
+            }
 
-        // ip match messages should be only visible to the device and the user
-        // so that only the user can claim the device.
-        var matchMessage = new nitrogen.Message({ message_type: "ip_match",
-                                                  from: device.id,
-                                                  to: user.id,
-                                                  public: false
+
+            log.info("deviceMatch: creating ip_match message for device: " + device.id);
+
+            var matchMessage = new nitrogen.Message({ 
+                message_type: "ip_match",                                                
+                from: device.id,
+                to: user.id
+            });
+
+            matchMessage.save(session, callback);
         });
-
-        matchMessage.save(session, callback);
     });
 }
 
