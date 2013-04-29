@@ -1,10 +1,16 @@
 function createIpMatchMessage(session, user, device, callback) {
+    log.info("deviceMatch: creating ip_match message for device: " + device.id);
+
+    // ip match messages should be only visible to the device and the user
+    // so that only the user can claim the device.
     var matchMessage = new nitrogen.Message({ message_type: "ip_match",
                                               from: device.id,
-                                              to: user.id
+                                              to: user.id,
+                                              public: false
     });
 
-    crypto.randomBytes(10, function(err, secretBuf) {
+    var IPMATCH_KEY_BYTES = 10;
+    crypto.randomBytes(IPMATCH_KEY_BYTES, function(err, secretBuf) {
         if (err) return callback(err, null);
 
         matchMessage.body.key = secretBuf.toString('base64');
@@ -20,7 +26,7 @@ function completionCallback(err) {
 session.onMessage(function(message) {
 
     if (message.message_type == "ip") {
-        log.info("deviceMatching agent processing ip message");
+        log.info("deviceMatch: agent processing ip message");
 
         nitrogen.Principal.find(session, { last_ip: message.body.ip_address }, function(err, principalsAtIp) {
             var devices = [];
@@ -33,12 +39,12 @@ session.onMessage(function(message) {
                     devices.push(principal);
             });
 
-            log.info("users length: " + users.length + " devices length: " + devices.length);
+            log.info("deviceMatch: users length: " + users.length + " devices length: " + devices.length);
 
             if (users.length != 1) return;  /* don't match devices if more than one (or no) user at this IP address. */
 
             nitrogen.Principal.find(session, { _id: message.from }, function(err, fromPrincipals) {
-                if (err) return log.error("deviceMatch didn't find principal: " + err);
+                if (err) return log.error("deviceMatch: didn't find principal: " + err);
 
                 var fromPrincipal = fromPrincipals[0];
 
@@ -48,14 +54,12 @@ session.onMessage(function(message) {
                     /* for each device at this IP address that is not currently owned by a principal, emit an ip_match message. */
                     var user = fromPrincipal;
                     async.each(devices, function(device, callback) {
-                       log.info("creating ip_match message for device: " + device.id);
                        if (!device.owner) createIpMatchMessage(session, user, device, callback);
                     }, completionCallback);
 
                 } else {
                     /* create an ip_match message for this device. */
                     var device = fromPrincipal;
-                    log.info("creating ip_match message for device: " + device.id);
                     if (!device.owner) createIpMatchMessage(session, users[0], device, completionCallback);
                 }
 
