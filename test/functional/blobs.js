@@ -27,6 +27,7 @@ if (config.blob_provider) {
                                 assert.equal(resp.statusCode, 200);
                                 assert.equal(body_json.blob._id, undefined);
                                 assert.notEqual(body_json.blob.id, undefined);
+                                assert.notEqual(body_json.blob.link, undefined);
 
                                 var blob_url = config.blobs_endpoint + '/' + body_json.blob.id;
 

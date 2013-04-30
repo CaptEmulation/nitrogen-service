@@ -12,7 +12,7 @@ var create = function(blob, stream, callback) {
     config.blob_provider.create(blob, stream, function(err) {
         if (err) return callback(err, null);
 
-        blob.link = mongoose.Schema.Types.ObjectId();
+        blob.link = new mongoose.Types.ObjectId;
 
         blob.save(function(err, blob) {
             if (err) return callback(err, null);
