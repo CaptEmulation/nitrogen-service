@@ -20,7 +20,6 @@ function createIpMatchMessage(session, user, device, callback) {
                 return callback(null, null);
             }
 
-
             log.info("deviceMatch: creating ip_match message for device: " + device.id);
 
             var matchMessage = new nitrogen.Message({ 
@@ -41,8 +40,7 @@ function completionCallback(err) {
 }
 
 session.onMessage(function(message) {
-
-    if (message.message_type == "ip") {
+    if (message.is('ip')) {
         log.info("deviceMatch: agent processing ip message");
 
         nitrogen.Principal.find(session, { last_ip: message.body.ip_address }, function(err, principalsAtIp) {
@@ -50,6 +48,8 @@ session.onMessage(function(message) {
             var users = [];
 
             principalsAtIp.forEach(function(principal) {
+                log.info("deviceMatch: principal at ip: " + principal.principal_type + ":" + principal.id);
+
                 if (principal.isUser())
                     users.push(principal);
                 else if (principal.isDevice())

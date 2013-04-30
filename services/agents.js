@@ -74,8 +74,14 @@ var prepareAgents = function(session, agents, callback) {
         agent.compiledAction = vm.createScript(agent.action);
 
         session.impersonate(agent.execute_as, function(err, impersonatedSession) {
+            if (err || !impersonatedSession) {
+
+                log.error("failed to impersonate agent session, skipping agent: " + agent.name + ":" + agent.id);
+                return callback(null, null);
+            }
+
             agent.session = impersonatedSession;
-            callback(err, agent);
+            callback(null, agent);
         });
     }, callback);
 };
