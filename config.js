@@ -1,4 +1,7 @@
-var providers = require('./providers');
+var log = require('./log')
+  , Loggly = require('winston-loggly').Loggly
+  , providers = require('./providers')
+  , winston = require('winston');
 
 var config = null;
 
@@ -57,14 +60,18 @@ if (process.env.AZURE_STORAGE_ACCOUNT && process.env.AZURE_STORAGE_KEY) {
 }
 
 if (process.env.LOGGLY_SUBDOMAIN && process.env.LOGGLY_INPUT_TOKEN && process.env.LOGGLY_USERNAME && process.env.LOGGLY_PASSWORD) {
-    config.loggly = {
+    log.add(winston.transports.Loggly, {
         "subdomain": process.env.LOGGLY_SUBDOMAIN,
         "inputToken": process.env.LOGGLY_INPUT_TOKEN,
         "auth": {
             "username": process.env.LOGGLY_USERNAME,
             "password": process.env.LOGGLY_PASSWORD
         }
-    }
+    });
+}
+
+if (process.env.NODE_ENV != "production") {
+    log.add(winston.transports.Console, { colorize: true, timestamp: true });
 }
 
 module.exports = config;
