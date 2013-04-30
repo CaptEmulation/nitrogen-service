@@ -2,7 +2,7 @@
 	"title": "image",
 	"type": "object",
 	"properties": {
-		"image": {
+		"url": {
 			"type": "string",
 			"required": true
 		}
