@@ -1,0 +1,10 @@
+{
+	"title": "claim",
+	"type": "object",
+	"properties": {
+		"principal": {
+			"type": "string",
+			"required": true
+		}
+	}
+}

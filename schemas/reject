@@ -1,0 +1,10 @@
+{
+	"title": "reject",
+	"type": "object",
+	"properties": {
+		"principal": {
+			"type": "string",
+			"required": true
+		}
+	}
+}

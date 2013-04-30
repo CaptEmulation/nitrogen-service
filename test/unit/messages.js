@@ -88,4 +88,20 @@ describe('messages service', function() {
         });
     });
 
+    it ('flunks incorrect schema for log message', function(done) {
+        var message = new models.Message({
+            from: fixtures.models.principals.device.id,
+            message_type: "log",
+            body: {
+                notright: "error",
+                message: "something terrible happened"
+            }
+        });
+
+        services.messages.create(message, function(err, savedMessages) {
+            assert.notEqual(err, null);
+            done();
+        });
+    });
+
 });

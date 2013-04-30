@@ -1,0 +1,10 @@
+{
+	"title": "ip_match",
+	"type": "object",
+	"properties": {
+		"principal": {
+			"type": "string",
+			"required": true
+		}
+	}
+}

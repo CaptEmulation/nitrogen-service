@@ -16,6 +16,7 @@
     "passport": "0.1.x",
     "passport-http-bearer": "0.2.x",
     "request": "2.x",
+    "revalidator": "0.1.x",
     "winston": "0.7.x",
     "winston-loggly": "0.6.x"
   },

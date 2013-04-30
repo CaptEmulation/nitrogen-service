@@ -38,4 +38,12 @@ messageSchema.set('toJSON', { transform: BaseSchema.baseObjectTransform });
 
 var Message = mongoose.model('Message', messageSchema);
 
+Message.prototype.isCustomType = function() {
+    return this.message_type[0] == "_";
+};
+
+Message.prototype.is = function(type) {
+    return this.message_type == type;
+};
+
 module.exports = Message;

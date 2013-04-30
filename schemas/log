@@ -1,0 +1,14 @@
+{
+	"title": "log",
+	"type": "object",
+	"properties": {
+		"severity": {
+			"type": "string",
+			"required": true
+		},
+		"message": {
+			"type": "string",
+			"required": true
+		}
+	}
+}

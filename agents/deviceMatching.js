@@ -10,9 +10,9 @@ function createIpMatchMessage(session, user, device, callback) {
             return callback(null, null);
         }
 
-        nitrogen.Message.find(session, { 
-            from: device.id,
-            message_type: "ip_match"
+        nitrogen.Message.find(session, {
+            message_type: "ip_match",
+            body: { principal: device.id }
         }, function(err, messages) {
             if (err) return callback(err);
             if (messages.length > 0) {
@@ -25,8 +25,10 @@ function createIpMatchMessage(session, user, device, callback) {
 
             var matchMessage = new nitrogen.Message({ 
                 message_type: "ip_match",                                                
-                from: device.id,
-                to: user.id
+                to: user.id,
+                body: {
+                    principal: device.id
+                }
             });
 
             matchMessage.save(session, callback);

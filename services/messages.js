@@ -1,6 +1,8 @@
 var async = require('async')
+  , fs = require('fs')
   , log = require('../log')
   , models = require('../models')
+  , revalidator = require('revalidator')
   , services = require('../services')
   , utils = require('../utils');
 
@@ -128,13 +130,14 @@ var validate = function(message, callback) {
         return callback("Message must have a message type.");
 
     // TODO: do validation of message_type values if they are not custom prefixed
-    if (!message.message_type in ["claim", "heartbeat", "image", "ip_match", "reject"] && !message_message_type[0] === "_") {
+    if (!message.message_type in ["claim", "heartbeat", "image", "ip_match", "reject"] && !message.isCustomType()) {
         return callback("Message type not recognized.  Custom message types must be prefixed by _");
     }
 
     // TODO: schema validation of messages
-    validateSchema(message, function(err) {
+    validateSchema(message, function(err, result) {
         if (err) return callback(err);
+        if (!result.valid) return callback(result.errors);
 
         services.principals.findById(services.principals.systemPrincipal, message.from, function(err, principal) {
             if (err) return callback(err);
@@ -145,8 +148,24 @@ var validate = function(message, callback) {
     });
 };
 
+var loadSchema = function(type, callback) {
+    var schemaPath = "./schemas/" + type;
+    fs.readFile(schemaPath, function (err, schemaText) {
+        if (err) return callback(err);
+
+        var schema = JSON.parse(schemaText);
+        callback(null, schema);
+    });
+};
+
+var memoizedSchema = async.memoize(loadSchema);
+
 var validateSchema = function(message, callback) {
-    callback(null);
+    if (message.isCustomType()) return callback(null, { valid: true });
+
+    memoizedSchema(message.message_type, function(err, schema) {
+        callback(null, revalidator.validate(message.body, schema));
+    });
 };
 
 var validateAll = function(messages, callback) {
