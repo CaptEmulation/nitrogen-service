@@ -11,6 +11,19 @@ App.Message = Ember.Object.extend({
         return this.is('log');
     }.property('message_type'),
 
+    isIP: function() {
+        return this.is('ip');
+    }.property('message_type'),
+
+    isIPMatch: function() {
+        return this.is('ip_match');
+    }.property('message_type'),
+
+    createdAtString: function() {
+        var date = new Date(Date.parse(this.get('created_at')));
+        return date.toLocaleString();
+    }.property('timestamp'),
+
     timestampString: function() {
         var date = new Date(Date.parse(this.get('timestamp')));
         return date.toLocaleString();

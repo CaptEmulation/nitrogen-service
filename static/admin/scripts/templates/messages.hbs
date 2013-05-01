@@ -1,6 +1,7 @@
 <table class="table">
     <tr>
         <th>Timestamp</th>
+        <th>Created</th>
         <th>From</th>
         <th>Type</th>
         <th>Body</th>
@@ -9,6 +10,9 @@
     {{#each message in controller}}
 
     <tr>
+        <td>
+            {{message.createdAtString}}
+        </td>
         <td>
             {{message.timestampString}}
         </td>
@@ -24,6 +28,12 @@
             {{/if}}
             {{#if message.isLog}}
                 {{message.body.severity}}: {{message.body.message}}
+            {{/if}}
+            {{#if message.isIP}}
+                {{message.body.ip_address}}
+            {{/if}}
+            {{#if message.isIPMatch}}
+                {{view App.IpMatchView}}
             {{/if}}
         </td>
     </tr>

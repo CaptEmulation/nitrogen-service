@@ -10,11 +10,13 @@
             <a class="brand" href="#/">Nitrogen</a>
 
             <div class="nav-collapse collapse">
+                {{#if App.session}}
                 <ul class="nav">
                     <li><a href="#/principals/user">Users</a></li>
                     <li><a href="#/principals/device">Devices</a></li>
                     <li><a href="#/messages">Messages</a></li>
                 </ul>
+                {{/if}}
                 <ul class="nav pull-right">
                     {{#if App.user}}
                         <li><a>{{App.user.name}}</a></li>
@@ -29,5 +31,11 @@
         </div>
     </div>
 </div>
+
+{{#if App.flash}}
+    <div class="alert alert-error">
+        {{App.flash}}
+    </div>
+{{/if}}
 
 {{outlet}}
