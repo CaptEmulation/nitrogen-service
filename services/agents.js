@@ -104,12 +104,12 @@ var initialize = function(config, callback) {
 };
 
 var start = function(system, callback) {
-    initialize(system, function(err, session, compiledAgents) {
+    initialize(system, function(err, session, preparedAgents) {
         if (err) return callback(err);
 
         // TODO: use queuing to split agent execution between nodes to scale?
 
-        execute(compiledAgents, function(err) {
+        execute(preparedAgents, function(err) {
             if (err) log.error("agent execution failed with error: " + err);
         });
     });
@@ -122,20 +122,22 @@ var execute = function(agents, callback) {
     // agents between instances of that role.
 
     async.each(agents, function(agent, callback) {
-        
-        var context = { async: async,
-                        cron: cron,
-                        log: log,
-                        nitrogen: nitrogen,
-                        session: agent.session,
-                        setInterval: setInterval,
-                        setTimeout: setTimeout };
 
-        try {
-            agent.compiledAction.runInNewContext(context);
-            log.info("Agent " + agent.name + " started.");
-        } catch (e) {
-            log.error("Agent" + agent.name + " quit after throwing exception: " + e.toString());
+        if (agent && agent.session) {
+            var context = { async: async,
+                            cron: cron,
+                            log: log,
+                            nitrogen: nitrogen,
+                            session: agent.session,
+                            setInterval: setInterval,
+                            setTimeout: setTimeout };
+
+            try {
+                agent.compiledAction.runInNewContext(context);
+                log.info("Agent " + agent.name + " started.");
+            } catch (e) {
+                log.error("Agent" + agent.name + " quit after throwing exception: " + e.toString());
+            }
         }
 
         callback();
