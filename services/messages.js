@@ -10,11 +10,14 @@ var create = function(message, callback) {
 
     translate(message);
 
-    validate(message, function(err) {
+    validate(message, function(err, fromPrincipal, toPrincipal) {
         if (err) return callback(err);
 
+        // the from and to principals and their owners can see this message.
         message.visible_to = [message.from];
+        if (fromPrincipal.owner) message.visible_to.push(fromPrincipal.owner);
         if (message.to) message.visible_to.push(message.to);
+        if (toPrincipal && toPrincipal.owner) message.visible_to.push(toPrincipal.owner);
 
         if (message.is("log"))
             log.log(message.body.severity, message.body.message, { principal: message.from.toString() });
@@ -74,7 +77,7 @@ var findById = function(principal, messageId, callback) {
 
 var translate = function(message) {
     if (!message.expires) {
-        message.expires = utils.dateDaysFromNow(5);
+        message.expires = utils.dateDaysFromNow(1);
     }
 
     if (message.expires === 'never') {
@@ -118,7 +121,6 @@ var removeOne = function(principal, message, callback) {
     });
 };
 
-
 var validate = function(message, callback) {
     if (!message.from)
         return callback("Message must have a from principal.");
@@ -136,17 +138,17 @@ var validate = function(message, callback) {
         if (err) return callback(err);
         if (!result.valid) return callback(result.errors);
 
-        services.principals.findById(services.principals.systemPrincipal, message.from, function(err, principal) {
+        services.principals.findById(services.principals.systemPrincipal, message.from, function(err, fromPrincipal) {
             if (err) return callback(err);
-            if (!principal) return callback("Message must have an existing from principal.");
+            if (!fromPrincipal) return callback("Message must have an existing from principal.");
 
-            if (!message.to) return callback(null);
+            if (!message.to) return callback(null, fromPrincipal, null);
 
-            services.principals.findById(services.principals.systemPrincipal, message.to, function(err, principal) {
+            services.principals.findById(services.principals.systemPrincipal, message.to, function(err, toPrincipal) {
                 if (err) return callback(err);
-                if (!principal) return callback("Message must have an existing to principal.");
+                if (!toPrincipal) return callback("Message must have an existing to principal.");
 
-                callback(null);
+                callback(null, fromPrincipal, toPrincipal);
             });
         });
     });
