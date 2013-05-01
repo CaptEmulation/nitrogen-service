@@ -26,7 +26,7 @@ var create = function(message, callback) {
         message.visible_to = [message.from];
         if (message.to) message.visible_to.push(message.to);
 
-        if (message.message_type === "log") 
+        if (message.is("log"))
             log.log(message.body.severity, message.body.message, { principal: message.from.toString() });
 
         message.save(function(err, message) {
@@ -35,7 +35,12 @@ var create = function(message, callback) {
             var client_json = JSON.stringify(message);
             log.info("created message: " + message.id + ": " + client_json);
 
-            services.realtime.publish('/messages', client_json);
+            message.visible_to.forEach(function(principalId) {
+                log.info("publishing message " + message.id + " to principal: " + principalId);
+                services.realtime.publish('/messages/' + principalId, client_json);
+            });
+
+            services.realtime.publish('/messages/' + services.principals.systemPrincipal.id, client_json);
 
             callback(null, [message]);
         });
@@ -46,18 +51,7 @@ var createMany = function(messages, callback) {
     validateAll(messages, function(err) {
         if (err) return callback(err, []);
 
-        async.concat(messages, create, function(err, saved_messages) {
-            if (err) {
-                // rollback any already saved_messages
-                async.each(saved_messages, remove, function(err2) {
-                    log.error("error during rollback: " + err2);
-                    return callback(err, []);
-                });
-            }
-
-            callback(null, saved_messages);
-        });
-
+        async.concat(messages, create, callback);
     });
 };
 

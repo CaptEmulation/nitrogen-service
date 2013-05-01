@@ -87,6 +87,35 @@ describe('messages endpoint', function() {
 
     });
 
+    it('trying to subscribe to another principals messages should fail', function(done) {
+        var client = new faye.Client(config.realtime_endpoint);
+        client.addExtension({
+            outgoing: function(message, callback) {
+                message.ext = message.ext || {};
+                message.ext.access_token = fixtures.models.accessTokens.device.token;
+                callback(message);
+            }
+        });
+
+        client.subscribe('/messages/' + services.principals.systemPrincipal.id, function(json) {
+            assert.notEqual(true,false);
+        });
+
+        request.post(config.messages_endpoint,
+            { json: [{ message_type: "_messageSubscriptionTest",
+                       public: false,
+                       body: { reading: 5.1 } }],
+              headers: { Authorization: fixtures.models.accessTokens.system.toAuthHeader() } }, function(err, resp, body) {
+                assert.equal(err, null);
+                assert.equal(resp.statusCode, 200);
+
+                setTimeout(function() {
+                    done();
+                }, 200);
+            }
+        );
+    });
+
     it('should create and fetch a message', function(done) {
 		var notification_passed = false,
 			get_passed = false,
@@ -101,14 +130,14 @@ describe('messages endpoint', function() {
             }
         });
 
-		client.subscribe('/messages', function(message_json) {
+		client.subscribe('/messages/' + fixtures.models.principals.device.id, function(message_json) {
             var message = JSON.parse(message_json);
             if (message.message_type != "_messageSubscriptionTest") return;
 
 			assert.equal(message.body.reading, 5.1);
 			notification_passed = true;
 		    if (notification_passed && get_passed) {
-                client.unsubscribe('/messages');
+                client.unsubscribe('/messages/' + fixtures.models.principals.device.id);
                 done();
 		    }
 		});
@@ -155,7 +184,7 @@ describe('messages endpoint', function() {
 
                                 get_passed = true;
                                 if (notification_passed && get_passed) {
-                                    client.unsubscribe('/messages');
+                                    client.unsubscribe('/messages/' + fixtures.models.principals.device.id);
                                     done();
                                 }
                             }

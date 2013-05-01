@@ -16,7 +16,7 @@ describe('agent service', function() {
                 assert.equal(messages.length > 0, true);
                 done();
             });
-        }, 100);
+        }, 200);
 
     });
 
@@ -33,7 +33,7 @@ describe('agent service', function() {
                 assert.equal(messages.length > 0, false);
                 done();
             });
-        }, 100);
+        }, 200);
 
     });
 

@@ -6,7 +6,7 @@ function createIpMatchMessage(session, user, device, callback) {
     }, function(err, messages) {
         if (err) return callback(err);
         if (messages.length > 0) {
-            log.info("deviceMatch: reject message exists for user: " + user.id + " and device: " + device.id + " not creating ip_match");
+            log.info("matcher: reject message exists for user: " + user.id + " and device: " + device.id + " not creating ip_match");
             return callback(null, null);
         }
 
@@ -16,11 +16,11 @@ function createIpMatchMessage(session, user, device, callback) {
         }, function(err, messages) {
             if (err) return callback(err);
             if (messages.length > 0) {
-                log.info("deviceMatch: ip_match message exists for device: " + device.id + " not creating ip_match");
+                log.info("matcher: ip_match message exists for device: " + device.id + " not creating ip_match");
                 return callback(null, null);
             }
 
-            log.info("deviceMatch: creating ip_match message for device: " + device.id);
+            log.info("matcher: creating ip_match message for device: " + device.id);
 
             var matchMessage = new nitrogen.Message({ 
                 message_type: "ip_match",                                                
@@ -41,14 +41,14 @@ function completionCallback(err) {
 
 session.onMessage(function(message) {
     if (message.is('ip')) {
-        log.info("deviceMatch: agent processing ip message");
+        log.info("matcher: agent processing ip message");
 
         nitrogen.Principal.find(session, { last_ip: message.body.ip_address }, function(err, principalsAtIp) {
             var devices = [];
             var users = [];
 
             principalsAtIp.forEach(function(principal) {
-                log.info("deviceMatch: principal at ip: " + principal.principal_type + ":" + principal.id);
+                log.info("matcher: principal at ip: " + principal.principal_type + ":" + principal.id);
 
                 if (principal.isUser())
                     users.push(principal);
@@ -56,12 +56,12 @@ session.onMessage(function(message) {
                     devices.push(principal);
             });
 
-            log.info("deviceMatch: users length: " + users.length + " devices length: " + devices.length);
+            log.info("matcher: users length: " + users.length + " devices length: " + devices.length);
 
             if (users.length != 1) return;  /* don't match devices if more than one (or no) user at this IP address. */
 
             nitrogen.Principal.find(session, { _id: message.from }, function(err, fromPrincipals) {
-                if (err) return log.error("deviceMatch: didn't find principal: " + err);
+                if (err) return log.error("matcher: didn't find principal: " + err);
 
                 var fromPrincipal = fromPrincipals[0];
 

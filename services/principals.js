@@ -66,10 +66,6 @@ var create = function(principal, callback) {
                     if (err) return callback(err);
 
                     log.info("created " + principal.principal_type + " principal: " + principal.id);
-                    var principal_json = JSON.stringify(principal);
-
-                    services.realtime.publish('/principals', principal_json);
-
                     callback(null, principal);
                 });
             });

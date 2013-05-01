@@ -1,28 +1,40 @@
 var bayeux = null
   , faye = require('faye')
   , log = require('../log')
-  , services = require('../services');
+  , services = require('../services')
+  , utils = require('../utils');
+
+var authorize = function(principal, message) {
+    if (utils.stringStartsWith(message.subscription, "/messages")) {
+        if (message.subscription != "/messages/" + principal.id) {
+            message.error = "403::Forbidden";
+        }
+    } else {
+        message.error = "404:NotFound";
+    }
+};
 
 var attach = function(server, config) {
+
     bayeux = new faye.NodeAdapter({
         mount: config.path_prefix + config.realtime_path,
         timeout: config.realtime_endpoint_timeout
     });
+
     bayeux.addExtension({
         incoming: function(message, callback) {
             if (message.channel != "/meta/subscribe") return callback(message);
 
             if (!message.ext) {
-                message.error = "Access token required for realtime endpoint";
+                message.error = "401::Unauthorized";
                 callback(message);
             } else {
                 services.accessTokens.verify(message.ext.access_token, function(err, principal) {
-                    if (err) message.error = "Verification of access token failed";
-                    if (!principal) message.error = "Access token is invalid";
+                    if (err || !principal) message.error = "401::Unauthorized";
 
-                    if (message.error) log.error("verification of access token failed: " + message.error);
+                    if (!message.error) authorize(principal, message);
 
-                    // TODO: authorization for particular channel
+                    if (message.error) log.error("auth failed: " + message.error);
 
                     callback(message);
                 });

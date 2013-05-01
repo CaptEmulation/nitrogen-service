@@ -9,8 +9,7 @@ exports.create = function(req, res) {
     async.concat(req.body, function(message_object, callback) {
         var message = new models.Message(message_object);
 
-        if (req.user.principal_type != "system")
-            message.from = req.user.id;
+        message.from = req.user.id;
 
         callback(null, [message]);
     }, function (err, messages) {

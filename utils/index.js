@@ -49,6 +49,10 @@ var stringEndsWith = function(s, suffix) {
     return s.indexOf(suffix, s.length - suffix.length) !== -1;
 };
 
+var stringStartsWith = function(s, prefix) {
+    return s.substr(0, prefix.length) === prefix;
+};
+
 module.exports = {
     dateDaysFromNow: dateDaysFromNow,
     ipFromRequest: ipFromRequest,
@@ -56,5 +60,6 @@ module.exports = {
     parseOptions: parseOptions,
     handleError: handleError,
     sendFailedResponse: sendFailedResponse,
-    stringEndsWith: stringEndsWith
+    stringEndsWith: stringEndsWith,
+    stringStartsWith: stringStartsWith
 };
