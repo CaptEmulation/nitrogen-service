@@ -7,18 +7,8 @@ var async = require('async')
   , utils = require('../utils');
 
 var create = function(message, callback) {
-    if (!message.expires) {
-        message.expires = utils.dateDaysFromNow(5);
-    }
 
-    // map special case constants 
-    if (message.expires === 'never') {
-        message.expires = null;
-    }
-
-    if (message.to === 'system') {
-        message.to = services.principals.systemPrincipal.id;
-    }
+    translate(message);
 
     validate(message, function(err) {
         if (err) return callback(err);
@@ -36,11 +26,9 @@ var create = function(message, callback) {
             log.info("created message: " + message.id + ": " + client_json);
 
             message.visible_to.forEach(function(principalId) {
-                log.info("publishing message " + message.id + " to principal: " + principalId);
+                log.info("publishing message " + message.id + " to principal: " + principalId + " on " + '/messages/' + principalId);
                 services.realtime.publish('/messages/' + principalId, client_json);
             });
-
-            services.realtime.publish('/messages/' + services.principals.systemPrincipal.id, client_json);
 
             callback(null, [message]);
         });
@@ -84,6 +72,20 @@ var findById = function(principal, messageId, callback) {
     });
 };
 
+var translate = function(message) {
+    if (!message.expires) {
+        message.expires = utils.dateDaysFromNow(5);
+    }
+
+    if (message.expires === 'never') {
+        message.expires = null;
+    }
+
+    if (message.to === 'system') {
+        message.to = services.principals.systemPrincipal.id;
+    }
+};
+
 var remove = function(principal, query, callback) {
     // TODO: will need more complicated authorization mechanism for non system users.
     if (!principal || !principal.isSystem()) return callback(403);
@@ -116,6 +118,7 @@ var removeOne = function(principal, message, callback) {
     });
 };
 
+
 var validate = function(message, callback) {
     if (!message.from)
         return callback("Message must have a from principal.");
@@ -137,7 +140,14 @@ var validate = function(message, callback) {
             if (err) return callback(err);
             if (!principal) return callback("Message must have an existing from principal.");
 
-            callback(null);
+            if (!message.to) return callback(null);
+
+            services.principals.findById(services.principals.systemPrincipal, message.to, function(err, principal) {
+                if (err) return callback(err);
+                if (!principal) return callback("Message must have an existing to principal.");
+
+                callback(null);
+            });
         });
     });
 };
@@ -158,7 +168,11 @@ var validateSchema = function(message, callback) {
     if (message.isCustomType()) return callback(null, { valid: true });
 
     memoizedSchema(message.message_type, function(err, schema) {
-        callback(null, revalidator.validate(message.body, schema));
+        var results = revalidator.validate(message.body, schema);
+        if (!results.valid) {
+            log.info("message validation failed with errors: " + results.errors);
+        }
+        callback(null, results);
     });
 };
 
@@ -173,6 +187,7 @@ module.exports = {
     findById: findById,
     remove: remove,
     removeOne: removeOne,
+    translate: translate,
     validate: validate,
     validateAll: validateAll
 };

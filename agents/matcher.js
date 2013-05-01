@@ -44,6 +44,7 @@ session.onMessage(function(message) {
         log.info("matcher: agent processing ip message");
 
         nitrogen.Principal.find(session, { last_ip: message.body.ip_address }, function(err, principalsAtIp) {
+            if (err) return log.error('matcher: error looking for principals at this ip address: ' + err);
             var devices = [];
             var users = [];
 

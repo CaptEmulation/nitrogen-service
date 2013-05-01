@@ -60,6 +60,24 @@ describe('principals service', function() {
         });
     });
 
+    it('system can update a principal', function(done) {
+        fixtures.models.principals.device.name = "my camera";
+        services.principals.update(services.principals.systemPrincipal, fixtures.models.principals.device.id, { name: "my camera"}, function(err, principal) {
+            assert.ifError(err);
+            assert.equal(principal.name, "my camera");
+
+            done();
+        });
+    });
+
+    it('not system principals cannot update a principal', function(done) {
+        services.principals.update(fixtures.models.principals.device, fixtures.models.principals.device.id, { name: "my camera" }, function(err, principal) {
+            assert.notEqual(err, null);
+
+            done();
+        });
+    });
+
     it('should reject creating a user without an email', function(done) {
         var user = new models.Principal({ principal_type: "user",
             password: fixtures.models.principals.user.password });

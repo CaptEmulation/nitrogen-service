@@ -11,6 +11,7 @@ exports.authenticate = function(req, res) {
     services.principals.authenticate(req.body, function (err, principal, accessToken) {
         if (err) return utils.handleError(res, err);
 
+        // since the authenticateRequest middleware was not run on this request run it manually.
         services.principals.updateLastConnection(principal, utils.ipFromRequest(req));
 
         sendAuthResponse(res, principal, accessToken);
@@ -19,7 +20,6 @@ exports.authenticate = function(req, res) {
 
 exports.create = function(req, res) {
 	var principal = new models.Principal(req.body);
-	principal.last_ip = utils.ipFromRequest(req);
 
 	services.principals.create(principal, function(err, principal) {
 		if (err) return utils.handleError(res, err);
@@ -33,6 +33,9 @@ exports.create = function(req, res) {
                 // for create (and create only) we want to pass back the secret to the device.
                 principalJSON.secret = principal.secret;
             }
+
+            // since the authenticateRequest middleware was not run on this request run it manually.
+            services.principals.updateLastConnection(principal, utils.ipFromRequest(req));
 
             sendAuthResponse(res, principalJSON, accessToken);
         });
@@ -67,4 +70,12 @@ exports.show = function(req, res) {
 
 		res.send({ principal: principal });
 	});
+};
+
+exports.update = function(req, res) {
+    services.principals.update(req.user, req.params.id, req.body, function(err, principal) {
+        if (err) return utils.handleError(res, err);
+
+        res.send({ principal: principal });
+    });
 };

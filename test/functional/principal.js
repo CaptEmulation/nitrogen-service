@@ -112,6 +112,20 @@ describe('principal endpoint', function() {
             });
     });
 
+    it('should allow system principal to update a message', function(done) {
+        fixtures.models.principals.device.name = "my camera";
+
+        request.put(config.principals_endpoint + "/" + fixtures.models.principals.device.id,
+            { headers: { Authorization: fixtures.models.accessTokens.system.toAuthHeader() },
+              json: fixtures.models.principals.device }, function(err, resp, body) {
+                assert.ifError(err);
+                assert.equal(resp.statusCode, 200);
+
+                done();
+            }
+        );
+    });
+
     it('should allow system to impersonate user principal', function(done) {
         request.post(config.principals_endpoint + '/impersonate',
             { headers: { Authorization: fixtures.models.accessTokens.system.toAuthHeader() },

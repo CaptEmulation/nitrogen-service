@@ -210,18 +210,26 @@ var initialize = function(callback) {
     });
 };
 
-var update = function(principal, callback) {
-    principal.save(callback);
+var update = function(authorizingPrincipal, id, updates, callback) {
+    if (!authorizingPrincipal || !authorizingPrincipal.isSystem()) return callback("Only system can update principals");
+
+    models.Principal.update({ _id: id }, { $set: updates }, function (err, updateCount) {
+        if (err) return callback(err);
+
+        findById(authorizingPrincipal, id, callback);
+    });
 };
 
 var updateLastConnection = function(principal, ip) {
 
+    var updates = {}
     // emit a ip message each time ip changes for principal.
     if (principal.last_ip != ip) {
-        principal.last_ip = ip;
+        principal.last_ip = updates.last_ip = ip;
 
         var ipMessage = new models.Message({ "message_type": "ip" });
         ipMessage.from = principal;
+        ipMessage.to = services.principals.systemPrincipal.id;
         ipMessage.body.ip_address = ip;
 
         services.messages.create(ipMessage, function(err, message) {
@@ -229,9 +237,11 @@ var updateLastConnection = function(principal, ip) {
         });
     }
 
-    principal.last_connection = new Date();
+    principal.last_connection = updates.last_connection = new Date();
 
-    services.principals.update(principal);
+    services.principals.update(services.principals.systemPrincipal, principal.id, updates, function(err, principal) {
+        if (err) return log.error("updating last connection failed: " + err);
+    });
 };
 
 var validate = function(principal, callback) {

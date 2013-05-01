@@ -6,8 +6,11 @@ var async = require('async')
   , utils = require('../utils');
 
 exports.create = function(req, res) {
-    async.concat(req.body, function(message_object, callback) {
-        var message = new models.Message(message_object);
+    async.concat(req.body, function(messageObject, callback) {
+
+        // translate constants to ObjectIds, apply defaults.
+        services.messages.translate(messageObject);
+        var message = new models.Message(messageObject);
 
         message.from = req.user.id;
 

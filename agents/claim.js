@@ -1,6 +1,6 @@
 session.onMessage(function(message) {
-    if (message.message_type == "claim") {
-        log.info("claimAgent: claim agent processing message");
+    if (message.is('claim')) {
+        log.info("claimAgent: claim agent processing message: " + message.id + " : " + message.to);
 
         nitrogen.Message.find(session, { _id: message.response_to }, function(err, ipMatches) {
 
@@ -16,19 +16,23 @@ session.onMessage(function(message) {
                 return;
             }
 
-            nitrogen.Message.find(session, { _id: message.body.principal }, function(err, claimedPrincipal) {
-                if (err || !claimedPrincipal) {
-                    log.error("claimAgent: couldn't find message claim was in response to: " + err);
+            nitrogen.Principal.find(session, { _id: message.body.principal }, function(err, claimedPrincipals) {
+                if (err || !claimedPrincipals || claimedPrincipals.length == 0) {
+                    log.error("claimAgent: couldn't find principal that claim was targeted to: " + err);
                     return;
                 }
 
+                var claimedPrincipal = claimedPrincipals[0];
+
                 if (claimedPrincipal.owner) {
-                    log.warn("claimAgent: principal " + claimPrincipal.id + " is already owned by " + claimPrincipal.owner + ": ignoring claim request.");
+                    log.warn("claimAgent: principal " + claimedPrincipal.id + " is already owned by " + claimedPrincipal.owner + ": ignoring claim request.");
                     return;
                 }
 
                 claimedPrincipal.owner = message.from;
-                claimedPrincipal.save(session);
+                claimedPrincipal.update(session, function(err, principal) {
+                    if (err) log.error("updating claimed principal failed: " + err);
+                });
             });
         });
     }
