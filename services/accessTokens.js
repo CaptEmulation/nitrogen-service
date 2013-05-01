@@ -42,7 +42,7 @@ var findByToken = function(token, callback) {
 var verify = function(token, done) {
     findByToken(token, function(err, accessToken) {
         if (err) { return done(err); }
-        if (!accessToken || accessToken.expired()) { return done(null, false); }
+        if (!accessToken || accessToken.expired()) { return done("Your session has expired.", false); }
 
         done(null, accessToken.principal);
     });

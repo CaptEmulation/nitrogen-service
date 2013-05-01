@@ -4,7 +4,8 @@ var passport = require('passport')
 
 module.exports = function(req, res, next) {
     var auth = passport.authenticate(['bearer'], { session: false });
-    auth(req, res, function() {
+    auth(req, res, function(err) {
+        if (err) return res.send(401, { error: err });
 
         // opportunistically update the last connection details for this principal.
         if (req.user && req.ips) {

@@ -9,7 +9,7 @@ var sendAuthResponse = function(res, principal, accessToken) {
 
 exports.authenticate = function(req, res) {
     services.principals.authenticate(req.body, function (err, principal, accessToken) {
-        if (err) return utils.handleError(res, err);
+        if (err) return res.send(400, { error: err });
 
         // since the authenticateRequest middleware was not run on this request run it manually.
         services.principals.updateLastConnection(principal, utils.ipFromRequest(req));
@@ -22,10 +22,10 @@ exports.create = function(req, res) {
 	var principal = new models.Principal(req.body);
 
 	services.principals.create(principal, function(err, principal) {
-		if (err) return utils.handleError(res, err);
+		if (err) return res.send(400, { error: err });
 
         services.accessTokens.create(principal, function(err, accessToken) {
-            if (err) return utils.handleError(res, err);
+            if (err) return res.send(400, { error: err });
 
             var principalJSON = principal.toObject();
 

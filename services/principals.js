@@ -11,14 +11,14 @@ var authenticate = function(authBody, callback) {
     } else if (authBody.id && authBody.secret) {
         authenticateDevice(authBody.id, authBody.secret, callback);
     } else {
-        callback(400);
+        callback("Please sign in with your email and password.");
     }
 };
 
 var authenticateUser = function(email, password, callback) {
     findByEmail(services.principals.systemPrincipal, email, function(err, principal) {
         if (err) return callback(err);
-        if (!principal) return callback(401);
+        if (!principal) return callback("The email or password you entered were not accepted.  Please try again.");
 
         verifyPassword(password, principal, function(err) {
             if (err) return callback(err);
@@ -36,7 +36,7 @@ var authenticateUser = function(email, password, callback) {
 var authenticateDevice = function(principalId, secret, callback) {
     findById(services.principals.systemPrincipal, principalId, function(err, principal) {
         if (err) return callback(err);
-        if (!principal) return callback(401);
+        if (!principal) return callback("The secret provided was not accepted.  Please try again.");
 
         verifySecret(secret, principal, function(err) {
             if (err) return callback(err);
@@ -57,7 +57,7 @@ var create = function(principal, callback) {
 
         checkForExistingPrincipal(principal, function(err, foundPrincipal) {
             if (err) return callback(err);
-            if (foundPrincipal) return callback(400);
+            if (foundPrincipal) return callback("A user with that email already exists.  Please sign in with your email and password.");
 
             createCredentials(principal, function(err, principal) {
                 if (err) return callback(err);
@@ -92,7 +92,7 @@ var createCredentials = function(principal, callback) {
 };
 
 var createSecretCredentials = function(principal, callback) {
-    if (!config.device_secret_bytes) return callback("config missing required device_secret_bytes element.");
+    if (!config.device_secret_bytes) return callback("Service is misconfigured.  Please add value for missing device_secret_bytes element.");
 
     crypto.randomBytes(config.device_secret_bytes, function(err, secretBuf) {
         if (err) return callback(err, null);
