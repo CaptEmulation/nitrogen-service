@@ -8,7 +8,7 @@
 # Transitioned into 'user.login' (undefined, #undefined)
 CACHE MANIFEST
 
-# Time: Wed May 01 2013 11:33:32 GMT-0700 (PDT)
+# Time: Fri May 03 2013 12:23:23 GMT-0700 (PDT)
 # This manifest was created by confess.js, http://github.com/jamesgpearce/confess
 #
 # Retrieved URL: http://localhost:3501/#/user/login
@@ -33,7 +33,7 @@ css/3e34ab81.style.css
 http://localhost:3030/client/nitrogen.js
 http://localhost:3501/img/glyphicons-halflings-white.png
 http://localhost:3501/img/glyphicons-halflings.png
-js/e9b1edde.script.js
+js/c5bb6fae.script.js
 js/vendor/2cb056b9.modernizr.min.js
 
 NETWORK:

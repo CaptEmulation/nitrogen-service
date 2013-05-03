@@ -9,8 +9,8 @@ App.deferReadiness();
 // We try to find the headwaiter at the same host, port, and protocol this was served from by default.
 
 App.config = {
-    host: "192.168.1.14",
-    http_port: 3030,
+    host: "nitrogen.io",
+    http_port: 80,
     protocol: "http"
 };
 
@@ -24,9 +24,6 @@ App.resetSession = function(err) {
         App.get('session').close();
     }
 
-    if (err === 400 && window.location.hash == "#/user/create") err = "That email already has an account.  Please log in with your credentials to continue.";
-    if (err === 401) err = "Your username or password were not correct or your session has expired.";
-
     App.set('flash', err);
     App.set('session', null);
     App.set('user', null);
@@ -34,7 +31,8 @@ App.resetSession = function(err) {
     App.advanceReadiness();
 
     // TODO: what's the right way to do this outside of an ember.js controller?
-    window.location = "#/user/login";
+    if (window.location.hash != "#/user/login" && window.location.hash != "#/user/create")
+        window.location = "#/user/login";
 };
 
 App.sessionHandler = function(err, session, user) {

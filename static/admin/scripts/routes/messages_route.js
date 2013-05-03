@@ -9,6 +9,10 @@ App.MessagesRoute = Ember.Route.extend({
         });
     },
 
+    claim: function() {
+        console.log("messages route");
+    },
+
     model: function() {
         return App.Message.find();
     }

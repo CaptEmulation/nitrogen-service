@@ -52,7 +52,7 @@ config.password_hash_iterations = 10000;
 config.password_hash_length = 128;
 config.salt_length_bytes = 64;
 
-config.access_token_bytes = 128;
+config.access_token_bytes = 64;
 config.device_secret_bytes = 128;
 
 if (process.env.AZURE_STORAGE_ACCOUNT && process.env.AZURE_STORAGE_KEY) {
