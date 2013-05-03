@@ -21,7 +21,6 @@ var create = function(principal, blob, stream, callback) {
             log.info('created blob with id: ' + blob._id);
             callback(null, blob);
         });
-
     });
 };
 
@@ -38,7 +37,7 @@ var remove = function(principal, query, callback) {
             models.Blob.remove(query, callback);
         });
     });
-}
+};
 
 var stream = function(blobId, stream, callback) {
     models.Blob.findOne({"_id": blobId}, function (err, blob) {

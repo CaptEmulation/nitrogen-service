@@ -31,7 +31,9 @@ session.onMessage(function(message) {
 
                 claimedPrincipal.owner = message.from;
                 claimedPrincipal.update(session, function(err, principal) {
-                    if (err) log.error("updating claimed principal failed: " + err);
+                    if (err) log.error("claimAgent: updating claimed principal failed: " + err);
+
+                    log.info("claimAgent: successfully set " + message.from + " as the owner of " + principal.id);
                 });
             });
         });
