@@ -59,7 +59,7 @@ session.onMessage(function(message) {
 
             log.info("matcher: users length: " + users.length + " devices length: " + devices.length);
 
-            if (users.length != 1) return log.info("matcher: more than one user at this ip address, can't match devices");
+            if (users.length != 1) return log.info("matcher: not exactly one user at this ip address. can't match devices.");
 
             nitrogen.Principal.find(session, { _id: message.from }, function(err, fromPrincipals) {
                 if (err) return log.error("matcher: didn't find principal: " + err);
