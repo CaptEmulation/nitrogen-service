@@ -5,13 +5,14 @@ var async = require('async')
   , mongoose = require('mongoose')
   , services = require('../services');
 
-var create = function(blob, stream, callback) {
+var create = function(principal, blob, stream, callback) {
 
-    // TODO: do authorization of principal to create blob here.
+    // TODO: authorization of principal to create blob here.
 
     config.blob_provider.create(blob, stream, function(err) {
         if (err) return callback(err, null);
 
+        blob.owner = principal;
         blob.link = new mongoose.Types.ObjectId;
 
         blob.save(function(err, blob) {
