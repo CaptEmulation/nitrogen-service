@@ -10,12 +10,16 @@ describe('messages service', function() {
 
     it('can create and removeOne a message', function(done) {
 
-        var message = new models.Message({ from: fixtures.models.principals.device.id,
-            message_type: "_test" });
+        var message = new models.Message({
+            from: fixtures.models.principals.device.id,
+            message_type: "_test",
+            body: { reading: 5.1 }
+        });
 
         services.messages.create(message, function(err, savedMessages) {
           assert.ifError(err);
           assert.notEqual(savedMessages[0].id, null);
+          assert.equal(savedMessages[0].body_length > 0, true);
 
           services.messages.removeOne(services.principals.systemPrincipal, savedMessages[0], function(err) {
             assert.equal(err, null);

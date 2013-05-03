@@ -20,8 +20,8 @@ messageSchema.add({
 	to: { type: Schema.Types.ObjectId, ref: 'Principal' },  	  // message target (if any)
     response_to: { type: Schema.Types.ObjectId, ref: 'Message' }, // message this is in response to (if any)
 
-	body: { type: Schema.Types.Mixed, default: {} }
-
+	body: { type: Schema.Types.Mixed, default: {} },
+    body_length: { type: Number }
 });
 
 messageSchema.index({ expires: 1 });

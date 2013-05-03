@@ -46,7 +46,7 @@ mongoose.connection.once('open', function () {
 
         if (config.blob_provider) {
             app.get(config.api_prefix + 'v1/blobs/:id',  middleware.authenticateRequest, controllers.blobs.show);
-            app.post(config.api_prefix + 'v1/blobs',     /*middleware.authenticateRequest,*/ controllers.blobs.create);
+            app.post(config.api_prefix + 'v1/blobs',     middleware.authenticateRequest, controllers.blobs.create);
         } else {
             log.warn("not exposing blob endpoints because no blob provider configured (see config.js).");
         }

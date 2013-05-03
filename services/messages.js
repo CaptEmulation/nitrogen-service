@@ -22,6 +22,8 @@ var create = function(message, callback) {
         if (message.is("log"))
             log.log(message.body.severity, message.body.message, { principal: message.from.toString() });
 
+        message.body_length = JSON.stringify(message.body).length;
+
         message.save(function(err, message) {
             if (err) return callback(err);
 
