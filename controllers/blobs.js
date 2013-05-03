@@ -16,9 +16,9 @@ exports.create = function(req, res) {
 	blob.content_length = req.get('Content-Length');
 
     services.blobs.create(blob, req, function(err, blob) {
-         if (err)
-            res.send(400, err);
-         else
-            res.send({"blob": blob});
+
+         if (err) res.send(400, err);
+
+         res.send({"blob": blob});
     });
 };

@@ -109,6 +109,7 @@ describe('messages endpoint', function() {
                 assert.equal(err, null);
                 assert.equal(resp.statusCode, 200);
 
+                // wait to make sure we don't get a system's message over the device's session.
                 setTimeout(function() {
                     done();
                 }, 200);
