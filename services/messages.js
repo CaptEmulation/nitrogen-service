@@ -110,6 +110,7 @@ var remove = function(principal, query, callback) {
 var removeLinkedResources = function(message, callback) {
     if (!message.link) return callback();
 
+    log.info("removing linked resources with link: " + message.link);
     services.blobs.remove(services.principals.systemPrincipal, { link: message.link }, callback);
 };
 
