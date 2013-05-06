@@ -19,7 +19,7 @@ var parseQuery = function(req) {
         query = JSON.parse(req.query.q);
     }
 
-    return query;
+    return translateDatesToNative(query);
 };
 
 var parseOptions = function(req) {
@@ -53,6 +53,20 @@ var stringStartsWith = function(s, prefix) {
     return s.substr(0, prefix.length) === prefix;
 };
 
+var translateDatesToNative = function(obj) {
+    for (var prop in obj) {
+        if (typeof obj[prop] === "object")
+        // recursively handle subobjects
+            obj[prop] = translateDatesToNative(obj[prop]);
+        else if (typeof obj[prop] === "string" &&
+                 obj[prop].match(/(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))/)) {
+            obj[prop] = new Date(Date.parse(obj[prop]));
+        }
+    }
+
+    return obj;
+};
+
 module.exports = {
     dateDaysFromNow: dateDaysFromNow,
     ipFromRequest: ipFromRequest,
@@ -61,5 +75,6 @@ module.exports = {
     handleError: handleError,
     sendFailedResponse: sendFailedResponse,
     stringEndsWith: stringEndsWith,
-    stringStartsWith: stringStartsWith
+    stringStartsWith: stringStartsWith,
+    translateDatesToNative: translateDatesToNative
 };
