@@ -95,8 +95,14 @@ var remove = function(principal, query, callback) {
     // TODO: will need more complicated authorization mechanism for non system users.
     if (!principal || !principal.isSystem()) return callback(403);
 
-    find(principal, query, { limit: 500 }, function (err, messages) {
+    if (query.expires && query.expires.$lt) {
+        log.info("lt query: " + query.expires.$lt);
+    }
 
+    find(principal, query, { limit: 500 }, function (err, messages) {
+        if (err) return callback(messages);
+
+        log.info("remove found " + messages.length + " messages");
         // delete linked resources and then the message itself.
         // TODO: what is an appropriate max parallelism here.
         async.eachLimit(messages, 50, removeLinkedResources, function(err) {
