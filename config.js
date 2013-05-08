@@ -55,6 +55,8 @@ config.salt_length_bytes = 64;
 config.access_token_bytes = 64;
 config.device_secret_bytes = 128;
 
+config.request_log_format = ':remote-addr - - [:date] ":method :url HTTP/:http-version" :status :res[content-length] :response-time ":referrer" ":user-agent"';
+
 if (process.env.AZURE_STORAGE_ACCOUNT && process.env.AZURE_STORAGE_KEY) {
     config.blob_provider = new providers.azure.AzureBlobProvider(config);
 }
