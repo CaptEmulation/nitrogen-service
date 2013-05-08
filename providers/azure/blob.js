@@ -37,6 +37,7 @@ AzureBlobProvider.prototype.stream = function(blob, stream, callback) {
 };
 
 AzureBlobProvider.prototype.remove = function(blob, callback) {
+    log.info("removing blob with id: " + blob.id);
     this.azureBlobService.deleteBlob(BLOB_CONTAINER, blob.id, callback);
 };
 
