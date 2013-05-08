@@ -6,10 +6,11 @@ var bayeux = null
 
 var authorize = function(principal, message) {
     if (utils.stringStartsWith(message.subscription, "/messages")) {
-        log.info("realtime service authorizing principal: " + principal.principal_type + ":" + principal.id + " for " + message.subscription);
         if (message.subscription != "/messages/" + principal.id) {
-            log.info("realtime subscription failed for " + principal.id + " for " + message.subscription);
+            log.error("realtime subscription not authorized for principal " + principal.principal_type + ":" + principal.id + " for " + message.subscription);
             message.error = "403::Forbidden";
+        } else {
+            log.info("realtime subscription authorized for principal: " + principal.principal_type + ":" + principal.id + " for " + message.subscription);
         }
     } else {
         message.error = "404:NotFound";

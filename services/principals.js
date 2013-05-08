@@ -211,7 +211,9 @@ var initialize = function(callback) {
 };
 
 var update = function(authorizingPrincipal, id, updates, callback) {
-    if (!authorizingPrincipal || !authorizingPrincipal.isSystem()) return callback("Only system can update principals");
+    if (!authorizingPrincipal || !authorizingPrincipal.isSystem()) {
+        updates = { name: updates.name };
+    }
 
     models.Principal.update({ _id: id }, { $set: updates }, function (err, updateCount) {
         if (err) return callback(err);

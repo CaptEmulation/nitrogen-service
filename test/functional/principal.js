@@ -121,6 +121,8 @@ describe('principal endpoint', function() {
                 assert.ifError(err);
                 assert.equal(resp.statusCode, 200);
 
+                assert.equal(body.principal.name, "my camera");
+
                 done();
             }
         );
