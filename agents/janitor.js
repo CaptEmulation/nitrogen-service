@@ -1,15 +1,13 @@
 function janitorIteration() {
 
-    log.info("janitor agent running");
-
     var expiredMessagesQuery = { expires: { $lt: new Date() } };
 
     // Nitrogen service will automatically remove linked resources (eg. blobs).
 
     nitrogen.Message.remove(session, expiredMessagesQuery, function(err, removed) {
-        if (err) return log.error("Removing expired messages in janitor failed: " + err);
+        if (err) return log.error("janitor execution failed: " + err);
 
-        log.info("janitor removed " + removed + " messages");
+        log.info("janitor execution finished:  removed " + removed + " messages");
     });
 
 }

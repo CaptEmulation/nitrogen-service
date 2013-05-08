@@ -98,7 +98,6 @@ var remove = function(principal, query, callback) {
     find(principal, query, { limit: 500 }, function (err, messages) {
         if (err) return callback(messages);
 
-        log.info("remove found " + messages.length + " messages");
         // delete linked resources and then the message itself.
         // TODO: what is an appropriate max parallelism here.
         async.eachLimit(messages, 50, removeLinkedResources, function(err) {
