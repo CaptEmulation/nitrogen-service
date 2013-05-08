@@ -70,8 +70,6 @@ if (process.env.LOGGLY_SUBDOMAIN && process.env.LOGGLY_INPUT_TOKEN && process.en
     });
 }
 
-if (process.env.NODE_ENV != "production") {
-    log.add(winston.transports.Console, { colorize: true, timestamp: true });
-}
+log.add(winston.transports.Console, { colorize: true, timestamp: true });
 
 module.exports = config;
