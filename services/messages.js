@@ -96,6 +96,7 @@ var remove = function(principal, query, callback) {
     if (!principal || !principal.isSystem()) return callback(403);
 
     if (query.expires && query.expires.$lt) {
+        log.info("query object: " + query);
         log.info("query: " + JSON.stringify(query));
         log.info("lt query: " + query.expires.$lt);
     }
