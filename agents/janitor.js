@@ -14,4 +14,4 @@ function janitorIteration() {
 
 }
 
-setInterval(janitorIteration, 10 * 1000);
+setInterval(janitorIteration, 61 * 1000);

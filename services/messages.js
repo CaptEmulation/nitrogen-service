@@ -95,12 +95,6 @@ var remove = function(principal, query, callback) {
     // TODO: will need more complicated authorization mechanism for non system users.
     if (!principal || !principal.isSystem()) return callback(403);
 
-    if (query.expires && query.expires.$lt) {
-        log.info("query object: " + query);
-        log.info("query: " + JSON.stringify(query));
-        log.info("lt query: " + query.expires.$lt);
-    }
-
     find(principal, query, { limit: 500 }, function (err, messages) {
         if (err) return callback(messages);
 
