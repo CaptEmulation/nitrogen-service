@@ -1,4 +1,6 @@
 var async = require('async')
+  , config = require('../../config')
+  , fs = require('fs')
   , models = require('../../models')
   , services = require('../../services');
 
@@ -37,19 +39,6 @@ var createSystemUserFixtures = function(callback) {
         callback();
     });
 
-};
-
-var createDeviceIpMessageFixture = function(callback) {
-    var message = new models.Message({ from: fixtures.principals.device.id,
-                                       message_type: "ip",
-                                       body: { ip_address: "127.0.0.1" } });
-
-    services.messages.create(message, function (err, message) {
-        if (err) throw err;
-
-        fixtures.messages.deviceIp = message;
-        callback();
-    });
 };
 
 var createAgentFixtures = function(callback) {
@@ -93,6 +82,27 @@ var createUserFixtures = function(callback) {
     });
 };
 
+var createBlobFixture = function(callback) {
+    var fixture_path = 'test/fixtures/images/image.jpg';
+
+    fs.stat(fixture_path, function(err, stats) {
+        if (err) throw err;
+
+        var blob = new models.Blob({
+            content_type: "image/jpeg",
+            content_length: stats.size
+        });
+
+        var stream = fs.createReadStream(fixture_path);
+        services.blobs.create(fixtures.principals.user, blob, stream, function(err, blob) {
+            if (err) throw err;
+
+            fixtures.blobs.removableBlob = blob;
+            callback();
+        });
+    });
+};
+
 var createDeviceIpMessageFixture = function(callback) {
     var message = new models.Message({ from: fixtures.principals.device.id,
                                        message_type: "ip",
@@ -114,14 +124,19 @@ exports.reset = function(callback) {
     async.each(modelTypes, removeAll, function(err) {
         if (err) throw err;
 
-        async.series([
+        var fixtureFactories = [
             createUserFixtures,
             createDeviceFixtures,
             createAgentFixtures,
             createDeviceIpMessageFixture,
             createSystemUserFixtures
-        ], callback);
+        ];
 
+        if (config.blob_provider) {
+            fixtureFactories.push(createBlobFixture);
+        }
+
+        async.series(fixtureFactories, callback);
     });
 
 };
@@ -129,6 +144,7 @@ exports.reset = function(callback) {
 var fixtures = {
     accessTokens: {},
     agents: {},
+    blobs: {},
     messages: {},
     principals: {}
 };

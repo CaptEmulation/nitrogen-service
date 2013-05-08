@@ -10,10 +10,10 @@ exports.show = function(req, res) {
 };
 
 exports.create = function(req, res) {
-	var blob = new models.Blob();
-	blob.id = new mongodb.ObjectID();
-	blob.content_type = req.get('Content-Type');
-	blob.content_length = req.get('Content-Length');
+	var blob = new models.Blob({
+        content_type: req.get('Content-Type'),
+        content_length: req.get('Content-Length')
+    });
 
     services.blobs.create(req.user, blob, req, function(err, blob) {
          if (err) res.send(400, err);

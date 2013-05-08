@@ -1,6 +1,8 @@
 var azure = require('azure'),
     log = require('../../log');
 
+var BLOB_CONTAINER = "blobs";
+
 function AzureBlobProvider(config) {
     var azure_storage_account = config.azure_storage_account || process.env.AZURE_STORAGE_ACCOUNT;
     var azure_storage_key = config.azure_storage_key || process.env.AZURE_STORAGE_KEY;
@@ -23,7 +25,7 @@ function AzureBlobProvider(config) {
 }
 
 AzureBlobProvider.prototype.create = function(blob, stream, callback) {
-    this.azureBlobService.createBlockBlobFromStream("blobs", blob.id, stream, blob.content_length,
+    this.azureBlobService.createBlockBlobFromStream(BLOB_CONTAINER, blob.id, stream, blob.content_length,
         {"contentType": blob.content_type},
         function(err, blobResult, response) {
             callback(err, blob);
@@ -31,9 +33,11 @@ AzureBlobProvider.prototype.create = function(blob, stream, callback) {
 };
 
 AzureBlobProvider.prototype.stream = function(blob, stream, callback) {
-    this.azureBlobService.getBlobToStream("blobs", blob.id, stream, function(err) {
-        callback(err);
-    });
+    this.azureBlobService.getBlobToStream(BLOB_CONTAINER, blob.id, stream, callback);
+};
+
+AzureBlobProvider.prototype.remove = function(blob, callback) {
+    this.azureBlobService.deleteBlob(BLOB_CONTAINER, blob.id, callback);
 };
 
 module.exports = AzureBlobProvider;

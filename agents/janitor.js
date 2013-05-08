@@ -1,4 +1,4 @@
-setInterval(function() {
+function janitorIteration() {
 
     log.info("janitor agent running");
 
@@ -12,4 +12,6 @@ setInterval(function() {
         log.info("janitor removed " + removed + " messages");
     });
 
-}, 61 * 1000);
+}
+
+setInterval(janitorIteration, 10 * 1000);

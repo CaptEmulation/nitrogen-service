@@ -95,7 +95,7 @@ var remove = function(principal, query, callback) {
     // TODO: will need more complicated authorization mechanism for non system users.
     if (!principal || !principal.isSystem()) return callback(403);
 
-    models.Message.find(filterForPrincipal(principal, query), function (err, messages) {
+    find(principal, query, { limit: 500 }, function (err, messages) {
 
         // delete linked resources and then the message itself.
         // TODO: what is an appropriate max parallelism here.
