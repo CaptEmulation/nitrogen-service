@@ -70,10 +70,10 @@ describe('principals service', function() {
         });
     });
 
-    it('not system principals cannot update a principal', function(done) {
+    it('system principals can update a principals name', function(done) {
         services.principals.update(fixtures.models.principals.device, fixtures.models.principals.device.id, { name: "my camera" }, function(err, principal) {
-            assert.notEqual(err, null);
-
+            assert.ifError(err);
+            assert.equal(principal.name, "my camera");
             done();
         });
     });
