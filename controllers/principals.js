@@ -12,7 +12,7 @@ exports.authenticate = function(req, res) {
     services.principals.authenticate(req.body, function (err, principal, accessToken) {
         if (err) {
             log.error("authentication of principal failed: " + err);
-            return res.send(400, { error: err });
+            return res.send(401, { error: err });
         }
 
         // since the authenticateRequest middleware was not run on this request run it manually.
