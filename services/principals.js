@@ -20,9 +20,11 @@ var authenticateUser = function(email, password, callback) {
         if (err) return callback(err);
         if (!principal) return callback("The email or password you entered were not accepted.  Please try again.");
 
+        log.info("found user email: " + email + " verifying password.");
         verifyPassword(password, principal, function(err) {
             if (err) return callback(err);
 
+            log.info("verified password, creating access token.");
             services.accessTokens.findOrCreateToken(principal, function(err, accessToken) {
                 if (err) return callback(err);
 
