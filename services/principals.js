@@ -265,6 +265,7 @@ var verifyPassword = function(password, user, callback) {
 
     hashPassword(password, saltBuf, function(err, hashedPasswordBuf) {
         if (err) return callback(err);
+        log.info("hashed password: " + hashedPasswordBuf.toString('base64'));
         if (user.password_hash != hashedPasswordBuf.toString('base64')) return callback(401);
 
         callback(null);
