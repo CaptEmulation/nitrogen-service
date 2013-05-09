@@ -1,4 +1,5 @@
 var config = require('../config')
+  , log = require('../log')
   , models = require('../models')
   , services = require('../services')
   , utils = require('../utils');
