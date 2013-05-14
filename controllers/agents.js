@@ -9,7 +9,7 @@ exports.index = function(req, res) {
     var query = utils.parseQuery(req);
     var options = utils.parseOptions(req);
 
-    services.agents.find(query, options, function(err, agents) {
+    services.agents.find(req.user, query, options, function(err, agents) {
         if (err) return res.send(400, err);
 
         res.send({"agents": agents});

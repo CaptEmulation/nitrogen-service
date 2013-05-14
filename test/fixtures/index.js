@@ -48,7 +48,7 @@ var createAgentFixtures = function(callback) {
         name: "nop"
     });
 
-    services.agents.create(agent, function(err, agent) {
+    services.agents.create(services.principals.systemPrincipal, agent, function(err, agent) {
         if (err) throw err;
 
         fixtures.agents.nop = agent;

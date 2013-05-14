@@ -1,3 +1,5 @@
+var async = require('async');
+
 exports.accessTokens = require('./accessTokens');
 exports.agents = require('./agents');
 exports.blobs = require('./blobs');
@@ -6,5 +8,8 @@ exports.principals = require('./principals');
 exports.realtime = require('./realtime');
 
 exports.initialize = function(callback) {
-    exports.principals.initialize(callback);
+    async.series([
+        exports.principals.initialize,
+        exports.agents.initialize
+    ], callback);
 };
