@@ -27,7 +27,7 @@ exports.index = function(req, res) {
     var query = utils.parseQuery(req);
     var options = utils.parseOptions(req);
 
-    if (!options.sort) options.sort = { timestamp: -1 };
+    if (!options.sort) options.sort = { ts: -1 };
 
     services.messages.find(req.user, query, options, function(err, messages) {
         if (err) return utils.handleError(res, err);

@@ -43,7 +43,7 @@ function sendMessage(location, callback) {
     var times = suncalc.getTimes(new Date(), location.body.latitude, location.body.longitude);
     var message = new nitrogen.Message({
         type: "camera_control",
-        timestamp: times.sunset,
+        ts: times.sunset,
         body: {
             command: "snapshot"
         }
