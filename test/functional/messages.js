@@ -30,7 +30,7 @@ describe('messages endpoint', function() {
 	});
 
     it('index query should return only those messages', function(done) {
-        request({ url: config.messages_endpoint + "?message_type=ip",
+        request({ url: config.messages_endpoint + "?type=ip",
                   headers: { Authorization: fixtures.models.accessTokens.device.toAuthHeader() },
                   json: true }, function(err,resp,body) {
 
@@ -40,7 +40,7 @@ describe('messages endpoint', function() {
             assert.equal(body.messages.length > 0, true);
 
             body.messages.forEach(function(message) {
-                assert.equal(message.message_type, 'ip');
+                assert.equal(message.type === 'ip', true);
             });
 
             done();
@@ -65,7 +65,7 @@ describe('messages endpoint', function() {
     it('create should be not be accessible without accessToken', function(done) {
         request.post(config.messages_endpoint,
             { json: [{ from: fixtures.models.principals.device.id,
-                       message_type: "_custom"}] }, function(err, resp, body) {
+                       type: "_custom"}] }, function(err, resp, body) {
             assert.equal(err, null);
             assert.equal(resp.statusCode, 401);
             done();
@@ -102,7 +102,7 @@ describe('messages endpoint', function() {
         });
 
         request.post(config.messages_endpoint,
-            { json: [{ message_type: "_messageSubscriptionTest",
+            { json: [{ type: "_messageSubscriptionTest",
                        public: false,
                        body: { reading: 5.1 } }],
               headers: { Authorization: fixtures.models.accessTokens.system.toAuthHeader() } }, function(err, resp, body) {
@@ -133,7 +133,7 @@ describe('messages endpoint', function() {
 
 		client.subscribe('/messages/' + fixtures.models.principals.device.id, function(message_json) {
             var message = JSON.parse(message_json);
-            if (message.message_type != "_messageSubscriptionTest") return;
+            if (message.type !== '_messageSubscriptionTest') return;
 
 			assert.equal(message.body.reading, 5.1);
 			notification_passed = true;
@@ -149,7 +149,7 @@ describe('messages endpoint', function() {
 
 			request.post(config.messages_endpoint,
 				{ json: [{ from: fixtures.models.principals.device.id,
-                           message_type: "_messageSubscriptionTest",
+                           type: "_messageSubscriptionTest",
                            public: false,
                            body: { reading: 5.1 } }],
                   headers: { Authorization: fixtures.models.accessTokens.device.toAuthHeader() } }, function(post_err, post_resp, post_body) {

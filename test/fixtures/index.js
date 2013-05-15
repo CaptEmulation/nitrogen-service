@@ -105,7 +105,7 @@ var createBlobFixture = function(callback) {
 
 var createDeviceIpMessageFixture = function(callback) {
     var message = new models.Message({ from: fixtures.principals.device.id,
-                                       message_type: "ip",
+                                       type: "ip",
                                        public: true,
                                        body: { ip_address: "127.0.0.1" } });
 

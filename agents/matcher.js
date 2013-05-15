@@ -2,7 +2,7 @@ function createIpMatchMessage(session, user, device, callback) {
 
     nitrogen.Message.find(session, {
         from: user.id,
-        message_type: "reject",
+        type: 'reject',
         body: { principal: device.id }
     }, function(err, messages) {
         if (err) return callback(err);
@@ -12,7 +12,7 @@ function createIpMatchMessage(session, user, device, callback) {
         }
 
         nitrogen.Message.find(session, {
-            message_type: "ip_match",
+            type: 'ip_match',
             body: { principal: device.id }
         }, function(err, messages) {
             if (err) return callback(err);
@@ -24,7 +24,7 @@ function createIpMatchMessage(session, user, device, callback) {
             log.info("matcher: creating ip_match message for device: " + device.id);
 
             var matchMessage = new nitrogen.Message({ 
-                message_type: "ip_match",                                                
+                type: 'ip_match',
                 to: user.id,
                 body: {
                     principal: device.id
@@ -89,7 +89,7 @@ function processIpMessage(message) {
 
 session.onMessage(function(message) {
     if (message.is('ip')) {
-        log.info("matcher: agent processing ip message");
+        log.info("matcher: processing ip message");
 
         processIpMessage(message);
     }

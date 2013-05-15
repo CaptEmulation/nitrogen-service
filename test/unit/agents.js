@@ -11,7 +11,7 @@ describe('agent service', function() {
         services.principals.updateLastConnection(fixtures.models.principals.user, "127.0.0.1");
 
         setTimeout(function() {
-            services.messages.find(services.principals.systemPrincipal, { message_type: "ip_match" }, {}, function(err, messages) {
+            services.messages.find(services.principals.systemPrincipal, { type: "ip_match" }, {}, function(err, messages) {
                 assert.ifError(err);
                 assert.equal(messages.length > 0, true);
                 done();
@@ -26,7 +26,7 @@ describe('agent service', function() {
 
         setTimeout(function() {
             services.messages.find(services.principals.systemPrincipal,
-                                   { message_type: "ip_match",
+                                   { type: "ip_match",
                                      to: fixtures.models.principals.anotherUser.id }, {}, function(err, messages) {
                 assert.ifError(err);
                 assert.equal(messages.length > 0, false);
@@ -41,14 +41,14 @@ describe('agent service', function() {
 
         // wait for matcher agent to match the user and device ip addresses.
         setTimeout(function() {
-            services.messages.find(services.principals.systemPrincipal, { message_type: "ip_match" }, {}, function(err, messages) {
+            services.messages.find(services.principals.systemPrincipal, { type: "ip_match" }, {}, function(err, messages) {
                 assert.ifError(err);
                 assert.equal(messages.length > 0, true);
 
                 var ipMatch = messages[0];
 
                 var claimMessage = models.Message({
-                    message_type: 'claim',
+                    type: 'claim',
                     response_to: ipMatch.id,
                     from: fixtures.models.principals.user.id,
                     to: services.principals.systemPrincipal.id,

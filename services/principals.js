@@ -231,10 +231,14 @@ var updateLastConnection = function(principal, ip) {
     if (principal.last_ip != ip) {
         principal.last_ip = updates.last_ip = ip;
 
-        var ipMessage = new models.Message({ "message_type": "ip" });
-        ipMessage.from = principal;
-        ipMessage.to = services.principals.systemPrincipal.id;
-        ipMessage.body.ip_address = ip;
+        var ipMessage = new models.Message({
+            type: 'ip',
+            from: principal,
+            to: services.principals.systemPrincipal.id,
+            body: {
+                ip_address: ip
+            }
+        });
 
         services.messages.create(ipMessage, function(err, message) {
             if (err) log.info("creating ip message failed: " + err);

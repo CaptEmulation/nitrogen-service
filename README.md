@@ -18,10 +18,13 @@ service.connect(thermometer, function(err, session, thermometer) {
 	// take temperature every 15 minutes.
 
     setInterval(function() {
-        var message = new nitrogen.Message();
-        message.from = session.principal.id;
-        message.message_type = "temperature";
-        message.body.temperature = getTemp();
+        var message = new nitrogen.Message({
+            from: session.principal.id,
+            type: 'temperature',
+            body: { 
+                temperature: getTemp()
+            }
+        });
 
         message.save(session);
     }, 15 * 60 * 1000);

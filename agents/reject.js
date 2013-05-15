@@ -1,5 +1,5 @@
 session.onMessage(function(message) {
-    if (message.message_type == "reject") {
+    if (message.is('reject')) {
         log.info("rejectAgent: processing message");
         nitrogen.Message.find(session, { _id: message.response_to }, function(err, ipMatches) {
 

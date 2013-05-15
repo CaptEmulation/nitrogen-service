@@ -129,11 +129,11 @@ var validate = function(message, callback) {
     if (!message.from)
         return callback("Message must have a from principal.");
 
-    if (!message.message_type)
+    if (!message.type)
         return callback("Message must have a message type.");
 
-    // TODO: do validation of message_type values if they are not custom prefixed
-    if (!message.message_type in ["claim", "heartbeat", "image", "ip_match", "reject"] && !message.isCustomType()) {
+    // TODO: do validation of type values if they are not custom prefixed
+    if (!message.type in ["claim", "heartbeat", "image", "ip_match", "reject"] && !message.isCustomType()) {
         return callback("Message type not recognized.  Custom message types must be prefixed by _");
     }
 
@@ -173,7 +173,7 @@ var memoizedSchema = async.memoize(loadSchema);
 var validateSchema = function(message, callback) {
     if (message.isCustomType()) return callback(null, { valid: true });
 
-    memoizedSchema(message.message_type, function(err, schema) {
+    memoizedSchema(message.type, function(err, schema) {
         var results = revalidator.validate(message.body, schema);
         if (!results.valid) {
             log.info("message validation failed with errors: " + results.errors);

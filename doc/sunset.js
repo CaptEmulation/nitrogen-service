@@ -19,13 +19,13 @@ function setupSnapshots() {
 }
 
 function findLastLocation(callback) {
-    nitrogen.Message.find(session, { message_type: 'location', from: params.camera_id }, function(err, messages) {
+    nitrogen.Message.find(session, { type: 'location', from: params.camera_id }, function(err, messages) {
         if (err) return callback(err);
 
         if (!messages) {
             messages = [
                 new nitrogen.Message({
-                    message_type: 'location',
+                    type: 'location',
                     from: params.camera_id,
                     body: {
                         latitude: 36.9742,
@@ -42,7 +42,7 @@ function findLastLocation(callback) {
 function sendMessage(location, callback) {
     var times = suncalc.getTimes(new Date(), location.body.latitude, location.body.longitude);
     var message = new nitrogen.Message({
-        message_type: "camera_control",
+        type: "camera_control",
         timestamp: times.sunset,
         body: {
             command: "snapshot"

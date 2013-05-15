@@ -12,7 +12,7 @@ describe('messages service', function() {
 
         var message = new models.Message({
             from: fixtures.models.principals.device.id,
-            message_type: "_test",
+            type: "_test",
             body: { reading: 5.1 }
         });
 
@@ -30,16 +30,16 @@ describe('messages service', function() {
 
     it('can remove messages with a query', function(done) {
         var message = new models.Message({ from: fixtures.models.principals.device.id,
-            message_type: "_test" });
+            type: "_test" });
 
         services.messages.create(message, function(err, savedMessages) {
             assert.ifError(err);
             assert.notEqual(savedMessages[0].id, null);
 
-            services.messages.remove(services.principals.systemPrincipal, { message_type: "_test" }, function(err) {
+            services.messages.remove(services.principals.systemPrincipal, { type: "_test" }, function(err) {
                 assert.equal(err, null);
 
-                services.messages.find(services.principals.systemPrincipal, { message_type: "_test" }, function(err, messages) {
+                services.messages.find(services.principals.systemPrincipal, { type: "_test" }, function(err, messages) {
                     assert.equal(err, null);
                     assert.equal(messages.length, 0);
                     done();
@@ -50,7 +50,7 @@ describe('messages service', function() {
 
     it ('rejects message with invalid principal in from', function(done) {
         var message = new models.Message({ from: new mongoose.Types.ObjectId(),
-                                           message_type: "_test" });
+                                           type: "_test" });
 
         services.messages.create(message, function(err, savedMessages) {
             assert.notEqual(err, null);
@@ -58,7 +58,7 @@ describe('messages service', function() {
         });
     });
 
-    it ('rejects message without message_type', function(done) {
+    it ('rejects message without type', function(done) {
         var message = new models.Message({ from: fixtures.models.principals.device.id });
 
         services.messages.create(message, function(err, savedMessages) {
@@ -68,7 +68,7 @@ describe('messages service', function() {
     });
 
     it ('rejects message without from', function(done) {
-        var message = new models.Message({ message_type: "_test" });
+        var message = new models.Message({ type: "_test" });
 
         services.messages.create(message, function(err, savedMessages) {
             assert.notEqual(err, null);
@@ -79,7 +79,7 @@ describe('messages service', function() {
     it ('handles log message by creating log entry', function(done) {
         var message = new models.Message({
             from: fixtures.models.principals.device.id,
-            message_type: "log",
+            type: "log",
             body: {
                 severity: "error",
                 message: "something terrible happened"
@@ -95,7 +95,7 @@ describe('messages service', function() {
     it ('flunks incorrect schema for log message', function(done) {
         var message = new models.Message({
             from: fixtures.models.principals.device.id,
-            message_type: "log",
+            type: "log",
             body: {
                 notright: "error",
                 message: "something terrible happened"

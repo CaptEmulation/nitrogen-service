@@ -5,7 +5,7 @@ var async = require('async')
 
 var messageSchema = new BaseSchema();
 messageSchema.add({
-    message_type: { type: String },                 // s
+    type: { type: String },                 // s
     schema_version: { type: Number },               // sv
 
     // a link ties this message to another resource.
@@ -27,7 +27,7 @@ messageSchema.add({
 messageSchema.index({ expires: 1 });
 messageSchema.index({ from: 1 });
 messageSchema.index({ link: 1 });
-messageSchema.index({ message_type: 1 });
+messageSchema.index({ type: 1 });
 messageSchema.index({ public: 1 });
 messageSchema.index({ timestamp: 1, type: -1 });
 messageSchema.index({ to: 1 });
@@ -39,11 +39,11 @@ messageSchema.set('toJSON', { transform: BaseSchema.baseObjectTransform });
 var Message = mongoose.model('Message', messageSchema);
 
 Message.prototype.isCustomType = function() {
-    return this.message_type[0] == "_";
+    return this.type[0] == "_";
 };
 
 Message.prototype.is = function(type) {
-    return this.message_type == type;
+    return this.type === type;
 };
 
 module.exports = Message;
