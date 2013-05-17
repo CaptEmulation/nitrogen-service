@@ -213,14 +213,26 @@ var initialize = function(callback) {
 };
 
 var update = function(authorizingPrincipal, id, updates, callback) {
-    if (!authorizingPrincipal || !authorizingPrincipal.isSystem()) {
-        updates = { name: updates.name };
-    }
+    if (!authorizingPrincipal) return callback(403);
+    if (!id) return callback(400);
 
-    models.Principal.update({ _id: id }, { $set: updates }, function (err, updateCount) {
+    findById(authorizingPrincipal, id, function(err, principal) {
         if (err) return callback(err);
+        if (!principal) return callback(404);
+        if (!authorizingPrincipal.isSystem() && authorizingPrincipal.id != principal.id && authorizingPrincipal.id != principal.owner) {
+            return callback(403);
+        }
 
-        findById(authorizingPrincipal, id, callback);
+        // if its not the system, you can only update the name.
+        if (!authorizingPrincipal.isSystem()) {
+            updates = { name: updates.name };
+        }
+
+        models.Principal.update({ _id: id }, { $set: updates }, function (err, updateCount) {
+            if (err) return callback(err);
+
+            findById(authorizingPrincipal, id, callback);
+        });
     });
 };
 

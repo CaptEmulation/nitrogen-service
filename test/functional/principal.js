@@ -112,7 +112,7 @@ describe('principal endpoint', function() {
             });
     });
 
-    it('should allow system principal to update a message', function(done) {
+    it('should allow updates to a principals name', function(done) {
         fixtures.models.principals.device.name = "my camera";
 
         request.put(config.principals_endpoint + "/" + fixtures.models.principals.device.id,

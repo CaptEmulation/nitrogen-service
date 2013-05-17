@@ -5,9 +5,10 @@ var BaseSchema = require('./baseSchema'),
 var agentSchema = new BaseSchema();
 
 agentSchema.add({
-    name:       { type: String },
     action:     { type: String },
     execute_as: { type: Schema.Types.ObjectId, ref: 'Principal' },
+    enabled:    { type: Boolean },
+    name:       { type: String },
     params:     { type: Schema.Types.Mixed }
 });
 

@@ -67,17 +67,25 @@ var createUserFixtures = function(callback) {
 
         fixtures.principals.user = user;
 
-        var anotherUser = new models.Principal({ principal_type: 'user',
-                                                 email: 'anotheruser@server.org',
-                                                 public: false,
-                                                 password: 'sEcReTO66' });
-
-        services.principals.create(anotherUser, function(err, user) {
+        services.accessTokens.create(user, function(err, accessToken) {
             if (err) throw err;
 
-            fixtures.principals.anotherUser = user;
+            fixtures.accessTokens.user = accessToken;
 
-            callback();
+            var anotherUser = new models.Principal({
+                principal_type: 'user',
+                email: 'anotheruser@server.org',
+                public: false,
+                password: 'sEcReTO66'
+            });
+
+            services.principals.create(anotherUser, function(err, user) {
+                if (err) throw err;
+
+                fixtures.principals.anotherUser = user;
+
+                callback();
+            });
         });
     });
 };

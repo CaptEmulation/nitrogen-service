@@ -29,7 +29,7 @@ var create = function(principal, agent, callback) {
     agent.save(function(err, agent) {
         if (err) return callback(err);
 
-        callback(null, [agent]);
+        callback(null, agent);
     });
 };
 
@@ -41,7 +41,7 @@ var execute = function(agents, callback) {
 
     async.each(agents, function(agent, callback) {
 
-        if (agent && agent.session) {
+        if (agent && agent.enabled && agent.session) {
             var context = { async: async,
                             cron: cron,
                             log: log,
@@ -95,10 +95,12 @@ var initialize = function(callback) {
 
                     if (agents.length > 0) {
                         log.info("found existing agent for built-in agent: " + file + ": updating with latest action.");
+
                         update(services.principals.systemPrincipal, agents[0].id, { action: action }, callback);
                     } else {
                         log.info("no existing agent for built-in agent: " + file + ": creating.");
                         var agent = new models.Agent({ action: action,
+                                                       enabled: true,
                                                        execute_as: services.principals.systemPrincipal.id,
                                                        name: file });
                         create(services.principals.systemPrincipal, agent, callback);
@@ -111,6 +113,8 @@ var initialize = function(callback) {
 
 var prepareAgents = function(session, agents, callback) {
     async.map(agents, function(agent, callback) {
+        if (!agent.enabled) return callback(null, agent);
+
         agent.compiledAction = vm.createScript(agent.action);
 
         session.impersonate(agent.execute_as, function(err, impersonatedSession) {
@@ -152,7 +156,11 @@ var update = function(authorizingPrincipal, id, updates, callback) {
         if (!agent) return callback(404);
         if (!authorizingPrincipal.isSystem() && authorizingPrincipal.id != agent.execute_as) return callback(403);
 
-        models.Agent.update({ _id: id }, { $set: updates }, callback);
+        models.Agent.update({ _id: id }, { $set: updates }, function(err, updated) {
+            if (err) return callback(err);
+
+            findById(authorizingPrincipal, id, callback);
+        });
     });
 };
 
