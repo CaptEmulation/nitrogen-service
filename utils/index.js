@@ -38,6 +38,7 @@ var handleError = function(res, err) {
     if (err === 400) return sendFailedResponse(res, 400, err);
     if (err === 401) return sendFailedResponse(res, 401, err);
     if (err === 403) return sendFailedResponse(res, 403, err);
+    if (err === 404) return sendFailedResponse(res, 404, err);
     if (err) return sendFailedResponse(res, 500, err);
 };
 

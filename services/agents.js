@@ -62,12 +62,21 @@ var execute = function(agents, callback) {
     }, callback);
 };
 
+var filterForPrincipal = function(principal, filter) {
+    if (principal && principal.isSystem()) return filter;
+
+    if (principal) {
+        filter["$and"] = [ { execute_as: principal._id } ];
+    }
+    return filter;
+};
+
 var find = function(principal, filter, options, callback) {
-    models.Agent.find(filter, null, options, callback);
+    models.Agent.find(filterForPrincipal(principal, filter), null, options, callback);
 };
 
 var findById = function(principal, agentId, callback) {
-    models.Agent.findOne({ "_id": agentId }, function(err, agent) {
+    models.Agent.findOne(filterForPrincipal(principal, { "_id": agentId }), function(err, agent) {
         if (err) return callback(err);
         if (!agent) return callback(404);
         if (!principal.isSystem() && agent.execute_as != principal.id) return callback(403);
@@ -90,7 +99,7 @@ var initialize = function(callback) {
             fs.readFile(agentPath, function (err, action) {
                 if (err) return callback(err);
 
-                find({ name: file, execute_as: services.principals.systemPrincipal.id }, function (err, agents) {
+                find(services.principals.systemPrincipal, { name: file, execute_as: services.principals.systemPrincipal.id }, function (err, agents) {
                     if (err) return callback(err);
 
                     if (agents.length > 0) {

@@ -14,7 +14,7 @@ describe('agents endpoint', function() {
 
     it('index should return all agents', function(done) {
         request({ url: config.agents_endpoint,
-                  headers: { Authorization: fixtures.models.accessTokens.device.toAuthHeader() },
+                  headers: { Authorization: fixtures.models.accessTokens.system.toAuthHeader() },
                              json: true }, function(err,resp,body) {
             assert.ifError(err);
             assert.equal(resp.statusCode, 200);
@@ -47,7 +47,7 @@ describe('agents endpoint', function() {
             { headers: { Authorization: fixtures.models.accessTokens.device.toAuthHeader() },
                 json: fixtures.models.agents.nop }, function(err, resp, body) {
                 assert.ifError(err);
-                assert.equal(resp.statusCode, 403);
+                assert.equal(resp.statusCode, 404);
 
                 done();
             }
