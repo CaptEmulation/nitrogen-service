@@ -5,6 +5,16 @@ var async = require('async')
   , services = require('../services')
   , utils = require('../utils');
 
+exports.create = function(req, res) {
+    var agent = new models.Agent(req.body);
+
+    services.agents.create(req.user, agent, function(err, agent) {
+        if (err) return utils.handleError(res, err);
+
+        res.send({ 'agent': agent });
+    });
+};
+
 exports.index = function(req, res) {
     var query = utils.parseQuery(req);
     var options = utils.parseOptions(req);

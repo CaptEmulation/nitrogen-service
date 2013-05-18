@@ -43,6 +43,7 @@ mongoose.connection.once('open', function () {
         app.get(config.api_prefix + 'v1/headwaiter',                                     controllers.headwaiter.index);
 
         app.get(config.api_prefix + 'v1/agents',         middleware.authenticateRequest, controllers.agents.index);
+        app.post(config.api_prefix + 'v1/agents',        middleware.authenticateRequest, controllers.agents.create);
         app.put(config.api_prefix + 'v1/agents/:id',     middleware.authenticateRequest, controllers.agents.update);
 
         if (config.blob_provider) {

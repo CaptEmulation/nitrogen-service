@@ -1,5 +1,6 @@
 var assert = require('assert')
   ,	config = require('../../config')
+  , models = require('../../models')
   , fixtures = require('../fixtures')
   , request = require('request');
 
@@ -26,7 +27,29 @@ describe('agents endpoint', function() {
         });
     });
 
-    it('should allow updates to a agent by execute_as user', function(done) {
+    it('should allow creating an agent by a user', function(done) {
+
+        var agent = models.Agent({
+            execute_as: fixtures.models.principals.device.id,
+            action: ";",
+            enabled: true
+        });
+
+        request.post(config.agents_endpoint,
+            { headers: { Authorization: fixtures.models.accessTokens.user.toAuthHeader() },
+                json: agent }, function(err, resp, body) {
+                assert.ifError(err);
+                assert.equal(resp.statusCode, 200);
+
+                // should normalize agent execution to user
+                assert.equal(body.agent.execute_as, fixtures.models.principals.user.id);
+
+                done();
+            }
+        );
+    });
+
+    it('should allow updates to an agent by execute_as user', function(done) {
         fixtures.models.agents.nop.enabled = false;
 
         request.put(config.agents_endpoint + "/" + fixtures.models.agents.nop.id,

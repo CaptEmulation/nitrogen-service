@@ -43,7 +43,7 @@ var createSystemUserFixtures = function(callback) {
 
 var createAgentFixtures = function(callback) {
     var agent = new models.Agent({
-        action: "",
+        action: ";",
         execute_as: fixtures.principals.user.id,
         name: "nop"
     });

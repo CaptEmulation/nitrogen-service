@@ -24,7 +24,10 @@ var buildSystemClientSession = function(config, callback) {
 };
 
 var create = function(principal, agent, callback) {
-    if (!principal.isSystem()) return callback(403);
+    if (!principal) return callback(400);
+
+    if (!principal.isSystem())
+        agent.execute_as = principal.id;
 
     agent.save(function(err, agent) {
         if (err) return callback(err);
