@@ -4,10 +4,10 @@ var BaseSchema = require('./baseSchema')
 
 var principalSchema = new BaseSchema();
 principalSchema.add({
-	principal_type: { type: String },        // user, device
-    name: { type: String },                  // user friendly name for this principal
+	type: { type: String },        // user, device
+    name: { type: String },        // user friendly name for this principal
 
-    public: { type: Boolean, default: false },
+    public: { type: Boolean, default: true },
     owner: { type: Schema.Types.ObjectId, ref: 'Principal' },
 
 	last_ip: { type: String },
@@ -31,7 +31,7 @@ principalSchema.index({ email: 1 });
 principalSchema.index({ last_ip: 1 });
 principalSchema.index({ owner: 1 });
 principalSchema.index({ public: 1 });
-principalSchema.index({ principal_type: 1 });
+principalSchema.index({ type: 1 });
 
 principalSchema.virtual('secret').set(function(value) { this._secret = value; });
 principalSchema.virtual('secret').get(function() { return this._secret; });
@@ -50,7 +50,7 @@ var principalObjectTransform = function(doc, ret, options) {
 principalSchema.set('toObject', { transform: principalObjectTransform });
 principalSchema.set('toJSON', { transform: principalObjectTransform });
 
-principalSchema.path('principal_type').validate(function (value) {
+principalSchema.path('type').validate(function (value) {
     var invalid = false;
 
     if (!value)
@@ -60,20 +60,12 @@ principalSchema.path('principal_type').validate(function (value) {
         invalid = true;
 
     return !invalid;
-}, 'Principal must have valid principal_type.');
+}, 'Principal must have valid type.');
 
 var Principal = mongoose.model('Principal', principalSchema);
 
-Principal.prototype.isDevice = function() {
-    return this.principal_type == "device";
-};
-
-Principal.prototype.isSystem = function() {
-    return this.principal_type == "system";
-};
-
-Principal.prototype.isUser = function() {
-    return this.principal_type == "user";
+Principal.prototype.is = function(type) {
+    return this.type === type;
 };
 
 module.exports = Principal;

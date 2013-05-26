@@ -33,7 +33,7 @@ exports.create = function(req, res) {
 
             var principalJSON = principal.toObject();
 
-            if (principal.isDevice()) {
+            if (principal.is('device')) {
                 // for create (and create only) we want to pass back the secret to the device.
                 principalJSON.secret = principal.secret;
             }

@@ -67,7 +67,7 @@ var create = function(principal, callback) {
                 principal.save(function(err, principal) {
                     if (err) return callback(err);
 
-                    log.info("created " + principal.principal_type + " principal: " + principal.id);
+                    log.info("created " + principal.type + " principal: " + principal.id);
                     callback(null, principal);
                 });
             });
@@ -78,7 +78,7 @@ var create = function(principal, callback) {
 var checkForExistingPrincipal = function(principal, callback) {
     if (!services.principals.systemPrincipal) return callback(null, null);
 
-    if (principal.isUser()) {
+    if (principal.is('user')) {
         findByEmail(services.principals.systemPrincipal, principal.email, callback);
     } else {
         findById(services.principals.systemPrincipal, principal.id, callback);
@@ -86,7 +86,7 @@ var checkForExistingPrincipal = function(principal, callback) {
 };
 
 var createCredentials = function(principal, callback) {
-    if (principal.isUser()) {
+    if (principal.is('user')) {
         createUserCredentials(principal, callback);
     } else {
         createSecretCredentials(principal, callback);
@@ -123,7 +123,7 @@ var createUserCredentials = function(principal, callback) {
 };
 
 var filterForPrincipal = function(principal, filter) {
-    if (principal && principal.isSystem()) return filter;
+    if (principal && principal.is('system')) return filter;
 
     var visibilityFilter = [ { public: true }];
     if (principal) {
@@ -171,7 +171,7 @@ var hashSecret = function(secret, callback) {
 };
 
 var impersonate = function(principal, impersonatedPrincipalId, callback) {
-    if (principal.principal_type != "system" && principal.id != impersonatedPrincipalId) return callback(401);
+    if (principal.type != "system" && principal.id != impersonatedPrincipalId) return callback(401);
 
     findById(services.principals.systemPrincipal, impersonatedPrincipalId, function(err, impersonatedPrincipal) {
         if (err) return callback(err);
@@ -191,14 +191,14 @@ var initialize = function(callback) {
     // we don't use services find() here because it is a chicken and an egg visibility problem.
     // we aren't system so we can't find system. :)
 
-    models.Principal.find({ principal_type: "system" }, null, {}, function(err, principals) {
+    models.Principal.find({ type: "system" }, null, {}, function(err, principals) {
         if (err) return callback(err);
 
         log.info("found " + principals.length + " system principals");
 
         if (principals.length == 0) {
             log.info("creating system principal");
-            var systemPrincipal = new models.Principal({ principal_type: "system" });
+            var systemPrincipal = new models.Principal({ type: "system" });
             create(systemPrincipal, function(err, systemPrincipal) {
                 if (err) return callback(err);
 
@@ -219,12 +219,12 @@ var update = function(authorizingPrincipal, id, updates, callback) {
     findById(authorizingPrincipal, id, function(err, principal) {
         if (err) return callback(err);
         if (!principal) return callback(404);
-        if (!authorizingPrincipal.isSystem() && authorizingPrincipal.id != principal.id && authorizingPrincipal.id != principal.owner) {
+        if (!authorizingPrincipal.is('system') && authorizingPrincipal.id != principal.id && authorizingPrincipal.id != principal.owner) {
             return callback(403);
         }
 
         // if its not the system, you can only update the name.
-        if (!authorizingPrincipal.isSystem()) {
+        if (!authorizingPrincipal.is('system')) {
             updates = { name: updates.name };
         }
 
@@ -265,10 +265,10 @@ var updateLastConnection = function(principal, ip) {
 };
 
 var validate = function(principal, callback) {
-    if (principal.principal_type !== "device" && principal.principal_type !== "user" && principal.principal_type !== "system")
-        return callback("Principal type must be one of device, user, or system.");
+    if (!principal.is('device') && !principal.is('user') && !principal.is('system'))
+        return callback("Principal type must be one of device, user, or root.");
 
-    if (principal.isUser()) {
+    if (principal.is('user')) {
         if (!principal.email) return callback("user principal must have email");
         if (!principal.password) return callback("user principal must have password");        
     }

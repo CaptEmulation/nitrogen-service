@@ -8,7 +8,7 @@ describe('principals service', function() {
     var passwordFixture = "sEcReT44";
 
     it('can create and validate a user', function(done) {
-        var user = new models.Principal({ principal_type: "user",
+        var user = new models.Principal({ type: "user",
                                           email: "user@gmail.com",
                                           password: passwordFixture });
 
@@ -30,7 +30,7 @@ describe('principals service', function() {
     });
 
     it('can create and validate a device', function(done) {
-        var device = new models.Principal({ principal_type: "device" });
+        var device = new models.Principal({ type: "device" });
         services.principals.create(device, function(err, device) {
             assert.ifError(err);
             assert.notEqual(device.id, undefined);
@@ -61,10 +61,10 @@ describe('principals service', function() {
     });
 
     it('system can update a principal', function(done) {
-        fixtures.models.principals.device.name = "my camera";
+        fixtures.models.principals.device.name = 'my camera';
         services.principals.update(services.principals.systemPrincipal, fixtures.models.principals.device.id, { name: "my camera"}, function(err, principal) {
             assert.ifError(err);
-            assert.equal(principal.name, "my camera");
+            assert.equal(principal.name, 'my camera');
 
             done();
         });
@@ -73,13 +73,13 @@ describe('principals service', function() {
     it('system principals can update a principals name', function(done) {
         services.principals.update(fixtures.models.principals.device, fixtures.models.principals.device.id, { name: "my camera" }, function(err, principal) {
             assert.ifError(err);
-            assert.equal(principal.name, "my camera");
+            assert.equal(principal.name, 'my camera');
             done();
         });
     });
 
     it('should reject creating a user without an email', function(done) {
-        var user = new models.Principal({ principal_type: "user",
+        var user = new models.Principal({ type: 'user',
             password: fixtures.models.principals.user.password });
 
         services.principals.create(user, function(err, user) {
@@ -89,8 +89,8 @@ describe('principals service', function() {
     });
 
     it('should reject creating a user without a password', function(done) {
-        var user = new models.Principal({ principal_type: "user",
-                                            email: "newuser@gmail.com" });
+        var user = new models.Principal({ type: 'user',
+                                          email: 'newuser@gmail.com' });
 
         services.principals.create(user, function(err, user) {
             assert.equal(!!err, true);
@@ -99,7 +99,7 @@ describe('principals service', function() {
     });
 
     it('should reject creating a if user that already exists', function(done) {
-        var user = new models.Principal({ principal_type: "user",
+        var user = new models.Principal({ type: 'user',
                                           email: fixtures.models.principals.user.email,
                                           password: fixtures.models.principals.user.password });
 

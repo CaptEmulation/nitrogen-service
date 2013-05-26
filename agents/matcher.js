@@ -44,7 +44,7 @@ function sendIpMatchMessages(message, devices, users) {
 
         /* for device 'ip' messages we only generate one ip_match message from the user to that device. */
 
-        if (fromPrincipal.isUser()) {
+        if (fromPrincipal.is('user')) {
             /* for each device at this IP address that is not currently owned by a principal, emit an ip_match message. */
             var user = fromPrincipal;
 
@@ -71,11 +71,11 @@ function processIpMessage(message) {
         var users = [];
 
         principalsAtIp.forEach(function(principal) {
-            log.info("matcher: principal at ip: " + principal.principal_type + ":" + principal.id);
+            log.info("matcher: principal at ip: " + principal.type + ":" + principal.id);
 
-            if (principal.isUser())
+            if (principal.is('user'))
                 users.push(principal);
-            else if (principal.isDevice())
+            else if (principal.is('device'))
                 devices.push(principal);
         });
 

@@ -10,16 +10,16 @@ messageSchema.add({
 
     // a link ties this message to another resource.
     link: { type: Schema.Types.ObjectId },          // link to other resources (eg. blob)
-	ts: { type: Date, default: Date.now },          // timestamp
-	expires: { type: Date },                        // expires
+	  ts: { type: Date, default: Date.now },          // timestamp
+	  expires: { type: Date },                        // expires
 
     public: { type: Boolean, default: true },
 
-	from: { type: Schema.Types.ObjectId, ref: 'Principal' },  	  // principal who sent message
-	to: { type: Schema.Types.ObjectId, ref: 'Principal' },  	  // message target (if any)
+	  from: { type: Schema.Types.ObjectId, ref: 'Principal' },  	  // principal who sent message
+	  to: { type: Schema.Types.ObjectId, ref: 'Principal' },  	  // message target (if any)
     response_to: { type: Schema.Types.ObjectId, ref: 'Message' }, // message this is in response to (if any)
 
-	body: { type: Schema.Types.Mixed, default: {} },
+	  body: { type: Schema.Types.Mixed, default: {} },
 
     // internal fields
 
@@ -41,8 +41,12 @@ messageSchema.set('toJSON', { transform: BaseSchema.baseObjectTransform });
 
 var Message = mongoose.model('Message', messageSchema);
 
+Message.prototype.expired = function() {
+    return Date.now() > this.expires.getTime();
+};
+
 Message.prototype.isCustomType = function() {
-    return this.type[0] == "_";
+    return this.type[0] === "_";
 };
 
 Message.prototype.is = function(type) {

@@ -25,7 +25,7 @@ var create = function(principal, blob, stream, callback) {
 };
 
 var remove = function(principal, query, callback) {
-    if (!principal || !principal.isSystem()) return callback("Only system can delete messages");
+    if (!principal || !principal.is('system')) return callback("Only system can delete messages");
 
     models.Blob.find(query, function (err, blobs) {
 

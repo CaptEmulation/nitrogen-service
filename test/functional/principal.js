@@ -12,7 +12,7 @@ describe('principal endpoint', function() {
 	it('should create and fetch a device principal', function(done) {
 
         request.post(config.principals_endpoint,
-            { json: { principal_type: "device",
+            { json: { type: 'device',
                       name: "subscription_test" } }, function(post_err, post_resp, post_body) {
               assert.ifError(post_err);
               assert.equal(post_resp.statusCode, 200);
@@ -59,14 +59,14 @@ describe('principal endpoint', function() {
 
     it('should fetch only user principals', function(done) {
         request.get({ url: config.principals_endpoint,
-                      qs: { q: JSON.stringify({ principal_type: "user" }) },
+                      qs: { q: JSON.stringify({ type: 'user' }) },
                       headers: { Authorization: fixtures.models.accessTokens.device.toAuthHeader() },
                       json: true }, function(err, resp, body) {
             assert.equal(resp.statusCode, 200);
             assert.equal(body.principals.length > 0, true);
 
             body.principals.forEach(function(principal) {
-                assert.equal(principal.principal_type, 'user');
+                assert.equal(principal.type, 'user');
             });
 
             done();
@@ -85,7 +85,7 @@ describe('principal endpoint', function() {
         var secret = fixtures.models.principals.device.secret;
 
         request.post(config.principals_endpoint + '/auth',
-            { json: { principal_type: 'device',
+            { json: { type: 'device',
                       id: deviceId,
                       secret: secret} }, function(err, resp, body) {
                 assert.equal(resp.statusCode, 200);
@@ -99,7 +99,7 @@ describe('principal endpoint', function() {
 
     it('should login user principal', function(done) {
         request.post(config.principals_endpoint + '/auth',
-            { json: { principal_type: 'user',
+            { json: { type: 'user',
                       email: 'user@server.org',
                       password: 'sEcReT44'} }, function(err, resp, body) {
                 assert.equal(resp.statusCode, 200);

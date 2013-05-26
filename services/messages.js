@@ -49,7 +49,7 @@ var createMany = function(messages, callback) {
 };
 
 var filterForPrincipal = function(principal, filter) {
-    if (principal && principal.isSystem()) return filter;
+    if (principal && principal.is('system')) return filter;
 
     var visibilityFilter = [ { public: true } ];
     if (principal) {
@@ -93,7 +93,7 @@ var translate = function(message) {
 
 var remove = function(principal, query, callback) {
     // TODO: will need more complicated authorization mechanism for non system users.
-    if (!principal || !principal.isSystem()) return callback(403);
+    if (!principal || !principal.is('system')) return callback(403);
 
     find(principal, query, { limit: 500 }, function (err, messages) {
         if (err) return callback(messages);
@@ -116,7 +116,7 @@ var removeLinkedResources = function(message, callback) {
 };
 
 var removeOne = function(principal, message, callback) {
-    if (!principal || !principal.isSystem()) return callback("Only system can delete messages");
+    if (!principal || !principal.is('system')) return callback("Only system can delete messages");
 
     removeLinkedResources(message, function(err) {
         if (err) return callback(err);

@@ -26,7 +26,7 @@ var buildSystemClientSession = function(config, callback) {
 var create = function(principal, agent, callback) {
     if (!principal) return callback(400);
 
-    if (!principal.isSystem())
+    if (!principal.is('system'))
         agent.execute_as = principal.id;
 
     agent.save(function(err, agent) {
@@ -66,7 +66,7 @@ var execute = function(agents, callback) {
 };
 
 var filterForPrincipal = function(principal, filter) {
-    if (principal && principal.isSystem()) return filter;
+    if (principal && principal.is('system')) return filter;
 
     if (principal) {
         filter["$and"] = [ { execute_as: principal._id } ];
@@ -82,7 +82,7 @@ var findById = function(principal, agentId, callback) {
     models.Agent.findOne(filterForPrincipal(principal, { "_id": agentId }), function(err, agent) {
         if (err) return callback(err);
         if (!agent) return callback(404);
-        if (!principal.isSystem() && agent.execute_as != principal.id) return callback(403);
+        if (!principal.is('system') && agent.execute_as != principal.id) return callback(403);
 
         return callback(null, agent);
     });
@@ -166,7 +166,7 @@ var update = function(authorizingPrincipal, id, updates, callback) {
     findById(authorizingPrincipal, id, function(err, agent) {
         if (err) return callback(err);
         if (!agent) return callback(404);
-        if (!authorizingPrincipal.isSystem() && authorizingPrincipal.id != agent.execute_as) return callback(403);
+        if (!authorizingPrincipal.is('system') && authorizingPrincipal.id != agent.execute_as) return callback(403);
 
         models.Agent.update({ _id: id }, { $set: updates }, function(err, updated) {
             if (err) return callback(err);

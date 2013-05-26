@@ -11,7 +11,7 @@ var removeAll = function (modelType, callback) {
 };
 
 var createDeviceFixtures = function(callback) {
-    var device = new models.Principal({ principal_type: 'device',
+    var device = new models.Principal({ type: 'device',
                                         name: 'existing_device',
                                         public: true,
                                         owner: fixtures.principals.user });
@@ -57,7 +57,7 @@ var createAgentFixtures = function(callback) {
 };
 
 var createUserFixtures = function(callback) {
-    var user = new models.Principal({ principal_type: 'user',
+    var user = new models.Principal({ type: 'user',
                                       email: 'user@server.org',
                                       public: true,
                                       password: 'sEcReT44' });
@@ -73,7 +73,7 @@ var createUserFixtures = function(callback) {
             fixtures.accessTokens.user = accessToken;
 
             var anotherUser = new models.Principal({
-                principal_type: 'user',
+                type: 'user',
                 email: 'anotheruser@server.org',
                 public: false,
                 password: 'sEcReTO66'
