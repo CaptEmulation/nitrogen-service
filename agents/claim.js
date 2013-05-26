@@ -1,20 +1,23 @@
 function processClaim(message) {
-    nitrogen.Message.find(session, { _id: message.response_to }, function(err, ipMatches) {
+    if (message.is('claim') && message.response_to) {
+        log.info("claimAgent: claim agent processing message: " + message.id + " : " + message.to);
+        nitrogen.Message.find(session, { _id: message.response_to[0] }, function(err, ipMatches) {
 
-        if (err || ipMatches.length == 0) {
-            log.error("claimAgent: couldn't find ip_match claim was in response to, ignoring request.");
-            return;
-        }
+            if (err || ipMatches.length == 0) {
+                log.error("claimAgent: couldn't find ip_match claim was in response to, ignoring request.");
+                return;
+            }
 
-        var ipMatch = ipMatches[0];
+            var ipMatch = ipMatches[0];
 
-        if (ipMatch.to !== message.from) {
-            log.error("claimAgent: user trying to claim principal does not match ip match message, ignoring.");
-            return;
-        }
+            if (ipMatch.to !== message.from) {
+                log.error("claimAgent: user trying to claim principal does not match ip match message, ignoring.");
+                return;
+            }
 
-        assignOwnerToPrincipal(message);
-    });
+            assignOwnerToPrincipal(message);
+        });        
+    }
 }
 
 function assignOwnerToPrincipal(message) {
@@ -41,9 +44,5 @@ function assignOwnerToPrincipal(message) {
 }
 
 session.onMessage(function(message) {
-    if (message.is('claim')) {
-        log.info("claimAgent: claim agent processing message: " + message.id + " : " + message.to);
-
-        processClaim(message);
-    }
+    processClaim(message);
 });

@@ -49,7 +49,7 @@ describe('agent service', function() {
 
                 var claimMessage = models.Message({
                     type: 'claim',
-                    response_to: ipMatch.id,
+                    response_to: [ ipMatch.id ],
                     from: fixtures.models.principals.user.id,
                     to: services.principals.systemPrincipal.id,
                     body: {
