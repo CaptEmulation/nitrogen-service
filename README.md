@@ -1,16 +1,16 @@
 # Nitrogen Service
 
-Nitrogen is a platform for building connected devices and the applications that use them.  Nitrogen provides the authentication, authorization, event logging, device provisioning, discovery services, and real time message passing framework so that you can focus on your device and application.  All with a consistent development platform that leverages the ubiquity of Javascript.
+Nitrogen is a platform for building connected devices and the applications that use them.  Nitrogen provides the authentication, authorization, event logging, device provisioning, discovery services, and real time message passing framework so that you can focus on your device and/or application.  All with a consistent development platform that leverages the ubiquity of Javascript.
 
 ## Device Development Model
 
-Nitrogen at its heart uses messaging between principals (devices and users).  Principals in the system can create and consume messages.  Messages can follow a well known schema to enable interoperability between applications or use their own private custom message types.
+Nitrogen at its heart uses messaging between principals (devices and users) to allow them to communicate. Messages can follow a well known schema to enable interoperability between applications or use their own private custom message types for specialized applications.
 
 For example, a thermometer that measures temperature once every 15 minutes could be implemented in Nitrogen like this:
 
 ``` javascript
-var thermometer = new nitrogen.Device({ local_id: "thermometer",
-                                       capabilities: [ "thermometer" ] });
+var thermometer = new nitrogen.Device({ ni: "thermometer",
+                                        capabilities: [ "thermometer" ] });
 
 var service = new nitrogen.Service(config);
 service.connect(thermometer, function(err, session, thermometer) {
@@ -33,6 +33,8 @@ service.connect(thermometer, function(err, session, thermometer) {
 ```
 
 You can find a complete example for a device application of Nitrogen in the `chroma` project.
+
+Current message schemas are futher defined in [docs/schema.md](doc/schema.md).
 
 ## Application Development Model
 
