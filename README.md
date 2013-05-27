@@ -21,7 +21,7 @@ service.connect(thermometer, function(err, session, thermometer) {
         var message = new nitrogen.Message({
             from: session.principal.id,
             type: 'temperature',
-            body: { 
+            body: {
                 temperature: getTemp()
             }
         });
@@ -38,6 +38,7 @@ You can find a complete example for a device application of Nitrogen in the `chr
 
 The development model for applications is similiar.   A web application that displays these temperatures in real time as they are received would look like this:
 
+``` javascript
 var user = new nitrogen.User();
 
 var service = new nitrogen.Service(config);
@@ -53,6 +54,7 @@ service.connect(user, function(err, session, user) {
         }
     });
 });
+```
 
 A great example for understanding the Nitrogen application model is the `admin` project.
 
