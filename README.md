@@ -34,7 +34,7 @@ service.connect(thermometer, function(err, session, thermometer) {
 
 You can find a complete example for a device application of Nitrogen in the `chroma` project.
 
-Current message schemas are futher defined in [docs/schema.md](doc/schema.md).
+Current message schemas are futher defined in [docs/schema.md](docs/schemas.md).
 
 ## Application Development Model
 
