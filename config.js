@@ -42,6 +42,11 @@ config.realtime_path = "/realtime";
 config.realtime_endpoint = config.base_url + config.realtime_path;
 config.realtime_endpoint_timeout = 90; // seconds
 
+config.message_indexes = [
+];
+
+config.require_message_indexes_required = true;
+
 config.agents_endpoint = config.base_url + "/agents";
 config.blobs_endpoint = config.base_url + "/blobs";
 config.messages_endpoint = config.base_url + "/messages";

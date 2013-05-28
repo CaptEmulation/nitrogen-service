@@ -1,4 +1,5 @@
 var async = require('async')
+  , config = require('../config')
   , BaseSchema = require('./baseSchema')
   , mongoose = require('mongoose')
   , Schema = mongoose.Schema;
@@ -35,6 +36,10 @@ messageSchema.index({ public: 1 });
 messageSchema.index({ ts: 1, type: -1 });
 messageSchema.index({ to: 1 });
 messageSchema.index({ visible_to: 1 });
+
+config.message_indexes.forEach(function(index) {
+    messageSchema.index(index);
+});
 
 messageSchema.set('toObject', { transform: BaseSchema.baseObjectTransform });
 messageSchema.set('toJSON', { transform: BaseSchema.baseObjectTransform });
