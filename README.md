@@ -1,16 +1,16 @@
 # Nitrogen Service
 
-Nitrogen is a platform for building connected devices and the applications that use them.  Nitrogen provides the authentication, authorization, event logging, device provisioning, discovery services, and real time message passing framework so that you can focus on your device and application.  All with a consistent development platform that leverages the ubiquity of Javascript.
+Nitrogen is a platform for building connected devices and the applications that use them.  Nitrogen provides the authentication, authorization, event logging, device provisioning, discovery services, and real time message passing framework so that you can focus on your device and/or application.  All with a consistent development platform that leverages the ubiquity of Javascript.
 
 ## Device Development Model
 
-Nitrogen at its heart uses messaging between principals (devices and users).  Principals in the system can create and consume messages.  Messages can follow a well known schema to enable interoperability between applications or use their own private custom message types.
+Nitrogen at its heart uses messaging between principals (devices and users) to allow them to communicate. Messages can follow a well known schema to enable interoperability between applications or use their own private custom message types for specialized applications.
 
 For example, a thermometer that measures temperature once every 15 minutes could be implemented in Nitrogen like this:
 
 ``` javascript
-var thermometer = new nitrogen.Device({ local_id: "thermometer",
-                                       capabilities: [ "thermometer" ] });
+var thermometer = new nitrogen.Device({ ni: "thermometer",
+                                        capabilities: [ "thermometer" ] });
 
 var service = new nitrogen.Service(config);
 service.connect(thermometer, function(err, session, thermometer) {
@@ -21,7 +21,7 @@ service.connect(thermometer, function(err, session, thermometer) {
         var message = new nitrogen.Message({
             from: session.principal.id,
             type: 'temperature',
-            body: { 
+            body: {
                 temperature: getTemp()
             }
         });
@@ -34,10 +34,13 @@ service.connect(thermometer, function(err, session, thermometer) {
 
 You can find a complete example for a device application of Nitrogen in the `chroma` project.
 
+Current message schemas are futher defined in [docs/schema.md](docs/schemas.md).
+
 ## Application Development Model
 
 The development model for applications is similiar.   A web application that displays these temperatures in real time as they are received would look like this:
 
+``` javascript
 var user = new nitrogen.User();
 
 var service = new nitrogen.Service(config);
@@ -53,6 +56,7 @@ service.connect(user, function(err, session, user) {
         }
     });
 });
+```
 
 A great example for understanding the Nitrogen application model is the `admin` project.
 
@@ -64,7 +68,7 @@ To get started with a Nitrogen service locally:
 2. Fetch and install its node.js dependencies: `npm install`
 3. Install mongodb locally (if necessary).
 4. Edit `config.js` to change defaults as necessary.
-5. Create a Windows Azure account with a storage account.  Set the environmental variables AZURE_STORAGE_ACCOUNT and AZURE_STORAGE_KEY to your credentials.
+5. If you use of Nitrogen requires storing blob-like objects, create a Windows Azure account with a storage account and set the environmental variables AZURE_STORAGE_ACCOUNT and AZURE_STORAGE_KEY to your credentials in config.js.
 6. `node server.js`
 
 ## Running tests
@@ -75,7 +79,7 @@ To get started with a Nitrogen service locally:
 ## How to contribute
 
 1.  Feedback:  We'd love feedback on what problems you are using Nitrogen to solve.  Obviously, we'd also like to hear about where you ran into sharp edges and dead ends.   Drop me a message at timfpark@gmail.com or file an issue with us above.
-2.  Pull requests:  If you'd like to tackle an issue, fork the repo, create a clean commit for the fix or enhancement with tests if necessary, and send us a pull request. This is also the path to becoming a core committer for the project for folks that are interested in contributing in more depth.
+2.  Pull requests:  If you'd like to tackle an issue, fork the repo, create a clean commit for the fix or enhancement with tests if necessary, and send us a pull request.
 3.  Documentation:  Better technical documentation is key to broadening the use of the platform.   We'd love to have more help and this is one of the most valuable contributions you can make.
 
 ## Other Projects
