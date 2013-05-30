@@ -76,7 +76,10 @@ var create = function(principal, callback) {
 };
 
 var checkForExistingPrincipal = function(principal, callback) {
-    if (!services.principals.systemPrincipal) return callback(null, null);
+    if (!services.principals.systemPrincipal) {
+        log.error('principal service: not able to check for existing user because no system principal.');
+        return callback(null, null);
+    }
 
     if (principal.is('user')) {
         findByEmail(services.principals.systemPrincipal, principal.email, callback);
@@ -265,8 +268,11 @@ var updateLastConnection = function(principal, ip) {
 };
 
 var validate = function(principal, callback) {
-    if (!principal.is('device') && !principal.is('user') && !principal.is('system'))
-        return callback("Principal type must be one of device, user, or root.");
+    if (!principal.is('device') && !principal.is('user') && !principal.is('system')) {
+        var err = 'Principal type must be one of device, user, or root.';
+        log.error(err);
+        return callback(err);
+    }
 
     if (principal.is('user')) {
         if (!principal.email) return callback("user principal must have email");

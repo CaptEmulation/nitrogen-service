@@ -96,6 +96,8 @@ var initialize = function(callback) {
         if (err) return callback("failed to enumerate built in agents: " + err);
 
         log.info('agents initializing: ' + agentFiles.length + ' built-in agents.');
+
+        // TODO: break out per agent setup into another function.
         async.each(agentFiles, function(file, callback) {
             var agentPath = agentDir + file;
 

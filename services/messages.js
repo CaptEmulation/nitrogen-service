@@ -77,18 +77,28 @@ var findById = function(principal, messageId, callback) {
     });
 };
 
-var translate = function(message) {
-    if (!message.expires) {
-        message.expires = utils.dateDaysFromNow(1);
-    }
+var initialize = function(callback) {
+    loadSchemas(callback);
+};
 
-    if (message.expires === 'never') {
-        message.expires = null;
-    }
+var schemaPath = "./schemas";
+var schemas = {};
 
-    if (message.to === 'system') {
-        message.to = services.principals.systemPrincipal.id;
-    }
+var loadSchema = function(type, callback) {
+    fs.readFile(schemaPath + "/" + type, function (err, schemaText) {
+        if (err) return callback(err);
+
+        schemas[type] = JSON.parse(schemaText);
+        callback(null);
+    });
+};
+
+var loadSchemas = function(callback) {
+    schemas = {};
+    fs.readdir(schemaPath, function(err, schemas) {
+        if (err) return callback(err);
+        async.each(schemas, loadSchema, callback);
+    });
 };
 
 var remove = function(principal, query, callback) {
@@ -125,6 +135,20 @@ var removeOne = function(principal, message, callback) {
     });
 };
 
+var translate = function(message) {
+    if (!message.expires) {
+        message.expires = utils.dateDaysFromNow(1);
+    }
+
+    if (message.expires === 'never') {
+        message.expires = null;
+    }
+
+    if (message.to === 'system') {
+        message.to = services.principals.systemPrincipal.id;
+    }
+};
+
 var validate = function(message, callback) {
     if (!message.from)
         return callback("Message must have a from principal.");
@@ -132,12 +156,6 @@ var validate = function(message, callback) {
     if (!message.type)
         return callback("Message must have a message type.");
 
-    // TODO: do validation of type values if they are not custom prefixed
-    if (!message.type in ["claim", "heartbeat", "image", "ip_match", "reject"] && !message.isCustomType()) {
-        return callback("Message type not recognized.  Custom message types must be prefixed by _");
-    }
-
-    // TODO: schema validation of messages
     validateSchema(message, function(err, result) {
         if (err) return callback(err);
         if (!result.valid) return callback(result.errors);
@@ -150,7 +168,7 @@ var validate = function(message, callback) {
 
             services.principals.findById(services.principals.systemPrincipal, message.to, function(err, toPrincipal) {
                 if (err) return callback(err);
-                if (!toPrincipal) return callback("Message must have an existing to principal.");
+                if (!toPrincipal) return callback("Principal in to: field of message not found.");
 
                 callback(null, fromPrincipal, toPrincipal);
             });
@@ -158,28 +176,15 @@ var validate = function(message, callback) {
     });
 };
 
-var loadSchema = function(type, callback) {
-    var schemaPath = "./schemas/" + type;
-    fs.readFile(schemaPath, function (err, schemaText) {
-        if (err) return callback(err);
-
-        var schema = JSON.parse(schemaText);
-        callback(null, schema);
-    });
-};
-
-var memoizedSchema = async.memoize(loadSchema);
-
 var validateSchema = function(message, callback) {
     if (message.isCustomType()) return callback(null, { valid: true });
+    if (!message.type in schemas) return callback("Message type not recognized.  Custom message types must be prefixed by _");
 
-    memoizedSchema(message.type, function(err, schema) {
-        var results = revalidator.validate(message.body, schema);
-        if (!results.valid) {
-            log.info("message validation failed with errors: " + results.errors);
-        }
-        callback(null, results);
-    });
+    var results = revalidator.validate(message.body, schemas[message.type]);
+    if (!results.valid) {
+        log.info("message validation failed with errors: " + results.errors);
+    }
+    callback(null, results);
 };
 
 var validateAll = function(messages, callback) {
@@ -191,6 +196,7 @@ module.exports = {
     createMany: createMany,
     find: find,
     findById: findById,
+    initialize: initialize,
     remove: remove,
     removeOne: removeOne,
     translate: translate,
