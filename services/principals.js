@@ -65,6 +65,10 @@ var create = function(principal, callback) {
             createCredentials(principal, function(err, principal) {
                 if (err) return callback(err);
 
+                if (principal.is('user') || principal.is('system')) {
+                    principal.id = new mongoose.Types.ObjectId;
+                    principal.owner = new mongoose.Types.ObjectId;
+                }
                 principal.save(function(err, principal) {
                     if (err) return callback(err);
 
@@ -129,13 +133,14 @@ var createUserCredentials = function(principal, callback) {
 var filterForPrincipal = function(principal, filter) {
     if (principal && principal.is('system')) return filter;
 
-    var visibilityFilter = [ { public: true }];
+    var visibilityFilter = [ { public: true } ];
     if (principal) {
         visibilityFilter.push( { owner: principal._id } );
         visibilityFilter.push( { "_id": principal._id } );
     }
 
-    filter["$or"] = visibilityFilter;
+    filter = { $and: [ filter, { $or: visibilityFilter } ] };
+    console.log('filter: ' + JSON.stringify(filter));
     return filter;
 
 };
@@ -203,10 +208,9 @@ var initialize = function(callback) {
         if (principals.length == 0) {
             log.info("creating system principal");
 
-            var id = new mongoose.Types.ObjectId;
             var systemPrincipal = new models.Principal({
-                id: id,
-                owner: id,
+                name: 'System',
+                public: false,
                 type: 'system'
             });
 
@@ -259,6 +263,7 @@ var updateLastConnection = function(principal, ip) {
         var ipMessage = new models.Message({
             type: 'ip',
             from: principal,
+            public: false,
             to: services.principals.systemPrincipal.id,
             body: {
                 ip_address: ip
