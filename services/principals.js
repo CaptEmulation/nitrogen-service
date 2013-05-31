@@ -3,6 +3,7 @@ var async = require("async")
   , crypto = require("crypto")
   , log = require('../log')
   , models = require("../models")
+  , mongoose = require('mongoose')
   , services = require("../services");
 
 var authenticate = function(authBody, callback) {
@@ -201,10 +202,19 @@ var initialize = function(callback) {
 
         if (principals.length == 0) {
             log.info("creating system principal");
-            var systemPrincipal = new models.Principal({ type: "system" });
+
+            var id = new mongoose.Types.ObjectId;
+            var systemPrincipal = new models.Principal({
+                id: id,
+                owner: id,
+                type: 'system'
+            });
+
             create(systemPrincipal, function(err, systemPrincipal) {
                 if (err) return callback(err);
 
+                systemPrincipal.owner = systemPrincipal.id;
+                update(systemPrincipal, systemPrincipal.id, { owner: systemPrincipal.id })
                 services.principals.systemPrincipal = systemPrincipal;
                 return callback(err);
             });

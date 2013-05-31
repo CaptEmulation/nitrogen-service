@@ -168,7 +168,7 @@ var validate = function(message, callback) {
 
             services.principals.findById(services.principals.systemPrincipal, message.to, function(err, toPrincipal) {
                 if (err) return callback(err);
-                if (!toPrincipal) return callback("Principal in to: field of message not found.");
+                if (!toPrincipal) return callback('Principal in to: field (' + message.to +') of message not found.');
 
                 callback(null, fromPrincipal, toPrincipal);
             });
