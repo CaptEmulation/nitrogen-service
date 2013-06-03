@@ -11,8 +11,9 @@ messageSchema.add({
 
     // a link ties this message to another resource.
     link: { type: Schema.Types.ObjectId },          // link to other resources (eg. blob)
-    ts: { type: Date, default: Date.now },          // timestamp
+    created_at: { type: Date, default: Date.now },  // created_at (assigned by service)
     expires: { type: Date },                        // expires
+    ts: { type: Date, default: Date.now },          // timestamp
 
     public: { type: Boolean, default: true },
 

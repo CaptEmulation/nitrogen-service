@@ -11,7 +11,10 @@ var create = function(message, callback) {
     translate(message);
 
     validate(message, function(err, fromPrincipal, toPrincipal) {
-        if (err) return callback(err);
+        if (err) {
+            log.error('message validation failed: ' + err);
+            return callback(err);
+        }
 
         // the from and to principals and their owners can see this message.
         message.visible_to = [message.from];
@@ -23,6 +26,7 @@ var create = function(message, callback) {
             log.log(message.body.severity, message.body.message, { principal: message.from.toString() });
 
         message.body_length = JSON.stringify(message.body).length;
+        message.created_at = new Date();
 
         message.save(function(err, message) {
             if (err) return callback(err);

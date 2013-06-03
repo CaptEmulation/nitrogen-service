@@ -1,0 +1,10 @@
+{
+	"title": "cameraCommand",
+	"type": "object",
+	"properties": {
+		"command": {
+			"type": "string",
+			"required": true
+		}
+	}
+}
