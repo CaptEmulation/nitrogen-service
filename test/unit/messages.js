@@ -108,4 +108,16 @@ describe('messages service', function() {
         });
     });
 
+    it ('flunks unknown well known schema', function(done) {
+        var message = new models.Message({
+            type: "unknownCommand"
+        });
+
+        services.messages.create(message, function(err, savedMessages) {
+            console.log(err);
+            assert.notEqual(err, null);
+            done();
+        });
+    });
+
 });

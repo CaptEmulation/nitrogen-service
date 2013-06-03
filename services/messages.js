@@ -42,7 +42,7 @@ var create = function(message, callback) {
 
 var createMany = function(messages, callback) {
     validateAll(messages, function(err) {
-        if (err) return callback(err, []);
+        if (err) return callback(err);
 
         async.concat(messages, create, callback);
     });
@@ -178,7 +178,7 @@ var validate = function(message, callback) {
 
 var validateSchema = function(message, callback) {
     if (message.isCustomType()) return callback(null, { valid: true });
-    if (!message.type in schemas) return callback("Message type not recognized.  Custom message types must be prefixed by _");
+    if (!(message.type in schemas)) return callback("Message type not recognized.  Custom message types must be prefixed by _");
 
     var results = revalidator.validate(message.body, schemas[message.type]);
     if (!results.valid) {
