@@ -1,8 +1,19 @@
+var fs = require('fs')
+  , log = require('../log');
+
 var dateDaysFromNow = function(days) {
     var date = new Date();
     date.setDate(new Date().getDate() + days);
 
     return date;
+};
+
+var handleError = function(res, err) {
+    if (err === 400) return sendFailedResponse(res, 400, err);
+    if (err === 401) return sendFailedResponse(res, 401, err);
+    if (err === 403) return sendFailedResponse(res, 403, err);
+    if (err === 404) return sendFailedResponse(res, 404, err);
+    if (err) return sendFailedResponse(res, 400, err);
 };
 
 var ipFromRequest = function(req) {
@@ -34,12 +45,14 @@ var parseOptions = function(req) {
     return options;
 };
 
-var handleError = function(res, err) {
-    if (err === 400) return sendFailedResponse(res, 400, err);
-    if (err === 401) return sendFailedResponse(res, 401, err);
-    if (err === 403) return sendFailedResponse(res, 403, err);
-    if (err === 404) return sendFailedResponse(res, 404, err);
-    if (err) return sendFailedResponse(res, 400, err);
+var pipeFile = function(filename) {
+    return function(req, res) {
+        fs.exists(filename, function(exists) {
+            if (!exists) return log.error('pipeFile: path ' + filename + ' not found.');
+
+            fs.createReadStream(filename).pipe(res);
+        });
+    }
 };
 
 var sendFailedResponse = function(res, statusCode, err) {
@@ -71,9 +84,10 @@ var translateDatesToNative = function(obj) {
 module.exports = {
     dateDaysFromNow: dateDaysFromNow,
     ipFromRequest: ipFromRequest,
+    handleError: handleError,
     parseQuery: parseQuery,
     parseOptions: parseOptions,
-    handleError: handleError,
+    pipeFile: pipeFile,
     sendFailedResponse: sendFailedResponse,
     stringEndsWith: stringEndsWith,
     stringStartsWith: stringStartsWith,

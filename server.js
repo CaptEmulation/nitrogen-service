@@ -9,7 +9,8 @@ var express = require('express')
   , models = require('./models')
   , mongoose = require('mongoose')
   , passport = require('passport')
-  , services = require('./services');
+  , services = require('./services')
+  , utils = require('./utils');
 
 log.info("connecting to mongodb instance: " + config.mongodb_connection_string);
 mongoose.connect(config.mongodb_connection_string);
@@ -69,6 +70,8 @@ mongoose.connection.once('open', function () {
 
         services.realtime.attach(server, config);
 
+        app.get('/client/nitrogen.js', utils.pipeFile('node_modules/nitrogen/browser/nitrogen.js'));
+        app.get('/client/nitrogen-min.js', utils.pipeFile('node_modules/nitrogen/browser/nitrogen-min.js'));
         app.use(express.static(__dirname + '/static'));
 
         log.info("service has initialized endpoints");
