@@ -9,7 +9,7 @@ describe('utils', function() {
             shouldBeDate: "2013-05-06T18:27:33.053Z"
         };
 
-        var translatedObject = utils.translateDatesToNative(testObject);
+        var translatedObject = utils.translateQuery(testObject, { dateFields: ['shouldBeDate'] });
 
         assert.equal(typeof translatedObject.shouldBeString, "string");
         assert.equal(typeof translatedObject.shouldBeDate, "object");
@@ -21,7 +21,7 @@ describe('utils', function() {
             }
         };
 
-        var translatedObject = utils.translateDatesToNative(testObjectWithHierarchy);
+        var translatedObject = utils.translateQuery(testObjectWithHierarchy, { dateFields: ['shouldBeDate'] });
 
         assert.equal(typeof translatedObject.hasADate.justAString, "string");
         assert.equal(typeof translatedObject.hasADate.shouldBeDate, "object");

@@ -47,6 +47,11 @@ messageSchema.set('toJSON', { transform: BaseSchema.baseObjectTransform });
 
 var Message = mongoose.model('Message', messageSchema);
 
+Message.fieldTranslationSpec = {
+    dateFields: ['created_at', 'expires', 'ts'],
+    objectIdFields: ['from', 'to', 'link', 'response_to']
+};
+
 Message.prototype.expired = function() {
     return Date.now() > this.expires.getTime();
 };

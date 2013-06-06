@@ -114,8 +114,20 @@ describe('messages service', function() {
         });
 
         services.messages.create(message, function(err, savedMessages) {
-            console.log(err);
             assert.notEqual(err, null);
+            done();
+        });
+    });
+
+    it('does queries with string object ids correctly', function(done) {
+        var deviceIdString = fixtures.models.principals.device.id.toString();
+        services.messages.find(fixtures.models.principals.device, { $or: [ { to: deviceIdString }, { from: deviceIdString } ] }, {}, function(err, messages) {
+            assert.ifError(err);
+            messages.forEach(function(message) {
+               console.log("from: " + message.from + " to: " + message.to + " device: " + fixtures.models.principals.device.id);
+               assert.equal(message.to && message.to.toString() === fixtures.models.principals.device.id ||
+                            message.from && message.from.toString() === fixtures.models.principals.device.id, true);
+            });
             done();
         });
     });

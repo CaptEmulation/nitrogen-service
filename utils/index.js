@@ -1,5 +1,6 @@
 var fs = require('fs')
-  , log = require('../log');
+  , log = require('../log')
+  , mongoose = require('mongoose');
 
 var dateDaysFromNow = function(days) {
     var date = new Date();
@@ -30,7 +31,7 @@ var parseQuery = function(req) {
         query = JSON.parse(req.query.q);
     }
 
-    return translateDatesToNative(query);
+    return query;
 };
 
 var parseOptions = function(req) {
@@ -67,14 +68,28 @@ var stringStartsWith = function(s, prefix) {
     return s.substr(0, prefix.length) === prefix;
 };
 
-var translateDatesToNative = function(obj) {
+// convert dates to Date objects and string objectIds to objectIds
+var translateQuery = function(obj, options) {
     for (var prop in obj) {
         if (typeof obj[prop] === "object")
-        // recursively handle subobjects
-            obj[prop] = translateDatesToNative(obj[prop]);
-        else if (typeof obj[prop] === "string" &&
-                 obj[prop].match(/(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))/)) {
+
+            // recursively handle subobjects
+            obj[prop] = translateQuery(obj[prop], options);
+
+        else if (options.objectIdFields && options.objectIdFields.indexOf(prop) != -1) {
+
+            if (Object.prototype.toString.call(obj[prop]) === '[object Array]') {
+                obj[prop] = obj[prop].map(function(objectIdString) {
+                    return mongoose.Types.ObjectId.fromString(objectIdString);
+                });
+            } else {
+                obj[prop] = mongoose.Types.ObjectId.fromString(obj[prop]);
+            }
+
+        } else if (options.dateFields && options.dateFields.indexOf(prop) != -1) {
+
             obj[prop] = new Date(Date.parse(obj[prop]));
+
         }
     }
 
@@ -91,5 +106,5 @@ module.exports = {
     sendFailedResponse: sendFailedResponse,
     stringEndsWith: stringEndsWith,
     stringStartsWith: stringStartsWith,
-    translateDatesToNative: translateDatesToNative
+    translateQuery: translateQuery
 };

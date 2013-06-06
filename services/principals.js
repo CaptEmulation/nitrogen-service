@@ -284,7 +284,7 @@ var updateLastConnection = function(principal, ip) {
 
 var validate = function(principal, callback) {
     if (!principal.is('device') && !principal.is('user') && !principal.is('system')) {
-        var err = 'Principal type must be one of device, user, or root.';
+        var err = 'Principal type must be one of device, user, or system. found: ' + principal.type;
         log.error(err);
         return callback(err);
     }

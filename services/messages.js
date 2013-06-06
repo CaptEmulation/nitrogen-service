@@ -11,10 +11,7 @@ var create = function(message, callback) {
     translate(message);
 
     validate(message, function(err, fromPrincipal, toPrincipal) {
-        if (err) {
-            log.error('message validation failed: ' + err);
-            return callback(err);
-        }
+        if (err) return callback(err);
 
         // the from and to principals and their owners can see this message.
         message.visible_to = [message.from];
@@ -55,17 +52,18 @@ var createMany = function(messages, callback) {
 var filterForPrincipal = function(principal, filter) {
     if (principal && principal.is('system')) return filter;
 
-    var visibilityFilter = [ { public: true } ];
+    var visibilityClauses = [ { public: true } ];
     if (principal) {
-        visibilityFilter.push( { visible_to: principal._id } );
+        visibilityClauses.push({ visible_to: principal._id });
     }
 
-    filter["$or"] = visibilityFilter;
-    return filter;
+    return { $and: [filter, { $or: visibilityClauses }] };
 };
 
 var find = function(principal, filter, options, callback) {
-    models.Message.find(filterForPrincipal(principal, filter), null, options, function(err, messages) {
+    var translatedFilter = utils.translateQuery(filter, models.Message.fieldTranslationSpec);
+
+    models.Message.find(filterForPrincipal(principal, translatedFilter), null, options, function(err, messages) {
         if (err) return callback(err);
 
         return callback(null, messages);
