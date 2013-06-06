@@ -6,8 +6,6 @@ var async = require('async')
   , nitrogen = require('nitrogen')
   , path = require('path')
   , services = require('../services')
-  , suncalc = require('suncalc')
-  , time = require('time')
   , vm = require('vm');
 
 var buildSystemClientSession = function(config, callback) {
@@ -55,11 +53,7 @@ var execute = function(agents, callback) {
                 params: agent.params,
                 session: agent.session,
                 setInterval: setInterval,
-                setTimeout: setTimeout,
-                time: time,
-
-                // TODO: need a better method of injecting agent specific packages.
-                suncalc: suncalc
+                setTimeout: setTimeout
             };
 
             try {
