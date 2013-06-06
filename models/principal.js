@@ -7,7 +7,7 @@ principalSchema.add({
 	type: { type: String },        // user, device
     name: { type: String },        // user friendly name for this principal
 
-    public: { type: Boolean, default: true },
+    public: { type: Boolean, default: false },
     owner: { type: Schema.Types.ObjectId, ref: 'Principal' },
 
 	last_ip: { type: String },

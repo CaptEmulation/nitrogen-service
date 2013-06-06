@@ -6,6 +6,23 @@ var async = require('async')
   , services = require('../services')
   , utils = require('../utils');
 
+// From and to principals and their owners can see this message.
+// This function builds the unique set of those principals.
+var buildVisibleTo = function(message, fromPrincipal, toPrincipal) {
+    var visibilitySet = {};
+
+    visibilitySet[message.from] = true;
+    if (fromPrincipal.owner) visibilitySet[fromPrincipal.owner] = true;
+    if (message.to) visibilitySet[message.to] = true;
+    if (toPrincipal && toPrincipal.owner) visibilitySet[toPrincipal.owner] = true;
+
+    var visibleTo = [];
+    for (var principal in visibilitySet)
+        visibleTo.push(principal);
+
+    return visibleTo;
+};
+
 var create = function(message, callback) {
 
     translate(message);
@@ -13,22 +30,17 @@ var create = function(message, callback) {
     validate(message, function(err, fromPrincipal, toPrincipal) {
         if (err) return callback(err);
 
-        // the from and to principals and their owners can see this message.
-        var visibleTo = {};
-        visibleTo[message.from] = true;
-        if (fromPrincipal.owner) visibleTo[fromPrincipal.owner] = true;
-        if (message.to) visibleTo[message.to] = true;
-        if (toPrincipal && toPrincipal.owner) visibleTo[toPrincipal.owner] = true;
-
-        message.visible_to = [];
-        for (var principal in visibleTo)
-            message.visible_to.push(principal);
+        message.visible_to = buildVisibleTo(message, fromPrincipal, toPrincipal);
 
         if (message.is("log"))
             log.log(message.body.severity, message.body.message, { principal: message.from.toString() });
 
         message.body_length = JSON.stringify(message.body).length;
         message.created_at = new Date();
+
+        // if no explicit visibility set on message, then the fromPrincipal's visibility is used.
+        if (!message.public)
+            message.public = fromPrincipal.public;
 
         message.save(function(err, message) {
             if (err) return callback(err);

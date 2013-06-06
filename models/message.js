@@ -15,7 +15,7 @@ messageSchema.add({
     expires: { type: Date },                        // expires
     ts: { type: Date, default: Date.now },          // timestamp
 
-    public: { type: Boolean, default: true },
+    public: { type: Boolean },
 
 	from: { type: Schema.Types.ObjectId, ref: 'Principal' },  	    // principal who sent message
 	to: { type: Schema.Types.ObjectId, ref: 'Principal' },  	      // message target (if any)
