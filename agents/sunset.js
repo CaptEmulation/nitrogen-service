@@ -199,13 +199,13 @@ function setupSnapshots() {
     }
 
     var now = new Date();
-    var midnightUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-    var sunsetCalculator = new SunriseSunset(now.getUTCFullYear(), now.getUTCMonth()+1, now.getUTCDate(), 36.9742, -122.0297);
+    var midnightUTC = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate() + 1));
+    var sunsetCalculator = new SunriseSunset(now.getYear(), now.getMonth(), now.getDate() + 1, 36.9742, -122.0297);
     var millisecondsFromMidnightToSunset = sunsetCalculator.sunsetUtcHours() * 3600 * 1000;
     var sunset = new Date(midnightUTC.getTime() + millisecondsFromMidnightToSunset);
 
     var message = new nitrogen.Message({
-        to: params.camera,
+        to: params.camera_id,
         ts: sunset,
         type: "cameraCommand",
         body: {
