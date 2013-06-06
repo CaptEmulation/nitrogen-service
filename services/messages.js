@@ -14,10 +14,15 @@ var create = function(message, callback) {
         if (err) return callback(err);
 
         // the from and to principals and their owners can see this message.
-        message.visible_to = [message.from];
-        if (fromPrincipal.owner) message.visible_to.push(fromPrincipal.owner);
-        if (message.to) message.visible_to.push(message.to);
-        if (toPrincipal && toPrincipal.owner) message.visible_to.push(toPrincipal.owner);
+        var visibleTo = {};
+        visibleTo[message.from] = true;
+        if (fromPrincipal.owner) visibleTo[fromPrincipal.owner] = true;
+        if (message.to) visibleTo[message.to] = true;
+        if (toPrincipal && toPrincipal.owner) visibleTo[toPrincipal.owner] = true;
+
+        message.visible_to = [];
+        for (var principal in visibleTo)
+            message.visible_to.push(principal);
 
         if (message.is("log"))
             log.log(message.body.severity, message.body.message, { principal: message.from.toString() });
