@@ -6,6 +6,8 @@ var async = require('async')
   , nitrogen = require('nitrogen')
   , path = require('path')
   , services = require('../services')
+  , suncalc = require('suncalc')
+  , time = require('time')
   , vm = require('vm');
 
 var buildSystemClientSession = function(config, callback) {
@@ -45,19 +47,26 @@ var execute = function(agents, callback) {
     async.each(agents, function(agent, callback) {
 
         if (agent && agent.enabled && agent.session) {
-            var context = { async: async,
-                            cron: cron,
-                            log: log,
-                            nitrogen: nitrogen,
-                            session: agent.session,
-                            setInterval: setInterval,
-                            setTimeout: setTimeout };
+            var context = {
+                async: async,
+                cron: cron,
+                log: log,
+                nitrogen: nitrogen,
+                params: agent.params,
+                session: agent.session,
+                setInterval: setInterval,
+                setTimeout: setTimeout,
+                time: time,
+
+                // TODO: need a better method of injecting agent specific packages.
+                suncalc: suncalc
+            };
 
             try {
                 agent.compiledAction.runInNewContext(context);
                 log.info("Agent " + agent.name + " started.");
             } catch (e) {
-                log.error("Agent" + agent.name + " quit after throwing exception: " + e.toString());
+                log.error("Agent " + agent.name + " quit after throwing exception: " + e.stack);
             }
         }
 
