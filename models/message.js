@@ -21,6 +21,7 @@ messageSchema.add({
 	to: { type: Schema.Types.ObjectId, ref: 'Principal' },  	      // message target (if any)
     response_to: [{ type: Schema.Types.ObjectId, ref: 'Message' }], // message(s) this is in response to
 
+    tags: [{ type: String}],
 	body: { type: Schema.Types.Mixed, default: {} },
 
     // internal fields
@@ -34,6 +35,7 @@ messageSchema.index({ from: 1 });
 messageSchema.index({ link: 1 });
 messageSchema.index({ type: 1 });
 messageSchema.index({ public: 1 });
+messageSchema.index({ tags: 1 });
 messageSchema.index({ ts: 1, type: -1 });
 messageSchema.index({ to: 1 });
 messageSchema.index({ visible_to: 1 });
