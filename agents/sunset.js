@@ -207,10 +207,11 @@ function setupSnapshots() {
     var message = new nitrogen.Message({
         to: params.camera_id,
         ts: sunset,
-        type: "cameraCommand",
+        type: 'cameraCommand',
         body: {
-            command: "snapshot"
-        }
+            command: 'snapshot'
+        },
+        tags: ['sunset']
     });
 
     log.info('sending sunset snapshot command for ' + sunset);
