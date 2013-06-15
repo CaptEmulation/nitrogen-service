@@ -4,7 +4,7 @@ function createIpMatchMessage(session, user, device, callback) {
         from: user.id,
         type: 'reject',
         body: { principal: device.id }
-    }, function(err, messages) {
+    }, {}, function(err, messages) {
         if (err) return callback(err);
         if (messages.length > 0) {
             log.info("matcher: reject message exists for user: " + user.id + " and device: " + device.id + " not creating ip_match");
@@ -14,7 +14,7 @@ function createIpMatchMessage(session, user, device, callback) {
         nitrogen.Message.find(session, {
             type: 'ip_match',
             body: { principal: device.id }
-        }, function(err, messages) {
+        }, {}, function(err, messages) {
             if (err) return callback(err);
             if (messages.length > 0) {
                 log.info("matcher: ip_match message exists for device: " + device.id + " not creating ip_match");
@@ -37,7 +37,7 @@ function createIpMatchMessage(session, user, device, callback) {
 }
 
 function sendIpMatchMessages(message, devices, users) {
-    nitrogen.Principal.find(session, { _id: message.from }, function(err, fromPrincipals) {
+    nitrogen.Principal.find(session, { _id: message.from }, {}, function(err, fromPrincipals) {
         if (err) return log.error("matcher: didn't find principal: " + err);
 
         var fromPrincipal = fromPrincipals[0];
@@ -65,7 +65,7 @@ function completionCallback(err) {
 }
 
 function processIpMessage(message) {
-    nitrogen.Principal.find(session, { last_ip: message.body.ip_address }, function(err, principalsAtIp) {
+    nitrogen.Principal.find(session, { last_ip: message.body.ip_address }, {}, function(err, principalsAtIp) {
         if (err) return log.error('matcher: error looking for principals at this ip address: ' + err);
         var devices = [];
         var users = [];

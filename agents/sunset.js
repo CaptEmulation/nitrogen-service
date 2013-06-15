@@ -225,7 +225,7 @@ function setupSnapshots() {
 }
 
 function findLastLocation(callback) {
-    nitrogen.Message.find(session, { type: 'location', from: params.camera_id }, function(err, messages) {
+    nitrogen.Message.find(session, { type: 'location', from: params.camera_id }, {}, function(err, messages) {
         if (err) return callback(err);
 
         if (!messages) {
