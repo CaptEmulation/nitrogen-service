@@ -41,7 +41,7 @@ var parseOptions = function(req) {
         options = JSON.parse(req.query.options);
     }
 
-    if (!options.limit || options.limit > 1000) options.limit = 1000;
+    if (!options.limit || options.limit > 10000) options.limit = 10000;
 
     return options;
 };
