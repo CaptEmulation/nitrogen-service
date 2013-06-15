@@ -67,13 +67,16 @@ var create = function(principal, callback) {
 
                 if (principal.is('user') || principal.is('system')) {
                     principal.id = new mongoose.Types.ObjectId;
-                    principal.owner = new mongoose.Types.ObjectId;
+                    principal.owner = principal.id;
                 }
+
                 principal.save(function(err, principal) {
                     if (err) return callback(err);
 
                     log.info("created " + principal.type + " principal: " + principal.id);
-                    callback(null, principal);
+                    notifySubscriptions(principal, function(err) {
+                        return callback(err, principal);
+                    });
                 });
             });
         });
@@ -102,7 +105,7 @@ var createCredentials = function(principal, callback) {
 };
 
 var createSecretCredentials = function(principal, callback) {
-    if (!config.device_secret_bytes) return callback("Service is misconfigured.  Please add value for missing device_secret_bytes element.");
+    if (!config.device_secret_bytes) return callback("Service is missing configuration.  Please add value for missing device_secret_bytes element.");
 
     crypto.randomBytes(config.device_secret_bytes, function(err, secretBuf) {
         if (err) return callback(err, null);
@@ -133,16 +136,13 @@ var createUserCredentials = function(principal, callback) {
 var filterForPrincipal = function(principal, filter) {
     if (principal && principal.is('system')) return filter;
 
-    var visibilityFilter = [ { public: true } ];
+    var visibilityFilter = [{ public: true }];
     if (principal) {
-        visibilityFilter.push( { owner: principal._id } );
-        visibilityFilter.push( { "_id": principal._id } );
+        visibilityFilter.push({ owner: principal._id });
+        visibilityFilter.push({ "_id": principal._id });
     }
 
-    filter = { $and: [ filter, { $or: visibilityFilter } ] };
-    console.log('filter: ' + JSON.stringify(filter));
-    return filter;
-
+    return { $and: [ filter, { $or: visibilityFilter } ] };
 };
 
 var find = function(principal, filter, options, callback) {
@@ -167,7 +167,6 @@ var hashPassword = function(password, saltBuf, callback) {
             callback(null, hashBuf);
         });
 };
-
 
 var hashSecret = function(secret, callback) {
     // have to create a buffer here because node's sha256 hash function expects binary encoding.
@@ -218,15 +217,36 @@ var initialize = function(callback) {
                 if (err) return callback(err);
 
                 systemPrincipal.owner = systemPrincipal.id;
-                update(systemPrincipal, systemPrincipal.id, { owner: systemPrincipal.id })
-                services.principals.systemPrincipal = systemPrincipal;
-                return callback(err);
+                update(systemPrincipal, systemPrincipal.id, { owner: systemPrincipal.id }, function(err) {
+                    if (err) return callback(err);
+                    services.principals.systemPrincipal = systemPrincipal;
+
+                    return callback();
+                });
             });
         } else {
             services.principals.systemPrincipal = principals[0];
             return callback();
         }
     });
+};
+
+var notifySubscriptions = function(principal, callback) {
+    var principalsVisibleTo = [principal.id];
+
+    if (services.principals.systemPrincipal)
+        principalsVisibleTo.push(services.principals.systemPrincipal.id);
+
+    if (principal.owner)
+        principalsVisibleTo.push(principal.owner);
+
+    var clientJson = JSON.stringify(principal);
+    async.each(principalsVisibleTo, function(visibleTo, cb) {
+        log.info("publishing change to principal " + principal.id + " to principal: " + visibleTo + " on " + '/principals/' + visibleTo);
+        services.realtime.publish('/principals/' + visibleTo, clientJson);
+
+        cb();
+    }, callback);
 };
 
 var update = function(authorizingPrincipal, id, updates, callback) {
@@ -248,7 +268,13 @@ var update = function(authorizingPrincipal, id, updates, callback) {
         models.Principal.update({ _id: id }, { $set: updates }, function (err, updateCount) {
             if (err) return callback(err);
 
-            findById(authorizingPrincipal, id, callback);
+            findById(authorizingPrincipal, id, function(err, updatedPrincipal) {
+                if (err) return callback(err);
+
+                notifySubscriptions(updatedPrincipal, function(err) {
+                    return callback(err, updatedPrincipal);
+                });
+            });
         });
     });
 };

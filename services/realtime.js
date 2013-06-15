@@ -1,20 +1,22 @@
-var bayeux = null
+var async = require('async')
   , faye = require('faye')
   , log = require('../log')
   , services = require('../services')
   , utils = require('../utils');
 
+var bayeux;
+
 var authorize = function(principal, message) {
-    if (utils.stringStartsWith(message.subscription, "/messages")) {
-        if (message.subscription != "/messages/" + principal.id) {
-            log.error("realtime subscription not authorized for principal " + principal.principal_type + ":" + principal.id + " for " + message.subscription);
-            message.error = "403::Forbidden";
-        } else {
-            log.info("realtime subscription authorized for principal: " + principal.principal_type + ":" + principal.id + " for " + message.subscription);
-        }
-    } else {
-        message.error = "404:NotFound";
-    }
+    async.some(['/messages', '/principals'], function(prefix, callback) {
+        var matches = utils.stringStartsWith(message.subscription, prefix);
+        if (matches)
+            checkEndpointAuthorization(principal, message, prefix);
+
+        return callback(matches);
+    }, function (matched) {
+        if (!matched)
+            message.error = "404:NotFound";
+    });
 };
 
 var attach = function(server, config) {
@@ -54,10 +56,20 @@ var bind = function(event, f) {
     bayeux.bind(event, f);
 };
 
+var checkEndpointAuthorization = function(principal, message, prefix) {
+    if (message.subscription !== prefix + '/' + principal.id) {
+        log.error('realtime subscription not authorized for principal ' + principal.type + ':' + principal.id + ' for ' + message.subscription);
+        message.error = "403::Forbidden";
+    } else {
+        log.info('realtime subscription authorized for principal: ' + principal.type + ':' + principal.id + ' for ' + message.subscription);
+    }
+};
+
 var publish = function(channel, message) {
     if (!bayeux) return;
 
     var client = bayeux.getClient();
+    log.info('publishing to ' + channel + ': ' + message);
     client.publish(channel, message);
 };
 

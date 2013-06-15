@@ -11,30 +11,68 @@ describe('principal endpoint', function() {
 
 	it('should create and fetch a device principal', function(done) {
 
-        request.post(config.principals_endpoint,
-            { json: { type: 'device',
-                      name: "subscription_test" } }, function(post_err, post_resp, post_body) {
-              assert.ifError(post_err);
-              assert.equal(post_resp.statusCode, 200);
+        var notification_passed = false,
+            get_passed = false,
+            started_post = false;
 
-              assert.equal(!!post_body.principal.secret, true);
-              assert.equal(post_body.principal.secret_hash, undefined);
-              assert.equal(post_body.principal.name, "subscription_test");
-              assert.ok(Date.now() < Date.parse(post_body.accessToken.expires_at));
+        var client = new faye.Client(config.realtime_endpoint);
+        client.addExtension({
+            outgoing: function(message, callback) {
+                message.ext = message.ext || {};
+                message.ext.access_token = fixtures.models.accessTokens.system.token;
+                return callback(message);
+            }
+        });
 
-              assert.equal(post_body.principal.id, post_body.accessToken.principal);
+        var subscriptionChannel = '/principals/' + services.principals.systemPrincipal.id;
+        console.log('#### subscription channel for principal: ' + subscriptionChannel);
 
-              request({ url: config.principals_endpoint + '/' + post_body.principal.id, json: true,
-                        headers: { Authorization: "Bearer " + post_body.accessToken.token } }, function(get_err, get_resp, get_body) {
-                    assert.equal(get_err, null);
-                    assert.equal(get_resp.statusCode, 200);
+        client.subscribe(subscriptionChannel, function(principalJson) {
+            console.log('### GOT RESPONSE');
+            var principal = JSON.parse(principalJson);
+            if (principal.name !== 'subscription_test') return;
 
-                    assert.equal(get_body.principal.secret, undefined);
-                    assert.equal(get_body.principal.name, "subscription_test");
-                    assert.notEqual(get_body.principal.last_connection, undefined);
-                    assert.notEqual(get_body.principal.last_ip, undefined);
-                    done();
-              });
+            notification_passed = true;
+            if (notification_passed && get_passed) {
+                client.unsubscribe('/principals/' + services.principals.systemPrincipal.id);
+                done();
+            }
+        });
+
+        services.realtime.bind('subscribe', function(clientId) {
+            if (started_post) return;
+            started_post = true;
+
+            request.post(config.principals_endpoint,
+                { json: { type: 'device',
+                          name: "subscription_test" } }, function(post_err, post_resp, post_body) {
+                  assert.ifError(post_err);
+                  assert.equal(post_resp.statusCode, 200);
+
+                  assert.equal(!!post_body.principal.secret, true);
+                  assert.equal(post_body.principal.secret_hash, undefined);
+                  assert.equal(post_body.principal.name, "subscription_test");
+                  assert.ok(Date.now() < Date.parse(post_body.accessToken.expires_at));
+
+                  assert.equal(post_body.principal.id, post_body.accessToken.principal);
+
+                  request({ url: config.principals_endpoint + '/' + post_body.principal.id, json: true,
+                            headers: { Authorization: "Bearer " + post_body.accessToken.token } }, function(get_err, get_resp, get_body) {
+                        assert.equal(get_err, null);
+                        assert.equal(get_resp.statusCode, 200);
+
+                        assert.equal(get_body.principal.secret, undefined);
+                        assert.equal(get_body.principal.name, "subscription_test");
+                        assert.notEqual(get_body.principal.last_connection, undefined);
+                        assert.notEqual(get_body.principal.last_ip, undefined);
+                        get_passed = true;
+
+                        if (notification_passed && get_passed) {
+                            client.unsubscribe('/principals/' + services.principals.systemPrincipal.id);
+                            done();
+                        }
+                  });
+            });
         });
 	});
 
