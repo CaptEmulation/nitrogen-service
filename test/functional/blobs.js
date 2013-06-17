@@ -10,12 +10,12 @@ if (config.blob_provider) {
     describe('blobs REST endpoint', function() {
         it('should be able to create and then fetch a blob', function(done) {
 
-            var fixture_path = 'test/fixtures/images/image.jpg';
+            var fixturePath = 'test/fixtures/images/image.jpg';
 
-            fs.stat(fixture_path, function(err, stats) {
+            fs.stat(fixturePath, function(err, stats) {
                     assert.ifError(err);
 
-                    fs.createReadStream(fixture_path).
+                    fs.createReadStream(fixturePath).
                     pipe(
                         request.post({ url: config.blobs_endpoint,
                                        headers: { 'Content-Type': 'image/jpeg', 'Content-Length': stats.size,

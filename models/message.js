@@ -66,4 +66,6 @@ Message.prototype.is = function(type) {
     return this.type === type;
 };
 
+Message.NEVER_EXPIRE = new Date(2500,1,1,0,0,0);
+
 module.exports = Message;

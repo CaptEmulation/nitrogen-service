@@ -90,7 +90,6 @@ var find = function(principal, filter, options, callback) {
 var findById = function(principal, messageId, callback) {
     models.Message.findOne(filterForPrincipal(principal, { "_id": messageId }), function(err, message) {
         if (err) return callback(err);
-        if (!message) return callback(404);
 
         return callback(null, message);
     });
@@ -124,7 +123,7 @@ var remove = function(principal, query, callback) {
     // TODO: will need more complicated authorization mechanism for non system users.
     if (!principal || !principal.is('system')) return callback(403);
 
-    find(principal, query, { limit: 500 }, function (err, messages) {
+    find(principal, query, {}, function (err, messages) {
         if (err) return callback(messages);
 
         // delete linked resources and then the message itself.
@@ -156,11 +155,12 @@ var removeOne = function(principal, message, callback) {
 
 var translate = function(message) {
     if (!message.expires) {
+        // TODO: pull this out into a config value.
         message.expires = utils.dateDaysFromNow(1);
     }
 
     if (message.expires === 'never') {
-        message.expires = null;
+        message.expires = models.Message.NEVER_EXPIRE;
     }
 
     if (message.to === 'system') {

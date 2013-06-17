@@ -2,6 +2,7 @@ var app = require('../../server')
   , assert = require('assert')
   , config = require('../../config')
   , fixtures = require('../fixtures')
+  , fs = require('fs')
   , models = require('../../models')
   , mongoose = require('mongoose')
   , services = require('../../services');
@@ -132,4 +133,108 @@ describe('messages service', function() {
         });
     });
 
+    it('removes both expired message and blob', function(done) {
+        var fixturePath = 'test/fixtures/images/image.jpg';
+
+        fs.stat(fixturePath, function(err, stats) {
+            assert.ifError(err);
+
+            var stream = fs.createReadStream(fixturePath);
+
+            var blob = new models.Blob({
+                content_type: 'image/jpg',
+                content_length: stats.size
+            });
+
+            services.blobs.create(fixtures.models.principals.device, blob, stream, function(err, blob) {
+                assert.ifError(err);
+
+                var message = new models.Message({
+                    from: fixtures.models.principals.device.id,
+                    expires: new Date(2013,1,1),
+                    type: 'image',
+                    link: blob.link,
+                    body: {
+                        url: blob.url
+                    }
+                });
+
+                services.messages.create(message, function(err, messages) {
+                    assert.ifError(err);
+                    assert.equal(messages.length, 1);
+
+                    // We now have a message with a linked blob.  Running remove with the current time should remove them both.
+                    services.messages.remove(services.principals.systemPrincipal, { expires: { $lt: new Date() } }, function(err, removed) {
+                        assert.ifError(err);
+                        assert.notEqual(removed, 0);
+
+                        services.messages.findById(fixtures.models.principals.device, messages[0].id, function(err, message) {
+                            assert.ifError(err);
+                            assert.equal(!message, true);
+
+                            services.blobs.findById(blob.id, function(err, blob) {
+                                assert.ifError(err);
+                                assert.equal(!blob, true);
+
+                                done();
+                            });
+                        });
+                    });
+                });
+            });
+        });
+    });
+
+
+    it('never removes a message nor blob with a never expire', function(done) {
+        var fixturePath = 'test/fixtures/images/image.jpg';
+
+        fs.stat(fixturePath, function(err, stats) {
+            assert.ifError(err);
+
+            var stream = fs.createReadStream(fixturePath);
+
+            var blob = new models.Blob({
+                content_type: 'image/jpg',
+                content_length: stats.size
+            });
+
+            services.blobs.create(fixtures.models.principals.device, blob, stream, function(err, blob) {
+                assert.ifError(err);
+
+                var message = new models.Message({
+                    from: fixtures.models.principals.device.id,
+                    expires: models.Message.NEVER_EXPIRE,
+                    type: 'image',
+                    link: blob.link,
+                    body: {
+                        url: blob.url
+                    }
+                });
+
+                services.messages.create(message, function(err, messages) {
+                    assert.ifError(err);
+                    assert.equal(messages.length, 1);
+
+                    // We now have a message with a linked blob.  Running remove with the current time should remove them both.
+                    services.messages.remove(services.principals.systemPrincipal, { expires: { $lt: new Date() } }, function(err, removed) {
+                        assert.ifError(err);
+                        assert.equal(removed, 0);
+
+                        services.messages.findById(services.principals.systemPrincipal, messages[0]._id, function(err, message) {
+                            assert.ifError(err);
+                            assert.equal(!message, false);
+
+                            services.blobs.findById(blob.id, function(err, blob) {
+                                assert.ifError(err);
+                                assert.equal(!blob, false);
+
+                                done();
+                            });
+                        });
+                    });
+                });
+            });
+        });
+    });
 });

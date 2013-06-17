@@ -18,10 +18,15 @@ var create = function(principal, blob, stream, callback) {
         blob.save(function(err, blob) {
             if (err) return callback(err, null);
 
-            log.info('created blob with id: ' + blob._id);
+            blob.url = config.blobs_endpoint + '/' + blob.id;
+            log.info('created blob with id: ' + blob.id);
             callback(null, blob);
         });
     });
+};
+
+var findById = function(blobId, callback) {
+    models.Blob.findOne({"_id": blobId}, callback);
 };
 
 var remove = function(principal, query, callback) {
@@ -40,7 +45,7 @@ var remove = function(principal, query, callback) {
 };
 
 var stream = function(blobId, stream, callback) {
-    models.Blob.findOne({"_id": blobId}, function (err, blob) {
+    findById(blobId, function(err, blob) {
         if (err) return callback(err, null);
         if (!blob) return callback(null, null);
 
@@ -52,6 +57,7 @@ var stream = function(blobId, stream, callback) {
 
 module.exports = {
     create: create,
+    findById: findById,
     remove: remove,
     stream: stream
 };
