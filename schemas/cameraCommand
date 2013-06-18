@@ -5,6 +5,11 @@
 		"command": {
 			"type": "string",
 			"required": true
-		}
+		},
+        "message": {
+            "type": "object",
+            "required": false
+        }
+
 	}
 }
