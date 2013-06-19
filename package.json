@@ -1,6 +1,6 @@
 {
   "name": "service",
-  "homepage": "https://github.com/magentajs/service",
+  "homepage": "https://github.com/nitrogenjs/service",
   "version": "0.0.1",
   "private": "true",
   "engines": {
