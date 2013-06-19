@@ -9,7 +9,7 @@ Nitrogen at its heart uses messaging between principals (devices and users) to a
 For example, a thermometer that measures temperature once every 15 minutes could be implemented in Nitrogen like this:
 
 ``` javascript
-var thermometer = new nitrogen.Device({ ni: "thermometer",
+var thermometer = new nitrogen.Device({ nickname: "thermometer",
                                         capabilities: [ "thermometer" ] });
 
 var service = new nitrogen.Service(config);
