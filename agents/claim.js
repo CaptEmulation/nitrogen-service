@@ -1,5 +1,5 @@
 function processClaim(message) {
-    if (message.is('claim') && message.response_to) {
+    if (message && message.is('claim') && message.response_to) {
         log.info("claimAgent: claim agent processing message: " + message.id + " : " + message.to);
         nitrogen.Message.find(session, { _id: message.response_to[0] }, {}, function(err, ipMatches) {
 

@@ -38,7 +38,8 @@ function createIpMatchMessage(session, user, device, callback) {
 
 function sendIpMatchMessages(message, devices, users) {
     nitrogen.Principal.find(session, { _id: message.from }, {}, function(err, fromPrincipals) {
-        if (err) return log.error("matcher: didn't find principal: " + err);
+        if (err) return log.error("matcher: error finding principal: " + err);
+        if (fromPrincipals.length === 0) return log.warn("matcher: didn't find principal with id (possibly deleted in the meantime?): " + message.from);
 
         var fromPrincipal = fromPrincipals[0];
 

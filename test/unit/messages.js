@@ -134,6 +134,8 @@ describe('messages service', function() {
     });
 
     it('removes both expired message and blob', function(done) {
+        if (!config.blob_provider) return done();
+
         var fixturePath = 'test/fixtures/images/image.jpg';
 
         fs.stat(fixturePath, function(err, stats) {
@@ -187,6 +189,8 @@ describe('messages service', function() {
 
 
     it('never removes a message nor blob with a never expire', function(done) {
+        if (!config.blob_provider) return done();
+
         var fixturePath = 'test/fixtures/images/image.jpg';
 
         fs.stat(fixturePath, function(err, stats) {

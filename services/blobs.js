@@ -6,6 +6,7 @@ var async = require('async')
   , services = require('../services');
 
 var create = function(principal, blob, stream, callback) {
+    if (!config.blob_provider) return callback("No blob provider configured.");
 
     // TODO: authorization of principal to create blob here.
 
