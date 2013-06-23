@@ -67,6 +67,14 @@ exports.index = function(req, res) {
 	});
 };
 
+exports.remove = function(req, res) {
+    services.principals.removeById(req.user, req.params.id, function(err) {
+        if (err) return utils.handleError(res, err);
+
+        res.send(200);
+    });
+};
+
 exports.show = function(req, res) {
 	services.principals.findById(req.user, req.params.id, function (err, principal) {
 		if (err) return utils.handleError(res, err);

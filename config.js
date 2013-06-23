@@ -42,6 +42,7 @@ config.realtime_path = "/realtime";
 config.realtime_endpoint = config.base_url + config.realtime_path;
 config.realtime_endpoint_timeout = 90; // seconds
 
+// If you'd like additional indexes applied to messages, you can specify them here.
 config.message_indexes = [
 ];
 

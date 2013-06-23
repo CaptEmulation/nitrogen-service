@@ -7,13 +7,12 @@ var app = require('../../server')
   , request = require('request')
   , services = require('../../services');
 
-describe('principal endpoint', function() {
+describe('principals endpoint', function() {
 
 	it('should create and fetch a device principal', function(done) {
-
-        var notification_passed = false,
-            get_passed = false,
-            started_post = false;
+        var notificationPassed = false,
+            getPassed = false,
+            startedPost = false;
 
         var client = new faye.Client(config.realtime_endpoint);
         client.addExtension({
@@ -32,16 +31,16 @@ describe('principal endpoint', function() {
             var principal = JSON.parse(principalJson);
             if (principal.name !== 'subscription_test') return;
 
-            notification_passed = true;
-            if (notification_passed && get_passed) {
+            notificationPassed = true;
+            if (notificationPassed && getPassed) {
                 client.unsubscribe('/principals/' + services.principals.systemPrincipal.id);
                 done();
             }
         });
 
         services.realtime.bind('subscribe', function(clientId) {
-            if (started_post) return;
-            started_post = true;
+            if (startedPost) return;
+            startedPost = true;
 
             request.post(config.principals_endpoint,
                 { json: { type: 'device',
@@ -56,6 +55,9 @@ describe('principal endpoint', function() {
 
                   assert.equal(post_body.principal.id, post_body.accessToken.principal);
 
+                  principalId = post_body.principal.id;
+                  token = post_body.accessToken.token;
+
                   request({ url: config.principals_endpoint + '/' + post_body.principal.id, json: true,
                             headers: { Authorization: "Bearer " + post_body.accessToken.token } }, function(get_err, get_resp, get_body) {
                         assert.equal(get_err, null);
@@ -65,9 +67,9 @@ describe('principal endpoint', function() {
                         assert.equal(get_body.principal.name, "subscription_test");
                         assert.notEqual(get_body.principal.last_connection, undefined);
                         assert.notEqual(get_body.principal.last_ip, undefined);
-                        get_passed = true;
+                        getPassed = true;
 
-                        if (notification_passed && get_passed) {
+                        if (notificationPassed && getPassed) {
                             client.unsubscribe('/principals/' + services.principals.systemPrincipal.id);
                             done();
                         }
@@ -75,6 +77,26 @@ describe('principal endpoint', function() {
             });
         });
 	});
+
+    it('should be able to remove principal', function(done) {
+        request.post(config.principals_endpoint,
+                     { json: {
+                         type: 'device',
+                         name: "subscription_test" }
+                     }, function(err, resp, body) {
+
+            assert.ifError(err);
+            assert.equal(resp.statusCode, 200);
+
+            request.del({ url: config.principals_endpoint + "/" + body.principal.id,
+                headers: { Authorization: "Bearer " + body.accessToken.token } }, function(err, resp, body) {
+                assert.ifError(err);
+                assert.equal(resp.statusCode, 200);
+
+                done();
+            });
+        });
+    });
 
     it('should reject requests for a principal without access token', function(done) {
         request({ url: config.principals_endpoint + '/' + fixtures.models.principals.device.id, json: true }, function(get_err, get_resp, get_body) {

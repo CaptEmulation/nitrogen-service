@@ -249,6 +249,20 @@ var notifySubscriptions = function(principal, callback) {
     }, callback);
 };
 
+var removeById = function(authorizingPrincipal, id, callback) {
+    findById(authorizingPrincipal, id, function (err, principal) {
+        if (err) return callback(err);
+        if (!authorizingPrincipal.id === principal.id && !authorizingPrincipal.id === principal &&
+            !authorizingPrincipal.id !== services.principals.systemPrincipal.id) return callback(403);
+
+        services.messages.remove(services.principals.systemPrincipal, { from: principal.id }, function(err, removed) {
+            if (err) return callback(err);
+
+            models.Principal.remove({ _id: id }, callback);
+        });
+    });
+};
+
 var update = function(authorizingPrincipal, id, updates, callback) {
     if (!authorizingPrincipal) return callback(403);
     if (!id) return callback(400);
@@ -354,6 +368,7 @@ module.exports = {
     findById: findById,
     impersonate: impersonate,
     initialize: initialize,
+    removeById: removeById,
     update: update,
     updateLastConnection: updateLastConnection,
     verifySecret: verifySecret,

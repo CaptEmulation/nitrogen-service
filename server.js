@@ -62,6 +62,7 @@ mongoose.connection.once('open', function () {
         app.post(config.api_prefix + 'v1/principals/auth',                               controllers.principals.authenticate);
         app.post(config.api_prefix + 'v1/principals/impersonate', middleware.authenticateRequest, controllers.principals.impersonate);
         app.put(config.api_prefix + 'v1/principals/:id', middleware.authenticateRequest, controllers.principals.update);
+        app.delete(config.api_prefix + 'v1/principals/:id', middleware.authenticateRequest, controllers.principals.remove);
 
         app.get(config.api_prefix + 'v1/messages/:id',   middleware.authenticateRequest, controllers.messages.show);
         app.get(config.api_prefix + 'v1/messages',       middleware.authenticateRequest, controllers.messages.index);
