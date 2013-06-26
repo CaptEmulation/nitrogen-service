@@ -216,7 +216,7 @@ function setupSnapshots() {
 
     log.info('sending sunset snapshot command for ' + sunset);
 
-    message.save(session);
+    message.send(session);
 
 //    async.waterfall([
 //        findLastLocation,
@@ -255,7 +255,7 @@ function sendMessage(location, callback) {
         }
     });
 
-    message.save(session, callback);
+    message.send(session, callback);
 }
 
 // setup the day's sunset photo at 1am PST every morning.
