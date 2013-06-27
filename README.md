@@ -26,7 +26,7 @@ service.connect(thermometer, function(err, session, thermometer) {
             }
         });
 
-        message.save(session);
+        message.send(session);
     }, 15 * 60 * 1000);
 
 });

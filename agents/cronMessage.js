@@ -4,7 +4,7 @@ if (params && params.message && params.schedule && params.time_zone) {
         timeZone: params.time_zone,
         onTick: function() {
             var message = new nitrogen.Message(params.message);
-            message.save(session);
+            message.send(session);
 
             log.info('cronMessage: sent message: ' + JSON.stringify(params.message));
         }

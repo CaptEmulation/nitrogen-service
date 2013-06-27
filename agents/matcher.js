@@ -31,7 +31,7 @@ function createIpMatchMessage(session, user, device, callback) {
                 }
             });
 
-            matchMessage.save(session, callback);
+            matchMessage.send(session, callback);
         });
     });
 }
