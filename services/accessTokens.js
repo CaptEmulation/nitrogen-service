@@ -6,10 +6,7 @@ var config = require("../config")
 var create = function(principal, callback) {
     var accessToken = new models.AccessToken();
     accessToken.principal = principal;
-
-    // TODO: factor this out into some sort of util function.
-    accessToken.expires_at = new Date();
-    accessToken.expires_at.setDate(new Date().getDate() + 30);
+    accessToken.expires_at = utils.dateDaysFromNow(config.access_token_lifetime);
 
     crypto.randomBytes(config.access_token_bytes, function(err, tokenBuf) {
         if (err) return callback(err);
