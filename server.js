@@ -15,6 +15,7 @@ var express = require('express')
 log.info("connecting to mongodb instance: " + config.mongodb_connection_string);
 mongoose.connect(config.mongodb_connection_string);
 
+app.use(middleware.domainErrorHandler);
 app.use(express.logger(config.request_log_format));
 app.use(express.bodyParser());
 
