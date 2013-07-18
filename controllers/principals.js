@@ -10,10 +10,7 @@ var sendAuthResponse = function(res, principal, accessToken) {
 
 exports.authenticate = function(req, res) {
     services.principals.authenticate(req.body, function (err, principal, accessToken) {
-        if (err) {
-            log.error("authentication of principal failed: " + err);
-            return res.send(401, { error: err });
-        }
+        if (err) return utils.handleError(res, err);
 
         // since the authenticateRequest middleware was not run on this request run it manually.
         services.principals.updateLastConnection(principal, utils.ipFromRequest(req));

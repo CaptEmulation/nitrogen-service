@@ -1,11 +1,12 @@
-var models = require('../models'),
-    mongodb = require('mongodb'),
-    services = require('../services');
+var models = require('../models')
+  , mongodb = require('mongodb')
+  , services = require('../services')
+  , utils = require('../utils');
 
 exports.show = function(req, res) {
-    services.blobs.stream(req.params.id, res, function(err, blob) {
-      if (err) return res.send(400, err);
-      if (!blob) return res.send(404);
+    services.blobs.stream(req.user, req.params.id, res, function(err, blob) {
+      if (err) return utils.handleError(res, err);
+      if (!blob) return utils.handleError(res, utils.notFoundError());
     });
 };
 
@@ -16,7 +17,7 @@ exports.create = function(req, res) {
     });
 
     services.blobs.create(req.user, blob, req, function(err, blob) {
-         if (err) res.send(400, err);
+         if (err) return utils.handleError(err);
 
          res.send({ blob: blob });
     });

@@ -165,12 +165,29 @@ describe('principals endpoint', function() {
         request.post(config.principals_endpoint + '/auth',
             { json: { type: 'user',
                       email: 'user@server.org',
-                      password: 'sEcReT44'} }, function(err, resp, body) {
+                      password: 'sEcReT44' } }, function(err, resp, body) {
                 assert.equal(resp.statusCode, 200);
                 assert.notEqual(body.accessToken.token, undefined);
 
                 assert.equal(Date.parse(body.principal.last_connection) > fixtures.models.principals.user.last_connection.getTime(), true);
                 assert.notEqual(body.principal.last_ip, undefined);
+
+                done();
+            });
+    });
+
+    it('should return failed authorization for wrong password', function(done) {
+        request.post(config.principals_endpoint + '/auth',
+            { json: { type: 'user',
+                email: 'user@server.org',
+                password: 'WRONGPASSWORD'} }, function(err, resp, body) {
+                assert.equal(resp.statusCode, 401);
+                assert.equal(body.accessToken, undefined);
+                assert.notEqual(body.error, undefined);
+
+                var errorJson = JSON.parse(body.error);
+                assert.equal(errorJson.statusCode, 401);
+                assert.notEqual(errorJson.message, undefined);
 
                 done();
             });

@@ -1,6 +1,14 @@
 var fs = require('fs')
   , log = require('../log')
-  , mongoose = require('mongoose');
+  , mongoose = require('mongoose')
+  , ServiceError = require('./serviceError');
+
+var authorizationError = function() {
+    return new ServiceError({
+        statusCode: 403,
+        message: "Principal is not authorized to perform the requested operation."
+    });
+};
 
 var dateDaysFromNow = function(days) {
     var date = new Date();
@@ -10,6 +18,13 @@ var dateDaysFromNow = function(days) {
 };
 
 var handleError = function(res, err) {
+
+    if (err instanceof ServiceError) {
+        var statusCode = err.statusCode || 400;
+
+        return sendFailedResponse(res, statusCode, JSON.stringify(err));
+    }
+
     if (err === 400) return sendFailedResponse(res, 400, err);
     if (err === 401) return sendFailedResponse(res, 401, err);
     if (err === 403) return sendFailedResponse(res, 403, err);
@@ -23,6 +38,13 @@ var ipFromRequest = function(req) {
     	return ipParts[0];
     else
     	return req.ip;
+};
+
+var notFoundError = function() {
+    return new ServiceError({
+        statusCode: 404,
+        message: "Requested resource not found."
+    });
 };
 
 var parseQuery = function(req) {
@@ -57,6 +79,7 @@ var pipeFile = function(filename) {
 };
 
 var sendFailedResponse = function(res, statusCode, err) {
+    res.contentType('application/json');
     res.send(statusCode, { error: err });
 };
 
@@ -97,13 +120,16 @@ var translateQuery = function(obj, options) {
 };
 
 module.exports = {
+    authorizationError: authorizationError,
     dateDaysFromNow: dateDaysFromNow,
     ipFromRequest: ipFromRequest,
     handleError: handleError,
+    notFoundError: notFoundError,
     parseQuery: parseQuery,
     parseOptions: parseOptions,
     pipeFile: pipeFile,
     sendFailedResponse: sendFailedResponse,
+    ServiceError: ServiceError,
     stringEndsWith: stringEndsWith,
     stringStartsWith: stringStartsWith,
     translateQuery: translateQuery

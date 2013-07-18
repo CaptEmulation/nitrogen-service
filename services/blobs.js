@@ -3,21 +3,27 @@ var async = require('async')
   , log = require('../log')
   , models = require('../models')
   , mongoose = require('mongoose')
-  , services = require('../services');
+  , services = require('../services')
+  , utils = require('../utils');
 
 var create = function(principal, blob, stream, callback) {
-    if (!config.blob_provider) return callback("No blob provider configured.");
+    if (!config.blob_provider) {
+        return callback(new utils.ServiceError({
+            statusCode: 400,
+            message: 'No blob provider configured.'
+        }));
+    }
 
     // TODO: authorization of principal to create blob here.
 
     config.blob_provider.create(blob, stream, function(err) {
-        if (err) return callback(err, null);
+        if (err) return callback(err);
 
         blob.owner = principal;
         blob.link = new mongoose.Types.ObjectId;
 
         blob.save(function(err, blob) {
-            if (err) return callback(err, null);
+            if (err) return callback(err);
 
             blob.url = config.blobs_endpoint + '/' + blob.id;
             log.info('created blob with id: ' + blob.id);
@@ -31,7 +37,9 @@ var findById = function(blobId, callback) {
 };
 
 var remove = function(principal, query, callback) {
-    if (!principal || !principal.is('system')) return callback("Only system can delete messages");
+    if (!principal || !principal.is('system')) {
+        return callback(utils.authorizationError());
+    }
 
     models.Blob.find(query, function (err, blobs) {
 
@@ -45,12 +53,14 @@ var remove = function(principal, query, callback) {
     });
 };
 
-var stream = function(blobId, stream, callback) {
+var stream = function(principal, blobId, stream, callback) {
     findById(blobId, function(err, blob) {
-        if (err) return callback(err, null);
-        if (!blob) return callback(null, null);
+        if (err) return callback(err);
+        if (!blob) return callback(null);
 
-        // TODO:  do authorization here
+        if (!blob.owner.equals(principal.id) && !blob.owner.equals(principal.owner)) {
+            return callback(utils.authorizationError());
+        }
 
         config.blob_provider.stream(blob, stream, callback);
     });

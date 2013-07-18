@@ -1,10 +1,21 @@
-var async = require("async")
+var async = require('async')
   , config = require('../config')
-  , crypto = require("crypto")
+  , crypto = require('crypto')
   , log = require('../log')
-  , models = require("../models")
+  , models = require('../models')
   , mongoose = require('mongoose')
-  , services = require("../services");
+  , services = require('../services')
+  , utils = require('../utils');
+
+var DEVICE_AUTH_FAILURE_MESSAGE = "The device secret provided was not found or not accepted.";
+var USER_AUTH_FAILURE_MESSAGE = "The email or password you provided were not found or were incorrect.";
+
+var authenticationError = function(msg) {
+    return new utils.ServiceError({
+        statusCode: 401,
+        message: msg
+    });
+};
 
 var authenticate = function(authBody, callback) {
     if (authBody.email && authBody.password) {
@@ -19,7 +30,7 @@ var authenticate = function(authBody, callback) {
 var authenticateUser = function(email, password, callback) {
     findByEmail(services.principals.systemPrincipal, email, function(err, principal) {
         if (err) return callback(err);
-        if (!principal) return callback("The email or password you entered were not accepted.  Please try again.");
+        if (!principal) return callback(authenticationError(USER_AUTH_FAILURE_MESSAGE));
 
         log.info("found user email: " + email + " verifying password.");
         verifyPassword(password, principal, function(err) {
@@ -123,11 +134,14 @@ var createSecretCredentials = function(principal, callback) {
 
 var createUserCredentials = function(principal, callback) {
     crypto.randomBytes(config.salt_length_bytes, function(err, saltBuf) {
+        if (err) return callback(err);
+
         hashPassword(principal.password, saltBuf, function(err, hashedPasswordBuf) {
-            if (err) return callback(err, null);
+            if (err) return callback(err);
 
             principal.salt = saltBuf.toString('base64');
             principal.password_hash = hashedPasswordBuf.toString('base64');
+
             callback(null, principal);
         });
     });
@@ -158,14 +172,17 @@ var findById = function(principal, id, callback) {
 };
 
 var hashPassword = function(password, saltBuf, callback) {
-    crypto.pbkdf2(password, saltBuf,
-        config.password_hash_iterations, config.password_hash_length,
-        function(err, hash) {
-            if (err) return callback(err, null);
+    crypto.pbkdf2(password,
+                  saltBuf,
+                  config.password_hash_iterations,
+                  config.password_hash_length,
+                  function(err, hash) {
+                      if (err) return callback(err);
 
-            var hashBuf = new Buffer(hash, 'binary');
-            callback(null, hashBuf);
-        });
+                      var hashBuf = new Buffer(hash, 'binary');
+                      callback(null, hashBuf);
+                  }
+    );
 };
 
 var hashSecret = function(secret, callback) {
@@ -179,11 +196,11 @@ var hashSecret = function(secret, callback) {
 };
 
 var impersonate = function(principal, impersonatedPrincipalId, callback) {
-    if (principal.type != "system" && principal.id != impersonatedPrincipalId) return callback(401);
+    if (principal.type != "system" && principal.id != impersonatedPrincipalId) return callback(utils.authorizationError());
 
     findById(services.principals.systemPrincipal, impersonatedPrincipalId, function(err, impersonatedPrincipal) {
         if (err) return callback(err);
-        if (!impersonatedPrincipal) return callback(401);
+        if (!impersonatedPrincipal) return callback(utils.notFoundError());
 
         services.accessTokens.findOrCreateToken(impersonatedPrincipal, function(err, accessToken) {
             if (err) return callback(err);
@@ -294,8 +311,8 @@ var update = function(authorizingPrincipal, id, updates, callback) {
 };
 
 var updateLastConnection = function(principal, ip) {
+    var updates = {};
 
-    var updates = {}
     // emit a ip message each time ip changes for principal.
     if (principal.last_ip != ip) {
         principal.last_ip = updates.last_ip = ip;
@@ -342,10 +359,10 @@ var verifyPassword = function(password, user, callback) {
 
     hashPassword(password, saltBuf, function(err, hashedPasswordBuf) {
         if (err) return callback(err);
-        log.info("hashed password: " + hashedPasswordBuf.toString('base64'));
-        if (user.password_hash != hashedPasswordBuf.toString('base64')) return callback(401);
-
-        callback(null);
+        if (user.password_hash != hashedPasswordBuf.toString('base64'))
+            return callback(authenticationError(USER_AUTH_FAILURE_MESSAGE));
+        else
+            return callback(null);
     });
 };
 
@@ -354,7 +371,7 @@ var verifySecret = function(secret, principal, callback) {
         if (err) return callback(err);
         if (hashedSecret != principal.secret_hash) {
             log.info("verification of secret for principal: " + principal.id + " failed");
-            return callback(401);
+            return callback(authenticationError(DEVICE_AUTH_FAILURE_MESSAGE));
         }
 
         callback(null);
