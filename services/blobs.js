@@ -58,9 +58,10 @@ var stream = function(principal, blobId, stream, callback) {
         if (err) return callback(err);
         if (!blob) return callback(null);
 
-        if (!blob.owner.equals(principal.id) && !blob.owner.equals(principal.owner)) {
-            return callback(utils.authorizationError());
-        }
+        // TODO: rethink blob authorization
+//        if (!blob.owner.equals(principal._id) && !blob.owner.equals(principal.owner)) {
+//            return callback(utils.authorizationError());
+//        }
 
         config.blob_provider.stream(blob, stream, callback);
     });
