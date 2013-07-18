@@ -1,4 +1,4 @@
-var domain       = require("domain");
+var domain       = require('domain');
 
 module.exports = function (req, res, next) {
     var d = domain.create();
