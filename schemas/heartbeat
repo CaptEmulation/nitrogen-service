@@ -2,5 +2,14 @@
 	"title": "heartbeat",
 	"type": "object",
 	"properties": {
+		"error": {
+			"type": "boolean",
+			"required": true
+		},
+
+        "status": {
+            "type": "object",
+            "required": false
+        }
 	}
 }
