@@ -1,8 +1,9 @@
 var app = require('../../server')
   ,	assert = require('assert')
   ,	config = require('../../config')
-  ,	faye = require('faye')
   , fixtures = require('../fixtures')
+  , io = require('socket.io-client')
+  , log = require('../../log')
   , mongoose = require('mongoose')
   , request = require('request')
   , services = require('../../services');
@@ -87,111 +88,73 @@ describe('messages endpoint', function() {
 
     });
 
-    it('trying to subscribe to another principals messages should fail', function(done) {
-        var client = new faye.Client(config.realtime_endpoint);
-        client.addExtension({
-            outgoing: function(message, callback) {
-                message.ext = message.ext || {};
-                message.ext.access_token = fixtures.models.accessTokens.device.token;
-                callback(message);
-            }
-        });
-
-        client.subscribe('/messages/' + services.principals.systemPrincipal.id, function(json) {
-            assert.notEqual(true,false);
-        });
-
-        request.post(config.messages_endpoint,
-            { json: [{ type: "_messageSubscriptionTest",
-                       public: false,
-                       body: { reading: 5.1 } }],
-              headers: { Authorization: fixtures.models.accessTokens.system.toAuthHeader() } }, function(err, resp, body) {
-                assert.equal(err, null);
-                assert.equal(resp.statusCode, 200);
-
-                // wait to make sure we don't get a system's message over the device's session.
-                setTimeout(function() {
-                    done();
-                }, 200);
-            }
-        );
-    });
-
     it('should create and fetch a message', function(done) {
-		var notification_passed = false,
-			get_passed = false,
-			started_post = false;
+		var subscription_passed = false,
+			rest_passed = false;
 
-		var client = new faye.Client(config.realtime_endpoint);
-        client.addExtension({
-            outgoing: function(message, callback) {
-                message.ext = message.ext || {};
-                message.ext.access_token = fixtures.models.accessTokens.device.token;
-                callback(message);
-            }
+        console.log('config.subscriptions_endpoint: ' + config.subscriptions_endpoint);
+        var socket = io.connect(config.subscriptions_endpoint, {
+            query: "type=messages&auth=" + encodeURIComponent(fixtures.models.accessTokens.device.token)
         });
 
-		client.subscribe('/messages/' + fixtures.models.principals.device.id, function(message_json) {
-            var message = JSON.parse(message_json);
+        socket.on('messages', function(message) {
             if (message.type !== '_messageSubscriptionTest') return;
 
-			assert.equal(message.body.reading, 5.1);
-			notification_passed = true;
-		    if (notification_passed && get_passed) {
-                client.unsubscribe('/messages/' + fixtures.models.principals.device.id);
+            assert.equal(message.body.reading, 5.1);
+
+            subscription_passed = true;
+            if (subscription_passed && rest_passed) {
+                socket.disconnect();
                 done();
-		    }
-		});
+            }
+        });
 
-        services.realtime.bind('subscribe', function(clientId) {
-			if (started_post) return;
-			started_post = true;
+        socket.on('ready', function() {
+            request.post(config.messages_endpoint,
+                  { json: [{ from: fixtures.models.principals.device.id,
+                    type: "_messageSubscriptionTest",
+                    public: false,
+                    body: { reading: 5.1 } }],
+                    headers: { Authorization: fixtures.models.accessTokens.device.toAuthHeader() } }, function(post_err, post_resp, post_body) {
+                    assert.equal(post_err, null);
+                    assert.equal(post_resp.statusCode, 200);
 
-			request.post(config.messages_endpoint,
-				{ json: [{ from: fixtures.models.principals.device.id,
-                           type: "_messageSubscriptionTest",
-                           public: false,
-                           body: { reading: 5.1 } }],
-                  headers: { Authorization: fixtures.models.accessTokens.device.toAuthHeader() } }, function(post_err, post_resp, post_body) {
-				  assert.equal(post_err, null);
-			      assert.equal(post_resp.statusCode, 200);
+                    var message_id = null;
+                    post_body.messages.forEach(function(message) {
+                        assert.equal(message.body.reading, 5.1);
+                        message_id = message.id;
+                    });
 
-			      var message_id = null;
-                  post_body.messages.forEach(function(message) {
-				      assert.equal(message.body.reading, 5.1);
-				      message_id = message.id;
-                  });
+                    assert.notEqual(message_id, null);
 
-                  assert.notEqual(message_id, null);
+                    request({ url: config.messages_endpoint + '/' + message_id, json: true,
+                            headers: { Authorization: fixtures.models.accessTokens.device.toAuthHeader() } },
+                        function(get_err, get_resp, get_body) {
 
-			      request({ url: config.messages_endpoint + '/' + message_id, json: true,
-                          headers: { Authorization: fixtures.models.accessTokens.device.toAuthHeader() } },
-					function(get_err, get_resp, get_body) {
+                            assert.equal(get_err, null);
+                            assert.equal(get_resp.statusCode, 200);
 
-		                assert.equal(get_err, null);
-		                assert.equal(get_resp.statusCode, 200);
+                            assert.equal(get_body.message.body.reading, 5.1);
+                            assert.notEqual(get_body.message.created_at, 5.1);
 
-		                assert.equal(get_body.message.body.reading, 5.1);
-		                assert.notEqual(get_body.message.created_at, 5.1);
+                            var query = encodeURIComponent(JSON.stringify({ "_id" : message_id }));
+                            request.del({ url: config.messages_endpoint + "?q=" + query,
+                                    json: true,
+                                    headers: { Authorization: fixtures.models.accessTokens.system.toAuthHeader() } },
+                                function(del_err, del_resp, del_body) {
 
-                        var query = encodeURIComponent(JSON.stringify({ "_id" : message_id }));
-                        request.del({ url: config.messages_endpoint + "?q=" + query,
-                                      json: true,
-                                      headers: { Authorization: fixtures.models.accessTokens.system.toAuthHeader() } },
-                            function(del_err, del_resp, del_body) {
+                                    assert.equal(del_err, null);
+                                    assert.equal(del_resp.statusCode, 200);
 
-                                assert.equal(del_err, null);
-                                assert.equal(del_resp.statusCode, 200);
-
-                                get_passed = true;
-                                if (notification_passed && get_passed) {
-                                    client.unsubscribe('/messages/' + fixtures.models.principals.device.id);
-                                    done();
+                                    rest_passed = true;
+                                    if (subscription_passed && rest_passed) {
+                                        socket.disconnect();
+                                        done();
+                                    }
                                 }
-                            }
-                        );
-	              });
-		    });
-    	});
-	});
+                            );
+                        });
+                });
+        });
+    });
 });

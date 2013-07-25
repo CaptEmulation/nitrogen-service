@@ -233,13 +233,8 @@ var initialize = function(callback) {
             create(systemPrincipal, function(err, systemPrincipal) {
                 if (err) return callback(err);
 
-                systemPrincipal.owner = systemPrincipal.id;
-                update(systemPrincipal, systemPrincipal.id, { owner: systemPrincipal.id }, function(err) {
-                    if (err) return callback(err);
-                    services.principals.systemPrincipal = systemPrincipal;
-
-                    return callback();
-                });
+                services.principals.systemPrincipal = systemPrincipal;
+                return callback();
             });
         } else {
             services.principals.systemPrincipal = principals[0];
@@ -249,21 +244,7 @@ var initialize = function(callback) {
 };
 
 var notifySubscriptions = function(principal, callback) {
-    var principalsVisibleTo = [principal.id];
-
-    if (services.principals.systemPrincipal)
-        principalsVisibleTo.push(services.principals.systemPrincipal.id);
-
-    if (principal.owner)
-        principalsVisibleTo.push(principal.owner);
-
-    var clientJson = JSON.stringify(principal);
-    async.each(principalsVisibleTo, function(visibleTo, cb) {
-        log.info("publishing change to principal " + principal.id + " to principal: " + visibleTo + " on " + '/principals/' + visibleTo);
-        services.realtime.publish('/principals/' + visibleTo, clientJson);
-
-        cb();
-    }, callback);
+    services.subscriptions.publish('principals', principal, callback);
 };
 
 var removeById = function(authorizingPrincipal, id, callback) {
@@ -334,7 +315,7 @@ var updateLastConnection = function(principal, ip) {
 
     principal.last_connection = updates.last_connection = new Date();
 
-    services.principals.update(services.principals.systemPrincipal, principal.id, updates, function(err, principal) {
+    update(services.principals.systemPrincipal, principal.id, updates, function(err, principal) {
         if (err) return log.error("updating last connection failed: " + err);
     });
 };

@@ -45,15 +45,9 @@ var create = function(message, callback) {
         message.save(function(err, message) {
             if (err) return callback(err);
 
-            var clientJson = JSON.stringify(message);
-            log.info("created message: " + message.id + ": " + clientJson);
-
-            message.visible_to.forEach(function(principalId) {
-                log.info("publishing message " + message.id + " to principal: " + principalId + " on " + '/messages/' + principalId);
-                services.realtime.publish('/messages/' + principalId, clientJson);
+            services.subscriptions.publish('messages', message, function(err) {
+                callback(err, [message]);
             });
-
-            callback(null, [message]);
         });
     });
 };

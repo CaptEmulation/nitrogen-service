@@ -1,9 +1,9 @@
 var express = require('express')
   , app = express()
+  , server = require('http').createServer(app)
   , BearerStrategy = require('passport-http-bearer').Strategy
   , config = require('./config')
   , controllers = require('./controllers')
-  , faye = require('faye')
   , log = require('./log')
   , middleware = require('./middleware')
   , models = require('./models')
@@ -27,7 +27,7 @@ app.use(middleware.crossOrigin);
 app.enable('trust proxy');
 app.disable('x-powered-by');
 
-// only establish routing to endpoints when we have a connection to MongoDB.
+// only open endpoints when we have a connection to MongoDB.
 mongoose.connection.once('open', function () {
     log.info("service connected to mongodb.");
 
@@ -35,10 +35,10 @@ mongoose.connection.once('open', function () {
         if (err) return log.error("service failed to initialize: " + err);
         if (!services.principals.systemPrincipal) return log.error("system principal not available after initialize.");
 
-        log.info("service has initialized itself, exposing api at: " + config.base_url);
+        server.listen(process.env.PORT || config.http_port || 3030);
+        services.subscriptions.attach(server);
 
-        var port = process.env.PORT || config.http_port || 3030;
-        var server = app.listen(port);
+        log.info("service has initialized itself, exposing api at: " + config.api_endpoint);
 
         // REST endpoints
 
@@ -69,8 +69,6 @@ mongoose.connection.once('open', function () {
         app.get(config.api_prefix + 'v1/messages',       middleware.authenticateRequest, controllers.messages.index);
         app.post(config.api_prefix + 'v1/messages',      middleware.authenticateRequest, controllers.messages.create);
         app.delete(config.api_prefix + 'v1/messages',    middleware.authenticateRequest, controllers.messages.remove);
-
-        services.realtime.attach(server, config);
 
         app.get('/client/nitrogen.js', utils.pipeFile('node_modules/nitrogen/browser/nitrogen.js'));
         app.get('/client/nitrogen-min.js', utils.pipeFile('node_modules/nitrogen/browser/nitrogen-min.js'));

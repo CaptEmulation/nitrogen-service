@@ -38,7 +38,6 @@ var createSystemUserFixtures = function(callback) {
         fixtures.accessTokens.system = accessToken;
         callback();
     });
-
 };
 
 var createAgentFixtures = function(callback) {

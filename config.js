@@ -30,29 +30,23 @@ config.mongodb_connection_string = config.mongodb_connection_string || process.e
 config.api_prefix = "/api/";
 config.path_prefix = config.api_prefix + "v1";
 
-config.base_url = config.protocol + "://" + config.host;
+config.base_endpoint = config.protocol + "://" + config.host;
 
 if (config.http_port != 80)
-    config.base_url += ":" + config.http_port
+    config.base_endpoint += ":" + config.http_port
 
-config.base_url += config.path_prefix;
+config.api_endpoint = config.base_endpoint + config.path_prefix;
 
-// NOTE:  realtime_path below cannot have trailing slash or faye client will fail.
-config.realtime_path = "/realtime";
-config.realtime_endpoint = config.base_url + config.realtime_path;
-config.realtime_endpoint_timeout = 90; // seconds
-
-// If you'd like additional indexes applied to messages, you can specify them here.
-config.message_indexes = [
-];
+config.subscriptions_path = '/';
+config.subscriptions_endpoint = config.base_endpoint + config.subscriptions_path;
 
 config.require_message_indexes_required = true;
 
-config.agents_endpoint = config.base_url + "/agents";
-config.blobs_endpoint = config.base_url + "/blobs";
-config.messages_endpoint = config.base_url + "/messages";
-config.principals_endpoint = config.base_url + "/principals";
-config.ops_endpoint = config.base_url + "/ops";
+config.agents_endpoint = config.api_endpoint + "/agents";
+config.blobs_endpoint = config.api_endpoint + "/blobs";
+config.messages_endpoint = config.api_endpoint + "/messages";
+config.principals_endpoint = config.api_endpoint + "/principals";
+config.ops_endpoint = config.api_endpoint + "/ops";
 
 config.password_hash_iterations = 10000;
 config.password_hash_length = 128;
@@ -63,11 +57,15 @@ config.access_token_lifetime = 14; // days
 
 config.device_secret_bytes = 128;
 
-config.request_log_format = ':remote-addr - - [:date] ":method :url HTTP/:http-version" :status :res[content-length] :response-time ":referrer" ":user-agent"';
-
 if (process.env.AZURE_STORAGE_ACCOUNT && process.env.AZURE_STORAGE_KEY) {
     config.blob_provider = new providers.azure.AzureBlobProvider(config);
 }
+
+if (process.env.AZURE_SERVICEBUS_NAMESPACE && process.env.AZURE_SERVICEBUS_ACCESS_KEY) {
+    config.pubsub_provider = new providers.azure.AzurePubSubProvider(config);
+}
+
+config.request_log_format = ':remote-addr - - [:date] ":method :url HTTP/:http-version" :status :res[content-length] :response-time ":referrer" ":user-agent"';
 
 if (process.env.LOGGLY_SUBDOMAIN && process.env.LOGGLY_INPUT_TOKEN && process.env.LOGGLY_USERNAME && process.env.LOGGLY_PASSWORD) {
     log.add(winston.transports.Loggly, {
@@ -81,5 +79,9 @@ if (process.env.LOGGLY_SUBDOMAIN && process.env.LOGGLY_INPUT_TOKEN && process.en
 }
 
 log.add(winston.transports.Console, { colorize: true, timestamp: true });
+
+// If you'd like additional indexes applied to messages, you can specify them here.
+config.message_indexes = [
+];
 
 module.exports = config;

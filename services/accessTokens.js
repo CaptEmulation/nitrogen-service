@@ -4,9 +4,10 @@ var config = require("../config")
   , utils = require("../utils");
 
 var create = function(principal, callback) {
-    var accessToken = new models.AccessToken();
-    accessToken.principal = principal;
-    accessToken.expires_at = utils.dateDaysFromNow(config.access_token_lifetime);
+    var accessToken = new models.AccessToken({
+        expires_at: utils.dateDaysFromNow(config.access_token_lifetime),
+        principal: principal
+    });
 
     crypto.randomBytes(config.access_token_bytes, function(err, tokenBuf) {
         if (err) return callback(err);
@@ -38,7 +39,7 @@ var findByToken = function(token, callback) {
 
 var verify = function(token, done) {
     findByToken(token, function(err, accessToken) {
-        if (err) { return done(err); }
+        if (err) return done(err);
         if (!accessToken || accessToken.expired()) { return done("Your session has expired.", false); }
 
         done(null, accessToken.principal);

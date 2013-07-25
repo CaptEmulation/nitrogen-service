@@ -1,6 +1,5 @@
 var async = require('async')
   , config = require('../config')
-  , faye = require('faye')
   , models = require('../models')
   ,	services = require('../services')
   , utils = require('../utils');
