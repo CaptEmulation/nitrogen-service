@@ -7,8 +7,8 @@ var async = require('async')
   , services = require('../services')
   , utils = require('../utils');
 
-var DEVICE_AUTH_FAILURE_MESSAGE = "The device secret provided was not found or not accepted.";
-var USER_AUTH_FAILURE_MESSAGE = "The email or password you provided were not found or were incorrect.";
+var DEVICE_AUTH_FAILURE_MESSAGE = "The device authentication details provided were not accepted.";
+var USER_AUTH_FAILURE_MESSAGE = "The email or password provided were not found or incorrect.";
 
 var authenticationError = function(msg) {
     return new utils.ServiceError({
@@ -50,7 +50,10 @@ var authenticateUser = function(email, password, callback) {
 var authenticateDevice = function(principalId, secret, callback) {
     findById(services.principals.systemPrincipal, principalId, function(err, principal) {
         if (err) return callback(err);
-        if (!principal) return callback("The secret provided was not accepted.  Please try again.");
+        if (!principal) return callback(new utils.ServiceError({
+            statusCode: 401,
+            message: DEVICE_AUTH_FAILURE_MESSAGE
+        }));
 
         verifySecret(secret, principal, function(err) {
             if (err) return callback(err);
@@ -270,7 +273,10 @@ var removeById = function(authorizingPrincipal, id, callback) {
     findById(authorizingPrincipal, id, function (err, principal) {
         if (err) return callback(err);
         if (!authorizingPrincipal.id === principal.id && !authorizingPrincipal.id === principal &&
-            !authorizingPrincipal.id !== services.principals.systemPrincipal.id) return callback(403);
+            !authorizingPrincipal.id !== services.principals.systemPrincipal.id) return callback(new utils.ServiceError({
+            statusCode: 400,
+            message: "Principal.removeById: Principal not authorized to make change."
+        }));
 
         services.messages.remove(services.principals.systemPrincipal, { from: principal.id }, function(err, removed) {
             if (err) return callback(err);
@@ -281,14 +287,27 @@ var removeById = function(authorizingPrincipal, id, callback) {
 };
 
 var update = function(authorizingPrincipal, id, updates, callback) {
-    if (!authorizingPrincipal) return callback(403);
-    if (!id) return callback(400);
+    if (!authorizingPrincipal) return callback(new utils.ServiceError({
+        statusCode: 400,
+        message: "Principal.update: Missing required argument authorizingPrincipal."
+    }));
+
+    if (!id) return callback(new utils.ServiceError({
+        statusCode: 400,
+        message: "Principal.update: Missing required argument id."
+    }));
 
     findById(authorizingPrincipal, id, function(err, principal) {
         if (err) return callback(err);
-        if (!principal) return callback(404);
+        if (!principal) return callback(new utils.ServiceError({
+            statusCode: 400,
+            message: "Principal.update: Can't find authorizing principal."
+        }));
         if (!authorizingPrincipal.is('system') && authorizingPrincipal.id != principal.id && authorizingPrincipal.id != principal.owner) {
-            return callback(403);
+            return callback(new utils.ServiceError({
+                statusCode: 400,
+                message: "Principal.update: Principal not authorized to make change."
+            }));
         }
 
         // if its not the system, you can only update the name.
