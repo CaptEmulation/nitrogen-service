@@ -50,7 +50,13 @@ var attachSubscriptionsEndpoint = function() {
             if (err) return log.error('subscriptions: findOrCreate failed: ' + err);
 
             var connected = true;
-            socket.on('disconnect', function() { connected = false; });
+            socket.on('disconnect', function() {
+                connected = false;
+                log.info('subscriptions: subscription: ' + subscription.id + ' disconnected.  permanent? ' + subscription.permanent);
+
+                if (!subscription.permanent)
+                    remove(subscription);
+            });
 
             log.info('subscriptions: connecting subscription: ' + subscription.id);
 
@@ -66,7 +72,7 @@ var attachSubscriptionsEndpoint = function() {
                         // there might not be an item in the case the pubsub_provider's long poll et al timed out.
                         // in this case, we just need to check that we are still connected and restart the receive.
                         if (item) {
-                            console.log('received subscription notification from pubsub_provider, emitting on socket.io: ' + subscription.type + ": " + item);
+                            log.info('subscriptions:  new message from subscription: ' + subscription.id + ' of type: ' + subscription.type + ": " + JSON.stringify(item));
                             socket.emit(subscription.type, item);
                         }
 
@@ -74,8 +80,7 @@ var attachSubscriptionsEndpoint = function() {
                     });
                 },
                 function(err) {
-                    if (err) console.log(err);
-                    log.info('subscriptions: disconnecting subscription: ' + subscription.id);
+                    if (err) log.error(err);
                 }
             );
 
@@ -84,6 +89,8 @@ var attachSubscriptionsEndpoint = function() {
         // TODO: add ability to create messages through the realtime endpoint.
         //socket.on('message', function(message) {});
     });
+
+
 };
 
 var create = function(subscription, callback) {
@@ -120,8 +127,21 @@ var findOrCreate = function(subscription, callback) {
 var publish = function(type, item, callback) {
     if (!config.pubsub_provider) return log.error("subscriptions: can't publish without pubsub_provider");
 
-    log.info("publishing " + type + ": " + item.id + ": " + JSON.stringify(item));
+    log.info("subscriptions: publishing " + type + ": " + item.id + ": " + JSON.stringify(item));
     config.pubsub_provider.publish(type, item, callback);
+};
+
+var remove = function(subscription, callback) {
+    log.info('subscriptions: removing subscription: ' + subscription.id);
+    config.pubsub_provider.removeSubscription(subscription, function(err) {
+        if (err) return callback(err);
+
+        subscription.remove(callback);
+    });
+};
+
+var save = function(subscription, callback) {
+    subscription.save(callback);
 };
 
 module.exports = {
