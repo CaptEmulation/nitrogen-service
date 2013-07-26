@@ -22,10 +22,7 @@ var attach = function(server) {
 var attachAuthFilter = function() {
     io.configure(function () {
         io.set('authorization', function (handshakeData, callback) {
-            console.log('^^^^^^^^^^ got handshake auth request: ' + JSON.stringify(handshakeData));
             if (!handshakeData.query.auth) return callback(null, false);
-
-            console.log('^^^^^^^^^^ auth token: ' + handshakeData.query.auth);
 
             services.accessTokens.verify(handshakeData.query.auth, function(err, principal) {
                 var success = !err && principal;
@@ -40,8 +37,6 @@ var attachAuthFilter = function() {
 
 var attachSubscriptionsEndpoint = function() {
     io.sockets.on('connection', function(socket) {
-        console.log('########## handshake: ' + JSON.stringify(socket.handshake));
-
         if (!socket.handshake.query.type || !socket.handshake.principal) return log.error('subscription request without type and/or principal.');
 
         var subscription = new models.Subscription({
@@ -64,16 +59,22 @@ var attachSubscriptionsEndpoint = function() {
             async.whilst(
                 function() { return connected; },
                 function(callback) {
+                    log.info('starting receive for subscription: ' + subscription.id);
                     config.pubsub_provider.receive(subscription, function(err, item) {
                         if (err) return callback(err);
 
-                        console.log('received subscription notification from pubsub_provider, emitting on socket.io: ' + subscription.type + ": " + item);
-                        socket.emit(subscription.type, item);
+                        // there might not be an item in the case the pubsub_provider's long poll et al timed out.
+                        // in this case, we just need to check that we are still connected and restart the receive.
+                        if (item) {
+                            console.log('received subscription notification from pubsub_provider, emitting on socket.io: ' + subscription.type + ": " + item);
+                            socket.emit(subscription.type, item);
+                        }
 
                         callback();
                     });
                 },
-                function() {
+                function(err) {
+                    if (err) console.log(err);
                     log.info('subscriptions: disconnecting subscription: ' + subscription.id);
                 }
             );
@@ -108,11 +109,7 @@ var findOne = function(subscription, callback) {
 };
 
 var findOrCreate = function(subscription, callback) {
-
-    console.log('in findOrCreate');
-
     findOne(subscription, function(err, existingSubscription) {
-        console.log("findOrCreate: err: " + err + " existingSubscription: " + existingSubscription);
         if (err) return callback(err);
         if (existingSubscription) return callback(null, existingSubscription);
 
@@ -123,7 +120,7 @@ var findOrCreate = function(subscription, callback) {
 var publish = function(type, item, callback) {
     if (!config.pubsub_provider) return log.error("subscriptions: can't publish without pubsub_provider");
 
-    log.info("publishing " + type + ": " + item.id + " to subscribers");
+    log.info("publishing " + type + ": " + item.id + ": " + JSON.stringify(item));
     config.pubsub_provider.publish(type, item, callback);
 };
 

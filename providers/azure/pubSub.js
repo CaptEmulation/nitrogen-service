@@ -18,8 +18,6 @@ function AzurePubSubProvider() {
 }
 
 AzurePubSubProvider.prototype.createSubscription = function(subscription, callback) {
-    console.log('createSubscription type: ' + subscription.type + ' name: ' + subscription.name);
-
     this.serviceBus.createSubscription(subscription.type, subscription.name, function(err) {
         if (err) return callback(err);
 
@@ -40,7 +38,14 @@ AzurePubSubProvider.prototype.receive = function(subscription, callback) {
         subscription.name,
         { timeoutIntervalInS: 5 * 60 },
         function (err, item) {
-            callback(err, JSON.parse(item.body));
+            if (err) {
+                // squelch non error error from Azure.
+                if (err === 'No messages to receive') err = null;
+                callback(err);
+            }
+            else {
+                callback(null, JSON.parse(item.body));
+            }
         }
     );
 };

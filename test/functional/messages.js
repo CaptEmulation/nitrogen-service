@@ -93,7 +93,8 @@ describe('messages endpoint', function() {
 			restPassed = false;
 
         var socket = io.connect(config.subscriptions_endpoint, {
-            query: "type=messages&auth=" + encodeURIComponent(fixtures.models.accessTokens.device.token)
+            query: "type=messages&auth=" + encodeURIComponent(fixtures.models.accessTokens.device.token),
+            'force new connection': true
         });
 
         socket.on('messages', function(message) {
@@ -146,6 +147,7 @@ describe('messages endpoint', function() {
                                     assert.equal(del_resp.statusCode, 200);
 
                                     restPassed = true;
+                                    console.log('#################### rest passed');
                                     if (subscriptionPassed && restPassed) {
                                         socket.disconnect();
                                         done();

@@ -43,6 +43,4 @@ function assignOwnerToPrincipal(message) {
     });
 }
 
-session.onMessage(function(message) {
-    processClaim(message);
-});
+session.onMessage(processClaim);

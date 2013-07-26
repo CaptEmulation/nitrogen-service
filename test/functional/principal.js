@@ -14,16 +14,14 @@ describe('principals endpoint', function() {
             restPassed = false;
 
         var socket = io.connect(config.subscriptions_endpoint, {
-            query: "type=principals&auth=" + encodeURIComponent(fixtures.models.accessTokens.system.token)
+            query: "type=principals&auth=" + encodeURIComponent(fixtures.models.accessTokens.system.token),
+            'force new connection': true
         });
 
         socket.on('principals', function(principal) {
-            console.log('################ got principal via socket');
-            console.dir(principal);
             if (principal.name !== 'subscription_test') return;
 
             subscriptionPassed = true;
-            console.log('################ subscription passed.');
             if (subscriptionPassed && restPassed) {
                 socket.disconnect();
                 done();

@@ -33,6 +33,8 @@ var handleError = function(res, err) {
 };
 
 var ipFromRequest = function(req) {
+    if (!req || !req.ip) return;
+
     var ipParts = req.ip.split(":");
     if (ipParts.length)
     	return ipParts[0];
