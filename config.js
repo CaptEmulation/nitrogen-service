@@ -61,9 +61,11 @@ if (process.env.AZURE_STORAGE_ACCOUNT && process.env.AZURE_STORAGE_KEY) {
     config.blob_provider = new providers.azure.AzureBlobProvider(config);
 }
 
-if (process.env.AZURE_SERVICEBUS_NAMESPACE && process.env.AZURE_SERVICEBUS_ACCESS_KEY) {
-    config.pubsub_provider = new providers.azure.AzurePubSubProvider(config);
-}
+//if (process.env.AZURE_SERVICEBUS_NAMESPACE && process.env.AZURE_SERVICEBUS_ACCESS_KEY) {
+//    config.pubsub_provider = new providers.azure.AzurePubSubProvider(config);
+//}
+
+config.pubsub_provider = new providers.memory.MemoryPubSubProvider(config);
 
 config.request_log_format = ':remote-addr - - [:date] ":method :url HTTP/:http-version" :status :res[content-length] :response-time ":referrer" ":user-agent"';
 
