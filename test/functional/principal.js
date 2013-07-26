@@ -1,8 +1,8 @@
 var app = require('../../server')
   ,	assert = require('assert')
   , config = require('../../config')
-  ,	faye = require('faye')
   , fixtures = require('../fixtures')
+  , io = require('socket.io-client')
   , mongoose = require('mongoose')
   , request = require('request')
   , services = require('../../services');
@@ -10,38 +10,27 @@ var app = require('../../server')
 describe('principals endpoint', function() {
 
 	it('should create and fetch a device principal', function(done) {
-        var notificationPassed = false,
-            getPassed = false,
-            startedPost = false;
+        var subscriptionPassed = false,
+            restPassed = false;
 
-        var client = new faye.Client(config.realtime_endpoint);
-        client.addExtension({
-            outgoing: function(message, callback) {
-                message.ext = message.ext || {};
-                message.ext.access_token = fixtures.models.accessTokens.system.token;
-                return callback(message);
-            }
+        var socket = io.connect(config.subscriptions_endpoint, {
+            query: "type=principals&auth=" + encodeURIComponent(fixtures.models.accessTokens.system.token)
         });
 
-        var subscriptionChannel = '/principals/' + services.principals.systemPrincipal.id;
-        console.log('#### subscription channel for principal: ' + subscriptionChannel);
-
-        client.subscribe(subscriptionChannel, function(principalJson) {
-            console.log('### GOT RESPONSE');
-            var principal = JSON.parse(principalJson);
+        socket.on('principals', function(principal) {
+            console.log('################ got principal via socket');
+            console.dir(principal);
             if (principal.name !== 'subscription_test') return;
 
-            notificationPassed = true;
-            if (notificationPassed && getPassed) {
-                client.unsubscribe('/principals/' + services.principals.systemPrincipal.id);
+            subscriptionPassed = true;
+            console.log('################ subscription passed.');
+            if (subscriptionPassed && restPassed) {
+                socket.disconnect();
                 done();
             }
         });
 
-        services.realtime.bind('subscribe', function(clientId) {
-            if (startedPost) return;
-            startedPost = true;
-
+        socket.on('ready', function() {
             request.post(config.principals_endpoint,
                 { json: { type: 'device',
                           name: "subscription_test" } }, function(post_err, post_resp, post_body) {
@@ -67,10 +56,10 @@ describe('principals endpoint', function() {
                         assert.equal(get_body.principal.name, "subscription_test");
                         assert.notEqual(get_body.principal.last_connection, undefined);
                         assert.notEqual(get_body.principal.last_ip, undefined);
-                        getPassed = true;
 
-                        if (notificationPassed && getPassed) {
-                            client.unsubscribe('/principals/' + services.principals.systemPrincipal.id);
+                        restPassed = true;
+                        if (subscriptionPassed && restPassed) {
+                            socket.disconnect();
                             done();
                         }
                   });

@@ -89,10 +89,9 @@ describe('messages endpoint', function() {
     });
 
     it('should create and fetch a message', function(done) {
-		var subscription_passed = false,
-			rest_passed = false;
+		var subscriptionPassed = false,
+			restPassed = false;
 
-        console.log('config.subscriptions_endpoint: ' + config.subscriptions_endpoint);
         var socket = io.connect(config.subscriptions_endpoint, {
             query: "type=messages&auth=" + encodeURIComponent(fixtures.models.accessTokens.device.token)
         });
@@ -102,8 +101,8 @@ describe('messages endpoint', function() {
 
             assert.equal(message.body.reading, 5.1);
 
-            subscription_passed = true;
-            if (subscription_passed && rest_passed) {
+            subscriptionPassed = true;
+            if (subscriptionPassed && restPassed) {
                 socket.disconnect();
                 done();
             }
@@ -146,8 +145,8 @@ describe('messages endpoint', function() {
                                     assert.equal(del_err, null);
                                     assert.equal(del_resp.statusCode, 200);
 
-                                    rest_passed = true;
-                                    if (subscription_passed && rest_passed) {
+                                    restPassed = true;
+                                    if (subscriptionPassed && restPassed) {
                                         socket.disconnect();
                                         done();
                                     }
