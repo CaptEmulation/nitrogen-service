@@ -1,0 +1,10 @@
+{
+	"title": "switchState",
+	"type": "object",
+	"properties": {
+		"on": {
+			"type": "number",
+			"required": true
+		}
+	}
+}
