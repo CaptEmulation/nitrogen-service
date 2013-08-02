@@ -187,7 +187,6 @@ describe('messages service', function() {
         });
     });
 
-
     it('never removes a message nor blob with a never expire', function(done) {
         if (!config.blob_provider) return done();
 

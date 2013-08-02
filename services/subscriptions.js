@@ -40,22 +40,21 @@ var attachSubscriptionsEndpoint = function() {
         if (!socket.handshake.query.type || !socket.handshake.principal) return log.error('subscription request without type and/or principal.');
 
         var subscription = new models.Subscription({
-            filter: socket.handshake.query.q || {},
+            filter: socket.handshake.query.filter || {},
             name: socket.handshake.query.name,
             principal: socket.handshake.principal.id,
-            type: socket.handshake.query.type
+            type: socket.handshake.query.type,
         });
 
         findOrCreate(subscription, function(err, subscription) {
-            if (err) return log.error('subscriptions: findOrCreate failed: ' + err);
+            if (err) return log.error('subscriptions: failed to create: ' + err);
 
             var connected = true;
             socket.on('disconnect', function() {
                 connected = false;
-                log.info('subscriptions: subscription: ' + subscription.id + ' disconnected.  permanent? ' + subscription.permanent);
+                log.info('subscriptions: socket: ' + socket.id + ' disconnected.  permanent? ' + subscription.permanent);
 
-                if (!subscription.permanent)
-                    remove(subscription);
+                remove(subscription);
             });
 
             log.info('subscriptions: connecting subscription: ' + subscription.id);
@@ -65,14 +64,14 @@ var attachSubscriptionsEndpoint = function() {
             async.whilst(
                 function() { return connected; },
                 function(callback) {
-                    log.info('starting receive for subscription: ' + subscription.id);
+                    log.info('starting receive for socket: ' + socket.id);
                     config.pubsub_provider.receive(subscription, function(err, item) {
                         if (err) return callback(err);
 
                         // there might not be an item in the case the pubsub_provider's long poll et al timed out.
                         // in this case, we just need to check that we are still connected and restart the receive.
                         if (item) {
-                            log.info('subscriptions:  new message from subscription: ' + subscription.id + ' of type: ' + subscription.type + ": " + JSON.stringify(item));
+                            log.info('subscriptions:  new message from subscription: ' + socket.id + ' of type: ' + subscription.type + ": " + JSON.stringify(item));
                             socket.emit(subscription.type, item);
                         }
 
@@ -81,6 +80,8 @@ var attachSubscriptionsEndpoint = function() {
                 },
                 function(err) {
                     if (err) log.error(err);
+
+                    log.info('subscriptions: ending socket: ' + socket.id);
                 }
             );
 
@@ -90,20 +91,22 @@ var attachSubscriptionsEndpoint = function() {
         //socket.on('message', function(message) {});
     });
 
-
 };
 
 var create = function(subscription, callback) {
     subscription.permanent = !!subscription.name;
     if (!subscription.permanent) {
-        // assign a random name if this is a non-permanent subscription.
-        subscription.name = new mongoose.Types.ObjectId;
+        // assign a random name and id if this is a non-permanent subscription.
+        subscription.id = subscription.name = new mongoose.Types.ObjectId;
     }
 
     config.pubsub_provider.createSubscription(subscription, function(err) {
         if (err) callback(err);
 
-        subscription.save(callback);
+        if (subscription.permanent)
+            subscription.save(callback);
+        else
+            callback(null, subscription);
     });
 };
 
@@ -136,7 +139,8 @@ var remove = function(subscription, callback) {
     config.pubsub_provider.removeSubscription(subscription, function(err) {
         if (err) return callback(err);
 
-        subscription.remove(callback);
+        if (subscription.permanent)
+            subscription.remove(callback);
     });
 };
 
@@ -147,5 +151,6 @@ var save = function(subscription, callback) {
 module.exports = {
     attach: attach,
     create: create,
+    findOrCreate: findOrCreate,    
     publish: publish
 };

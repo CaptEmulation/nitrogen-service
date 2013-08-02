@@ -12,18 +12,17 @@ MemoryPubSubProvider.prototype.createSubscription = function(subscription, callb
 };
 
 MemoryPubSubProvider.prototype.publish = function(type, item, callback) {
-    var subscriptionIds = [];
-    for (var id in this.subscriptions)
-        subscriptionIds.push(id);
-
     var self = this;
-    async.each(subscriptionIds, function(subscriptionId, cb) {
+    async.each(Object.keys(this.subscriptions), function(subscriptionId, cb) {
+        
         var subscription = self.subscriptions[subscriptionId];
         if (subscription && subscription.type === type && subscription.callback) {
             log.info('memory pubsub provider publishing to subscription: ' + subscription.id + ' item: ' + JSON.stringify(item));
             subscription.callback(null, item);
         }
+
         cb();
+
     }, callback);
 };
 
