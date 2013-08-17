@@ -13,11 +13,12 @@ var removeAll = function (modelType, callback) {
 var createDeviceFixtures = function(callback) {
     var device = new models.Principal({ type: 'device',
                                         name: 'existing_device',
-                                        public: true,
-                                        owner: fixtures.principals.user });
+                                        public: true });
 
     services.principals.create(device, function(err, device) {
         if (err) throw err;
+
+        services.principals.updateLastConnection(device, '127.0.0.1');
         fixtures.principals.device = device;
 
         services.accessTokens.create(device, function(err, accessToken) {

@@ -37,60 +37,28 @@ var attachAuthFilter = function() {
 
 var attachSubscriptionsEndpoint = function() {
     io.sockets.on('connection', function(socket) {
-        if (!socket.handshake.query.type || !socket.handshake.principal) return log.error('subscription request without type and/or principal.');
+        if (!socket.handshake.principal) return log.error('subscription request without type and/or principal.');
 
-        var subscription = new models.Subscription({
-            filter: socket.handshake.query.filter || {},
-            name: socket.handshake.query.name,
-            principal: socket.handshake.principal.id,
-            type: socket.handshake.query.type,
+        socket.subscriptions = {};
+        socket.on('start', function(spec) {
+            start(socket, spec);
         });
 
-        findOrCreate(subscription, function(err, subscription) {
-            if (err) return log.error('subscriptions: failed to create: ' + err);
+        socket.on('disconnect', function() {
+            log.info('subscriptions: socket: ' + socket.id + ' disconnected.  removing all subscriptions on this socket.');
 
-            var connected = true;
-            socket.on('disconnect', function() {
-                connected = false;
-                log.info('subscriptions: socket: ' + socket.id + ' disconnected.  permanent? ' + subscription.permanent);
-
-                remove(subscription);
+            async.each(Object.keys(socket.subscriptions), function(clientId, callback) {
+                remove(socket.subscriptions[clientId], callback);
             });
+        });
 
-            log.info('subscriptions: connecting subscription: ' + subscription.id);
-
-            socket.emit('ready');
-
-            async.whilst(
-                function() { return connected; },
-                function(callback) {
-                    log.info('starting receive for socket: ' + socket.id);
-                    config.pubsub_provider.receive(subscription, function(err, item) {
-                        if (err) return callback(err);
-
-                        // there might not be an item in the case the pubsub_provider's long poll et al timed out.
-                        // in this case, we just need to check that we are still connected and restart the receive.
-                        if (item) {
-                            log.info('subscriptions:  new message from subscription: ' + socket.id + ' of type: ' + subscription.type + ": " + JSON.stringify(item));
-                            socket.emit(subscription.type, item);
-                        }
-
-                        callback();
-                    });
-                },
-                function(err) {
-                    if (err) log.error(err);
-
-                    log.info('subscriptions: ending socket: ' + socket.id);
-                }
-            );
-
+        socket.on('stop', function(spec) {
+            remove(socket.subscriptions[spec.id]);
         });
 
         // TODO: add ability to create messages through the realtime endpoint.
         //socket.on('message', function(message) {});
     });
-
 };
 
 var create = function(subscription, callback) {
@@ -103,6 +71,7 @@ var create = function(subscription, callback) {
     config.pubsub_provider.createSubscription(subscription, function(err) {
         if (err) callback(err);
 
+        // we only save permanent subscriptions to the db, not session ones.
         if (subscription.permanent)
             subscription.save(callback);
         else
@@ -135,17 +104,79 @@ var publish = function(type, item, callback) {
 };
 
 var remove = function(subscription, callback) {
-    log.info('subscriptions: removing subscription: ' + subscription.id);
+    log.info('subscriptions: removing subscription: ' + subscription.id + ': ' + subscription.clientId);
+
     config.pubsub_provider.removeSubscription(subscription, function(err) {
         if (err) return callback(err);
 
+        delete subscription.socket.subscriptions[subscription.clientId];
+
         if (subscription.permanent)
             subscription.remove(callback);
+        else
+            callback();
     });
 };
 
 var save = function(subscription, callback) {
     subscription.save(callback);
+};
+
+var start = function(socket, spec) {
+    var subscription = new models.Subscription({
+        clientId: spec.id,
+        filter: spec.filter || {},
+        name: spec.name,
+        principal: socket.handshake.principal.id,
+        socket: socket,
+        type: spec.type
+    });
+
+    findOrCreate(subscription, function(err, subscription) {
+        if (err) return log.error('subscriptions: failed to create: ' + err);
+
+        log.info('subscriptions: connecting subscription: ' + subscription.id);
+
+        socket.subscriptions[spec.id] = subscription;
+        socket.emit('ready');
+
+        stream(socket, subscription);
+    });
+};
+
+var stop = function(subscription) {
+    if (!subscription) return log.error('undefined subscription passed to disconnect');
+
+    console.log("$$$$$$$$: disconnecting " + subscription.clientId);
+
+    config.pubsub_provider.removeSubscription(subscription);
+};
+
+var stream = function(socket, subscription) {
+    async.whilst(
+        function() { return socket.subscriptions[subscription.clientId] !== undefined; },
+        function(callback) {
+            config.pubsub_provider.receive(subscription, function(err, item) {
+                if (err) return callback(err);
+
+                // there might not be an item when the pubsub_provider's timed out waiting for an item.
+                // in this case, we just need to check that we are still connected and restart the receive.
+
+                if (item) {
+                    console.log('$$$$$$$$$$$$$ subscriptions:  new message from subscription: ' + subscription.clientId + ' of type: ' + subscription.type + ": " + JSON.stringify(item));
+
+                    socket.emit(subscription.clientId, item);
+                }
+
+                callback();
+            });
+        },
+        function(err) {
+            if (err) log.error(err);
+
+            console.log("$$$$$$$$$$$: stream for " + subscription.clientId + " disconnected.");
+        }
+    );
 };
 
 module.exports = {

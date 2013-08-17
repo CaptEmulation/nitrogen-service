@@ -73,7 +73,7 @@ describe('messages endpoint', function() {
         });
     });
 
-    it ('delete should be only accessible to system principal', function(done) {
+    it('delete should be only accessible to system principal', function(done) {
         var query = encodeURIComponent(JSON.stringify({ "_id" : fixtures.models.messages.deviceIp.id }));
         request.del({ url: config.messages_endpoint + "?q=" + query,
                       json: true,
@@ -93,26 +93,33 @@ describe('messages endpoint', function() {
 			restPassed = false;
 
         var socket = io.connect(config.subscriptions_endpoint, {
-            query: "type=messages&auth=" + encodeURIComponent(fixtures.models.accessTokens.device.token),
-            'force new connection': true
+            query: "auth=" + encodeURIComponent(fixtures.models.accessTokens.device.token)
         });
 
-        socket.on('messages', function(message) {
-            if (message.type !== '_messageSubscriptionTest') return;
+        var subscriptionId = 'sub1';
+        socket.emit('start', { id: subscriptionId, filter: {}, type: 'messages' });
+
+        socket.on(subscriptionId, function(message) {
+            if (message.type !== '_messageSubscriptionTest1') return;
+
+            console.log('$$$$$$$$$$$: message test notification');
+            console.dir(message);
 
             assert.equal(message.body.reading, 5.1);
 
             subscriptionPassed = true;
+            socket.emit('stop', { id: subscriptionId });
+
             if (subscriptionPassed && restPassed) {
-                socket.disconnect();
+                console.log('#################### message subscription triggered done');
                 done();
             }
         });
 
-        socket.on('ready', function() {
+        setTimeout(function() {
             request.post(config.messages_endpoint,
                   { json: [{ from: fixtures.models.principals.device.id,
-                    type: "_messageSubscriptionTest",
+                    type: "_messageSubscriptionTest1",
                     public: false,
                     body: { reading: 5.1 } }],
                     headers: { Authorization: fixtures.models.accessTokens.device.toAuthHeader() } }, function(post_err, post_resp, post_body) {
@@ -147,15 +154,14 @@ describe('messages endpoint', function() {
                                     assert.equal(del_resp.statusCode, 200);
 
                                     restPassed = true;
-                                    console.log('#################### rest passed');
+                                    console.log('#################### message rest triggered done.');
                                     if (subscriptionPassed && restPassed) {
-                                        socket.disconnect();
                                         done();
                                     }
                                 }
                             );
                         });
                 });
-        });
+        }, 200);
     });
 });

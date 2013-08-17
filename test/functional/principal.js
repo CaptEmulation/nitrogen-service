@@ -14,21 +14,25 @@ describe('principals endpoint', function() {
             restPassed = false;
 
         var socket = io.connect(config.subscriptions_endpoint, {
-            query: "type=principals&auth=" + encodeURIComponent(fixtures.models.accessTokens.system.token),
-            'force new connection': true
+            query: "auth=" + encodeURIComponent(fixtures.models.accessTokens.system.token)
         });
 
-        socket.on('principals', function(principal) {
+        var subscriptionId = 'sub2';
+        socket.emit('start', { id: subscriptionId, type: 'principals' });
+
+        socket.on(subscriptionId, function(principal) {
             if (principal.name !== 'subscription_test') return;
 
             subscriptionPassed = true;
+            console.log('$$$$$$$$$: stopping principal test notification');
+            socket.emit('stop', { id: subscriptionId });
+
             if (subscriptionPassed && restPassed) {
-                socket.disconnect();
                 done();
             }
         });
 
-        socket.on('ready', function() {
+        setTimeout(function() {
             request.post(config.principals_endpoint,
                 { json: { type: 'device',
                           name: "subscription_test" } }, function(post_err, post_resp, post_body) {
@@ -45,7 +49,8 @@ describe('principals endpoint', function() {
                   principalId = post_body.principal.id;
                   token = post_body.accessToken.token;
 
-                  request({ url: config.principals_endpoint + '/' + post_body.principal.id, json: true,
+                  request({ url: config.principals_endpoint + '/' + post_body.principal.id,
+                            json: true,
                             headers: { Authorization: "Bearer " + post_body.accessToken.token } }, function(get_err, get_resp, get_body) {
                         assert.equal(get_err, null);
                         assert.equal(get_resp.statusCode, 200);
@@ -57,12 +62,11 @@ describe('principals endpoint', function() {
 
                         restPassed = true;
                         if (subscriptionPassed && restPassed) {
-                            socket.disconnect();
                             done();
                         }
                   });
             });
-        });
+        }, 200);
 	});
 
     it('should be able to remove principal', function(done) {

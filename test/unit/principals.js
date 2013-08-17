@@ -3,8 +3,8 @@ var assert = require('assert')
   , fixtures = require('../fixtures')
   , models = require('../../models')
   , services = require("../../services");
-describe('principals service', function() {
 
+describe('principals service', function() {
     var passwordFixture = "sEcReT44";
 
     it('can create and validate a user', function(done) {

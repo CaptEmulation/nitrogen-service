@@ -1,42 +1,13 @@
-function createIpMatchMessage(session, user, device, callback) {
+function pairDeviceWithOwner(device, owner) {
+    log.info('device id: ' + device.id + ' automatically matched to owner: ' + owner.id);
 
-    nitrogen.Message.find(session, {
-        from: user.id,
-        type: 'reject',
-        body: { principal: device.id }
-    }, {}, function(err, messages) {
-        if (err) return callback(err);
-        if (messages.length > 0) {
-            log.info("matcher: reject message exists for user: " + user.id + " and device: " + device.id + " not creating ip_match");
-            return callback(null, null);
-        }
-
-        nitrogen.Message.find(session, {
-            type: 'ip_match',
-            body: { principal: device.id }
-        }, {}, function(err, messages) {
-            if (err) return callback(err);
-            if (messages.length > 0) {
-                log.info("matcher: ip_match message exists for device: " + device.id + " not creating ip_match");
-                return callback(null, null);
-            }
-
-            log.info("matcher: creating ip_match message for device: " + device.id);
-
-            var matchMessage = new nitrogen.Message({ 
-                type: 'ip_match',
-                to: user.id,
-                body: {
-                    principal: device.id
-                }
-            });
-
-            matchMessage.send(session, callback);
-        });
-    });
+    device.owner = owner.id;
+    device.save(session);
 }
 
-function sendIpMatchMessages(message, devices, users) {
+function matchUnownedDevices(message, devices, users) {
+    log.info('matcher: matchingDevices');
+
     nitrogen.Principal.find(session, { _id: message.from }, {}, function(err, fromPrincipals) {
         if (err) return log.error("matcher: error finding principal: " + err);
         if (fromPrincipals.length === 0) return log.warn("matcher: didn't find principal with id (possibly deleted in the meantime?): " + message.from);
@@ -46,17 +17,24 @@ function sendIpMatchMessages(message, devices, users) {
         /* for device 'ip' messages we only generate one ip_match message from the user to that device. */
 
         if (fromPrincipal.is('user')) {
-            /* for each device at this IP address that is not currently owned by a principal, emit an ip_match message. */
-            var user = fromPrincipal;
-
             async.each(devices, function(device, callback) {
-                if (!device.owner) createIpMatchMessage(session, user, device, callback);
+                if (!device.owner) {
+                    pairDeviceWithOwner(device, fromPrincipal);
+                } else {
+                    log.info('matcher: device id: ' + device.id + ' already has owner: ' + device.owner);
+                }
             }, completionCallback);
 
         } else {
             /* create an ip_match message for this device. */
+            log.info('matcher: isDevice');
+
             var device = fromPrincipal;
-            if (!device.owner) createIpMatchMessage(session, users[0], device, completionCallback);
+            if (!device.owner) {
+                pairDeviceWithOwner(device, users[0]);
+            } else {
+                log.info('matcher: device id: ' + device.id + ' already has owner: ' + device.owner);
+            }
         }
     });
 }
@@ -84,7 +62,7 @@ function processIpMessage(message) {
 
         if (users.length != 1) return log.info("matcher: not exactly one user at this ip address. can't match devices.");
 
-        sendIpMatchMessages(message, devices, users);
+        matchUnownedDevices(message, devices, users);
     });
 }
 

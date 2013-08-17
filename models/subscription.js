@@ -17,6 +17,12 @@ subscriptionSchema.index({ name: 1 });
 subscriptionSchema.set('toObject', { transform: BaseSchema.baseObjectTransform });
 subscriptionSchema.set('toJSON', { transform: BaseSchema.baseObjectTransform });
 
+subscriptionSchema.virtual('clientId').set(function(value) { this._clientId = value; });
+subscriptionSchema.virtual('clientId').get(function() { return this._clientId; });
+
+subscriptionSchema.virtual('socket').set(function(value) { this._socket = value; });
+subscriptionSchema.virtual('socket').get(function() { return this._socket; });
+
 var Subscription = mongoose.model('Subscription', subscriptionSchema);
 
 module.exports = Subscription;
