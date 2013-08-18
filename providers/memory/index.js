@@ -1,3 +1,3 @@
 module.exports = {
-    MemoryPubSubProvider: require('./pubsub')
+    MemoryPubSubProvider: require('./pubSub')
 };
