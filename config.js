@@ -5,26 +5,34 @@ var log = require('./log')
 
 var config = null;
 
-if (process.env.NODE_ENV == "production") {
+// To enable proxies like NGINX, Nitrogen has internal and external ports.
+//
+// external_port defines the port that clients should use to access the service.
+// internal_port defines the port that the service will listen to.
+
+if (process.env.NODE_ENV === "production") {
     config = {
-        http_port: 443,
-        protocol: "https"
+        internal_port: process.env.PORT
     };
-} else if (process.env.NODE_ENV == "test") {
+} else if (process.env.NODE_ENV === "test") {
     config = {
-        http_port: 3050,
+        external_port: 3050,
+        internal_port: 3050,
+        protocol: 'http',
         mongodb_connection_string: "mongodb://localhost/nitrogen_test"
     };
 } else {
     config = {
-        http_port: 3030,
+        external_port: 3030,
+        protocol: 'http',
         mongodb_connection_string: "mongodb://localhost/nitrogen_dev"
     };
 }
 
-config.protocol = process.env.PROTOCOL || config.protocol || "http";
+config.internal_port = config.internal_port || 3030;
+config.external_port = config.external_port || 443;
+config.protocol = process.env.PROTOCOL || config.protocol || "https";
 config.host = process.env.HOST_NAME || config.host || "localhost";
-config.http_port = process.env.HTTP_PORT || config.http_port || 3030;
 config.mongodb_connection_string = config.mongodb_connection_string || process.env.MONGODB_CONNECTION_STRING;
 
 config.api_prefix = "/api/";
@@ -32,15 +40,14 @@ config.path_prefix = config.api_prefix + "v1";
 
 config.base_endpoint = config.protocol + "://" + config.host;
 
-if (config.http_port != 80)
-    config.base_endpoint += ":" + config.http_port
+if (config.external_port != 80 && config.protocol == 'http' ||
+    config.external_port != 443 && config.protocol == 'https')
+    config.base_endpoint += ":" + config.external_port;
 
 config.api_endpoint = config.base_endpoint + config.path_prefix;
 
 config.subscriptions_path = '/';
 config.subscriptions_endpoint = config.base_endpoint + config.subscriptions_path;
-
-config.require_message_indexes_required = true;
 
 config.agents_endpoint = config.api_endpoint + "/agents";
 config.blobs_endpoint = config.api_endpoint + "/blobs";

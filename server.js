@@ -35,7 +35,7 @@ mongoose.connection.once('open', function () {
         if (err) return log.error("service failed to initialize: " + err);
         if (!services.principals.systemPrincipal) return log.error("system principal not available after initialize.");
 
-        server.listen(process.env.PORT || config.http_port || 3030);
+        server.listen(config.internal_port);
         services.subscriptions.attach(server);
 
         log.info("service has initialized itself, exposing api at: " + config.api_endpoint);
