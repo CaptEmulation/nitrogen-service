@@ -6,7 +6,7 @@ var assert = require('assert')
 
 describe('agent service', function() {
 
-    it('deviceMatching automatically matches case where 1 user and 1 device are at same ip', function(done) {
+    it('matcher automatically matches case where 1 user and 1 device are at same ip', function(done) {
 
         services.principals.updateLastConnection(fixtures.models.principals.user, "127.0.0.1");
 
@@ -20,7 +20,7 @@ describe('agent service', function() {
 
     });
 
-    it('deviceMatching does not match 2 users at same ip address for 2nd user', function(done) {
+    it('matcher does not match 2 users at same ip address for 2nd user', function(done) {
         services.principals.updateLastConnection(fixtures.models.principals.user, "127.0.0.1");
         services.principals.updateLastConnection(fixtures.models.principals.anotherUser, "127.0.0.1");
 
