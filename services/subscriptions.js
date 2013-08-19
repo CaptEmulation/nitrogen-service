@@ -56,7 +56,7 @@ var attachSubscriptionsEndpoint = function() {
             remove(socket.subscriptions[spec.id]);
         });
 
-        // TODO: add ability to create messages through the realtime endpoint.
+        // TODO: add ability to create messages through the socket connection.
         //socket.on('message', function(message) {});
     });
 };
@@ -104,6 +104,8 @@ var publish = function(type, item, callback) {
 };
 
 var remove = function(subscription, callback) {
+    if (!subscription) return log.error('undefined subscription passed to services.subscription.remove.');
+
     log.info('subscriptions: removing subscription: ' + subscription.id + ': ' + subscription.clientId);
 
     config.pubsub_provider.removeSubscription(subscription, function(err) {
