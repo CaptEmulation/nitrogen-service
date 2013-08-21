@@ -16,8 +16,11 @@ var buildSystemClientSession = function(config, callback) {
 
         var service = new nitrogen.Service(config);
         var clientPrincipal = new nitrogen.Principal(services.principals.systemPrincipal);
+        clientPrincipal.id = accessToken.principal.id;
 
-        var session = new nitrogen.Session(service, clientPrincipal, accessToken);
+        var socket = service.connectSocket(clientPrincipal, accessToken);
+
+        var session = new nitrogen.Session(service, clientPrincipal, accessToken, socket);
 
         return callback(err, session);
     });

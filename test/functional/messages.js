@@ -93,7 +93,8 @@ describe('messages endpoint', function() {
 			restPassed = false;
 
         var socket = io.connect(config.subscriptions_endpoint, {
-            query: "auth=" + encodeURIComponent(fixtures.models.accessTokens.device.token)
+            query: "auth=" + encodeURIComponent(fixtures.models.accessTokens.device.token),
+            'force new connection': true
         });
 
         var subscriptionId = 'sub1';

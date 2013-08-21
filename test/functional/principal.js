@@ -14,7 +14,8 @@ describe('principals endpoint', function() {
             restPassed = false;
 
         var socket = io.connect(config.subscriptions_endpoint, {
-            query: "auth=" + encodeURIComponent(fixtures.models.accessTokens.system.token)
+            query: "auth=" + encodeURIComponent(fixtures.models.accessTokens.system.token),
+            'force new connection': true
         });
 
         var subscriptionId = 'sub2';
