@@ -23,7 +23,9 @@ function matchUnownedDevices(message, devices, users) {
                 } else {
                     log.info('matcher: device id: ' + device.id + ' already has owner: ' + device.owner);
                 }
-            }, completionCallback);
+            }, function(err) {
+                if (err) log.error("matcher: matchUnownedDevices finished with an error: " + err);
+            });
 
         } else {
             /* create an ip_match message for this device. */
@@ -37,10 +39,6 @@ function matchUnownedDevices(message, devices, users) {
             }
         }
     });
-}
-
-function completionCallback(err) {
-    if (err) log.error("createIPMatchMessage finished with an error: " + err);
 }
 
 function processIpMessage(message) {
@@ -66,10 +64,4 @@ function processIpMessage(message) {
     });
 }
 
-session.onMessage(function(message) {
-    if (message.is('ip')) {
-        log.info("matcher: processing ip message");
-
-        processIpMessage(message);
-    }
-});
+session.onMessage({ type: 'ip'}, processIpMessage);

@@ -1,5 +1,5 @@
 function processClaim(message) {
-    if (message && message.is('claim') && message.response_to) {
+    if (message.response_to) {
         log.info("claimAgent: claim agent processing message: " + message.id + " : " + message.to);
         nitrogen.Message.find(session, { _id: message.response_to[0] }, {}, function(err, ipMatches) {
 
@@ -43,4 +43,4 @@ function assignOwnerToPrincipal(message) {
     });
 }
 
-session.onMessage(processClaim);
+session.onMessage({ type: 'claim'}, processClaim);
