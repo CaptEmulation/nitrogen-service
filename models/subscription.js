@@ -4,7 +4,7 @@ var BaseSchema = require('./baseSchema'),
 
 var subscriptionSchema = new BaseSchema();
 subscriptionSchema.add({
-    filter: { type: String },
+    filter: { type: Schema.Types.Mixed },
     name: { type: String },
     principal: { type: Schema.Types.ObjectId, ref: 'Principal' },
     permanent: {type: Boolean },

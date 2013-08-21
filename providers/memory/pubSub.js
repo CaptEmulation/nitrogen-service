@@ -1,5 +1,6 @@
 var async = require('async')
-  , log = require('../../log');
+  , log = require('../../log')
+  , sift = require('sift');
 
 function MemoryPubSubProvider() {
     this.subscriptions = {};
@@ -13,15 +14,18 @@ MemoryPubSubProvider.prototype.createSubscription = function(subscription, callb
 
 MemoryPubSubProvider.prototype.publish = function(type, item, callback) {
     var self = this;
-    async.each(Object.keys(this.subscriptions), function(subscriptionId, cb) {
+    async.each(Object.keys(this.subscriptions), function(subscriptionId, eachCallback) {
         
         var subscription = self.subscriptions[subscriptionId];
-        if (subscription && subscription.type === type && subscription.callback) {
-            log.info('memory pubsub provider publishing to subscription: ' + subscription.id + ' item: ' + JSON.stringify(item));
-            subscription.callback(null, item);
+
+        if (subscription.type === type && subscription.callback) {
+            sift(subscription.filter, [item]).forEach(function(unfiltered) {
+                log.info('memory pubsub provider publishing to subscription: ' + subscription.id + ' item: ' + JSON.stringify(unfiltered));
+                subscription.callback(null, unfiltered);
+            });
         }
 
-        cb();
+        eachCallback();
 
     }, callback);
 };

@@ -207,6 +207,7 @@ var validateAll = function(messages, callback) {
 module.exports = {
     create: create,
     createMany: createMany,
+    filterForPrincipal: filterForPrincipal,
     find: find,
     findById: findById,
     initialize: initialize,

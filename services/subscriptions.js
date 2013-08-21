@@ -134,6 +134,9 @@ var start = function(socket, spec) {
         type: spec.type
     });
 
+    // compose filter that includes visibility limitations.
+    subscription.filter = services.messages.filterForPrincipal(socket.handshake.principal, subscription.filter);
+
     findOrCreate(subscription, function(err, subscription) {
         if (err) return log.error('subscriptions: failed to create: ' + err);
 
@@ -147,9 +150,9 @@ var start = function(socket, spec) {
 };
 
 var stop = function(subscription) {
-    if (!subscription) return log.error('undefined subscription passed to disconnect');
+    if (!subscription) return log.error('subscriptions: undefined subscription passed to stop');
 
-    console.log("$$$$$$$$: disconnecting " + subscription.clientId);
+    console.log("subscriptions: stopping " + subscription.clientId);
 
     config.pubsub_provider.removeSubscription(subscription);
 };
@@ -165,7 +168,7 @@ var stream = function(socket, subscription) {
                 // in this case, we just need to check that we are still connected and restart the receive.
 
                 if (item) {
-                    console.log('$$$$$$$$$$$$$ subscriptions:  new message from subscription: ' + subscription.clientId + ' of type: ' + subscription.type + ": " + JSON.stringify(item));
+                    console.log('subscriptions:  new message from subscription: ' + subscription.clientId + ' of type: ' + subscription.type + ": " + JSON.stringify(item));
 
                     socket.emit(subscription.clientId, item);
                 }
@@ -176,7 +179,7 @@ var stream = function(socket, subscription) {
         function(err) {
             if (err) log.error(err);
 
-            console.log("$$$$$$$$$$$: stream for " + subscription.clientId + " disconnected.");
+            console.log("subscriptions: stream for " + subscription.clientId + " disconnected.");
         }
     );
 };
