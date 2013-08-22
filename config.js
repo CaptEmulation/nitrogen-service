@@ -38,12 +38,7 @@ config.mongodb_connection_string = config.mongodb_connection_string || process.e
 config.api_prefix = "/api/";
 config.path_prefix = config.api_prefix + "v1";
 
-config.base_endpoint = config.protocol + "://" + config.host;
-
-if (config.external_port != 80 && config.protocol == 'http' ||
-    config.external_port != 443 && config.protocol == 'https')
-    config.base_endpoint += ":" + config.external_port;
-
+config.base_endpoint = config.protocol + "://" + config.host + ":" + config.external_port;
 config.api_endpoint = config.base_endpoint + config.path_prefix;
 
 config.subscriptions_path = '/';
