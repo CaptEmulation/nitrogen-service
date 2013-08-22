@@ -96,7 +96,7 @@ var findById = function(principal, agentId, callback) {
     models.Agent.findOne(filterForPrincipal(principal, { "_id": agentId }), function(err, agent) {
         if (err) return callback(err);
         if (!agent) return callback(404);
-        if (!principal.is('system') && agent.execute_as != principal.id) return callback(403);
+        if (!principal.isAdmin() && agent.execute_as != principal.id) return callback(403);
 
         return callback(null, agent);
     });
