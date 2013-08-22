@@ -6,7 +6,11 @@ var async = require('async')
   , nitrogen = require('nitrogen')
   , path = require('path')
   , services = require('../services')
+  , utils = require('../utils')
   , vm = require('vm');
+
+var AGENT_NOT_FOUND = "Agent not found.";
+var PRINCIPAL_REQUIRED = "Principal required to complete operation.";
 
 var buildSystemClientSession = function(config, callback) {
     if (!services.principals.systemPrincipal) return callback("System principal not available.");
@@ -27,7 +31,10 @@ var buildSystemClientSession = function(config, callback) {
 };
 
 var create = function(principal, agent, callback) {
-    if (!principal) return callback(400);
+    if (!principal) return callback(new utils.ServiceError({
+        statusCode: 401,
+        message: PRINCIPAL_REQUIRED
+    }));
 
     if (!principal.is('system'))
         agent.execute_as = principal.id;
@@ -74,9 +81,10 @@ var execute = function(agents, callback) {
 var filterForPrincipal = function(principal, filter) {
     if (principal && principal.is('system')) return filter;
 
-    if (principal) {
+    if (!principal.isAdmin()) {
         filter["$and"] = [ { execute_as: principal._id } ];
     }
+
     return filter;
 };
 
@@ -170,16 +178,20 @@ var start = function(config, callback) {
     });
 };
 
-var update = function(authorizingPrincipal, id, updates, callback) {
-    findById(authorizingPrincipal, id, function(err, agent) {
+var update = function(principal, id, updates, callback) {
+    findById(principal, id, function(err, agent) {
         if (err) return callback(err);
-        if (!agent) return callback(404);
-        if (!authorizingPrincipal.is('system') && authorizingPrincipal.id != agent.execute_as) return callback(403);
+        if (!agent) return callback(new utils.ServiceError({
+            statusCode: 404,
+            message: AGENT_NOT_FOUND
+        }));
+
+        if (!principal.isAdmin() && principal.id != agent.execute_as) return callback(403);
 
         models.Agent.update({ _id: id }, { $set: updates }, function(err, updated) {
             if (err) return callback(err);
 
-            findById(authorizingPrincipal, id, callback);
+            findById(principal, id, callback);
         });
     });
 };

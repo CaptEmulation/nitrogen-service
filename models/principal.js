@@ -68,4 +68,7 @@ Principal.prototype.is = function(type) {
     return this.type === type;
 };
 
+// TODO: Mechanism to enable promoting users to an admin role. For now, punt and make all users admins.
+Principal.prototype.isAdmin = function() { return this.is('user') || this.is('system'); };
+
 module.exports = Principal;
