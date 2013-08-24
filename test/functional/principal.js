@@ -163,6 +163,7 @@ describe('principals endpoint', function() {
 
                 assert.equal(Date.parse(body.principal.last_connection) > fixtures.models.principals.user.last_connection.getTime(), true);
                 assert.notEqual(body.principal.last_ip, undefined);
+                assert.equal(body.principal.password, undefined);
 
                 done();
             });
