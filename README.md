@@ -1,6 +1,6 @@
 # Nitrogen Service
 
-Nitrogen is a platform for building connected devices and the applications that use them.  Nitrogen provides the authentication, authorization, event logging, device provisioning, discovery services, and real time message passing framework so that you can focus on your device and/or application.  All with a consistent development platform that leverages the ubiquity of Javascript.
+Nitrogen is a platform for building connected devices.  Nitrogen provides the authentication, authorization, and real time message passing framework so that you can focus on your device and/or application.  All with a consistent development platform that leverages the ubiquity of Javascript.
 
 ## Device Development Model
 
@@ -32,35 +32,31 @@ service.connect(thermometer, function(err, session, thermometer) {
 });
 ```
 
-You can find a complete example for a device application of Nitrogen in the `chroma` project.
+You can find a complete example for a device application of Nitrogen in the `camera` project.
 
 Current message schemas are futher defined in [docs/schema.md](docs/schemas.md).
 
-## Application Development Model
+## Listening to a device's message stream
 
-The development model for applications is similiar.   A web application that displays these temperatures in real time as they are received would look like this:
+An application that displays these temperatures in real time as they are received would look like this.  In this case,
+we're using a user principal, and a filter with onMessage to only notify us of temperature updates.
 
 ``` javascript
-var user = new nitrogen.User();
+var user = new nitrogen.User({...});
 
 var service = new nitrogen.Service(config);
 service.connect(user, function(err, session, user) {
-
-    session.onMessage(function(message) {
+    session.onMessage({ type: 'temperature' }, function(message) {
         console.log("The temperature is now: " + message.body.temperature);
 
         // update the UI
-
-        if (message.body.temperature < 15) {
-        	// emit a control message to the furnance to turn it on.
-        }
     });
 });
 ```
 
-A great example for understanding the Nitrogen application model is the `admin` project.
-
 ## Getting Started
+
+There is a free hosted Nitrogen service running in the cloud if you'd like to get started quickly with building a device.  Go to [https://admin.nitrogen.io](https://admin.nitrogen.io) to sign up for an account and get started. 
 
 To get started with a Nitrogen service locally:
 
@@ -88,4 +84,4 @@ Nitrogen has three subprojects that you should have a look at as well.
 
 1. [client](https://github.com/nitrogenjs/client): The client library for building Nitrogen devices and applications.
 2. [admin](https://github.com/nitrogenjs/admin): An administrative tool for managing the Nitrogen service.
-3. [chroma](https://github.com/nitrogenjs/chroma): A sample device application that connects a camera to the Nitrogen service.
+3. [camera](https://github.com/nitrogenjs/camera): A sample device application that connects a camera to the Nitrogen service.
