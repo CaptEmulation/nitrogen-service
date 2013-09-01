@@ -195,7 +195,7 @@ var validateSchema = function(message, callback) {
 
     var results = revalidator.validate(message.body, schemas[message.type]);
     if (!results.valid) {
-        log.info("message validation failed with errors: " + results.errors);
+        log.info("message validation failed with errors: " + JSON.stringify(results.errors));
     }
     callback(null, results);
 };

@@ -1,0 +1,1 @@
+cp ../client/lib/* node_modules/nitrogen/lib

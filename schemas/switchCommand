@@ -1,0 +1,20 @@
+{
+	"title": "switchCommand",
+	"type": "object",
+	"properties": {
+		"command": {
+			"type": "object",
+			"properties": {
+			    "on": {
+			        "type": "number",
+			        "required": true
+			    }
+			},
+			"required": true
+		},
+        "message": {
+            "type": "object",
+            "required": false
+        }
+	}
+}
