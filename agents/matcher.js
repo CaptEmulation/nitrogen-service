@@ -64,4 +64,4 @@ function processIpMessage(message) {
     });
 }
 
-session.onMessage({ type: 'ip'}, processIpMessage);
+session.on({ type: 'message', filter: { type: 'ip' } }, processIpMessage);

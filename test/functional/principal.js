@@ -19,7 +19,7 @@ describe('principals endpoint', function() {
         });
 
         var subscriptionId = 'sub2';
-        socket.emit('start', { id: subscriptionId, type: 'principals' });
+        socket.emit('start', { id: subscriptionId, type: 'principal' });
 
         socket.on(subscriptionId, function(principal) {
             if (principal.name !== 'subscription_test') return;

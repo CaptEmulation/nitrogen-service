@@ -98,13 +98,10 @@ describe('messages endpoint', function() {
         });
 
         var subscriptionId = 'sub1';
-        socket.emit('start', { id: subscriptionId, filter: {}, type: 'messages' });
+        socket.emit('start', { id: subscriptionId, filter: {}, type: 'message' });
 
         socket.on(subscriptionId, function(message) {
             if (message.type !== '_messageSubscriptionTest1') return;
-
-            console.log('$$$$$$$$$$$: message test notification');
-            console.dir(message);
 
             assert.equal(message.body.reading, 5.1);
 
@@ -112,7 +109,6 @@ describe('messages endpoint', function() {
             socket.emit('stop', { id: subscriptionId });
 
             if (subscriptionPassed && restPassed) {
-                console.log('#################### message subscription triggered done');
                 done();
             }
         });
@@ -149,13 +145,12 @@ describe('messages endpoint', function() {
                             request.del({ url: config.messages_endpoint + "?q=" + query,
                                     json: true,
                                     headers: { Authorization: fixtures.models.accessTokens.system.toAuthHeader() } },
-                                function(del_err, del_resp, del_body) {
+                                    function(del_err, del_resp, del_body) {
 
                                     assert.equal(del_err, null);
                                     assert.equal(del_resp.statusCode, 200);
 
                                     restPassed = true;
-                                    console.log('#################### message rest triggered done.');
                                     if (subscriptionPassed && restPassed) {
                                         done();
                                     }

@@ -247,7 +247,7 @@ var initialize = function(callback) {
 };
 
 var notifySubscriptions = function(principal, callback) {
-    services.subscriptions.publish('principals', principal, callback);
+    services.subscriptions.publish('principal', principal, callback);
 };
 
 var removeById = function(authorizingPrincipal, id, callback) {

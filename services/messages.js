@@ -45,7 +45,7 @@ var create = function(message, callback) {
         message.save(function(err, message) {
             if (err) return callback(err);
 
-            services.subscriptions.publish('messages', message, function(err) {
+            services.subscriptions.publish('message', message, function(err) {
                 callback(err, [message]);
             });
         });
@@ -100,6 +100,7 @@ var loadSchema = function(type, callback) {
     fs.readFile(schemaPath + "/" + type, function (err, schemaText) {
         if (err) return callback(err);
 
+	log.info('loading schema: ' + type);
         schemas[type] = JSON.parse(schemaText);
         callback(null);
     });
