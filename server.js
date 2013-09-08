@@ -9,6 +9,7 @@ var express = require('express')
   , models = require('./models')
   , mongoose = require('mongoose')
   , passport = require('passport')
+  , path = require('path')
   , services = require('./services')
   , utils = require('./utils');
 
@@ -70,9 +71,9 @@ mongoose.connection.once('open', function () {
         app.post(config.api_prefix + 'v1/messages',      middleware.authenticateRequest, controllers.messages.create);
         app.delete(config.api_prefix + 'v1/messages',    middleware.authenticateRequest, controllers.messages.remove);
 
-        app.get('/client/nitrogen.js', utils.pipeFile('node_modules/nitrogen/browser/nitrogen.js'));
-        app.get('/client/nitrogen-min.js', utils.pipeFile('node_modules/nitrogen/browser/nitrogen-min.js'));
-        app.use(express.static(__dirname + '/static'));
+        app.use('/docs', express.static(path.join(__dirname, 'node_modules/nitrogen/docs')));
+        app.use('/client', express.static(path.join(__dirname, 'node_modules/nitrogen/browser')));
+        app.use(express.static(path.join(__dirname, '/static')));
 
         log.info("service has initialized endpoints");
 
