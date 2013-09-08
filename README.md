@@ -1,10 +1,10 @@
 # Nitrogen Service
 
-Nitrogen is a platform for building connected devices.  Nitrogen provides the authentication, authorization, and real time message passing framework so that you can focus on your device and/or application.  All with a consistent development platform that leverages the ubiquity of Javascript.
+Nitrogen is a platform for building connected devices.  Nitrogen provides the authentication, authorization, and realtime communications framework so that you can focus on your device and/or application.  All with a consistent development platform that leverages the ubiquity of Javascript.
 
 ## Device Development Model
 
-Nitrogen at its heart uses messaging between principals (devices and users) to allow them to communicate. Messages can follow a well known schema to enable interoperability between applications or use their own private custom message types for specialized applications.
+Nitrogen at its heart uses messaging between entities to allow them to communicate. Messages can follow a well known schema to enable interoperability between applications or use their own private custom message types for specialized applications.
 
 For example, a thermometer that measures temperature once every 15 minutes could be implemented in Nitrogen like this:
 
@@ -32,7 +32,7 @@ service.connect(thermometer, function(err, session, thermometer) {
 });
 ```
 
-You can find a complete example for a device application of Nitrogen in the `camera` project.
+You can find a complete example for a device application of Nitrogen in the [camera](https://github.com/nitrogenjs/camera) project.
 
 Current message schemas are futher defined in [docs/schema.md](docs/schemas.md).
 
@@ -56,16 +56,15 @@ service.connect(user, function(err, session, user) {
 
 ## Getting Started
 
-There is a free hosted Nitrogen service running in the cloud if you'd like to get started quickly with building a device.  Go to [https://admin.nitrogen.io](https://admin.nitrogen.io) to sign up for an account and get started. 
+There is a free hosted Nitrogen service running in the cloud if you'd like to get started quickly with building a device.  Go to [https://admin.nitrogen.io](https://admin.nitrogen.io) to sign up for an account and get started.   You can also use a  
 
 To get started with a Nitrogen service locally:
 
 1. Clone or fork this repo: `https://github.com/nitrogenjs/service`
 2. Fetch and install its node.js dependencies: `npm install`
-3. Install mongodb locally (if necessary).
+3. Install mongodb locally.
 4. Edit `config.js` to change defaults as necessary.
-5. If you use of Nitrogen requires storing blob-like objects, create a Windows Azure account with a storage account and set the environmental variables AZURE_STORAGE_ACCOUNT and AZURE_STORAGE_KEY to your credentials in config.js.
-6. `node server.js`
+5. `node server.js`
 
 ## Running tests
 
@@ -74,10 +73,8 @@ To get started with a Nitrogen service locally:
 
 ## How to contribute
 
-1.  Feedback:  We'd love feedback on what problems you are using Nitrogen to solve.  Obviously, we'd also like to hear about where you ran into sharp edges and dead ends.   Drop me a message at timfpark@gmail.com or file an issue with us above.
-2.  Pull requests:  If you'd like to tackle an issue, fork the repo, create a clean commit for the fix or enhancement with tests if necessary, and send us a pull request.
-3.  Documentation:  Better technical documentation is key to broadening the use of the platform.   We'd love to have more help and this is one of the most valuable contributions you can make.
-
+1.  Feedback:  We'd love feedback on what problems you are using Nitrogen to solve.  Obviously, we'd also like to hear about where you ran into sharp edges and dead ends.   Send us a message or file an issue.
+2.  Pull requests:  If you'd like to tackle an issue, fork the repo, create a clean commit for the fix or enhancement (with tests if necessary), and send us a pull request.
 ## Other Projects
 
 Nitrogen has three subprojects that you should have a look at as well.
