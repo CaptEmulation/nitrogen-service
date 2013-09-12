@@ -1,21 +1,21 @@
 {
-	"title": "droneCommand",
-	"type": "object",
-	"properties": {
-		"command": {
-		    "enum": [ "takeoff", "land",
-		              "up", "down",
-		              "clockwise", "counterClockwise",
-		              "forward", "back",
-		              "left", "right",
-		              "stop" ],
-			"type": "string",
-			"required": true
-		},
+    "title": "droneCommand",
+    "type": "object",
+    "properties": {
+        "command": {
+            "enum": [ "takeoff", "land",
+                      "up", "down",
+                      "clockwise", "counterClockwise",
+                      "forward", "back",
+                      "left", "right",
+                      "stop", "flipAhead" ],
+            "type": "string",
+            "required": true
+        },
         "speed": {
             "type": "number",
             "required": false
         }
 
-	}
+    }
 }
