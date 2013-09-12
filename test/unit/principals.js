@@ -46,6 +46,14 @@ describe('principals service', function() {
         });
     });
 
+    it('can generate a claim code', function(done) {
+        var code = services.principals.generateClaimCode();
+        assert.notEqual(code, undefined);
+        assert.equal(code.length, config.claim_code_length + 1);
+ 
+        done();
+    });
+
     it('can authenticate a device', function(done) {
 
         var request = { id: fixtures.models.principals.device.id,

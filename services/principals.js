@@ -122,15 +122,19 @@ var createSecretCredentials = function(principal, callback) {
     if (!config.device_secret_bytes) return callback("Service is missing configuration.  Please add value for missing device_secret_bytes element.");
 
     crypto.randomBytes(config.device_secret_bytes, function(err, secretBuf) {
-        if (err) return callback(err, null);
+        if (err) return callback(err);
 
         principal.secret = secretBuf.toString('base64');
+        issueClaimCode(principal, function(err, code) {
+            if (err) return callback(err);
+            principal.claim_code = code;
 
-        hashSecret(principal.secret, function(err, hashedSecret) {
-            if (err) return callback(err, null);
+            hashSecret(principal.secret, function(err, hashedSecret) {
+                if (err) return callback(err);
 
-            principal.secret_hash = hashedSecret;
-            callback(null, principal);
+                principal.secret_hash = hashedSecret;
+                callback(null, principal);
+            });
         });
     });
 };
@@ -172,6 +176,52 @@ var findByEmail = function(principal, email, callback) {
 
 var findById = function(principal, id, callback) {
     models.Principal.findOne(filterForPrincipal(principal, { "_id": id }), callback);
+}
+
+var checkClaimCode = function(code, callback) {
+    find(services.principals.systemPrincipal, { claim_code: code }, {}, function (err, principals) {
+        if (err) return callback(true);
+        callback(principals.length > 0);  
+    });
+};
+
+var generateClaimCode = function() {
+    var code = '';
+    var characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    for (var i=0; i < config.claim_code_length / 2; i++) {
+        var idx = Math.floor(Math.random() * characters.length);
+        code += characters[idx]; 
+    }
+
+    code += '-';
+
+    for (var i=0; i < config.claim_code_length / 2; i++) {
+        code += Math.floor(Math.random() * 10);    
+    }
+
+    return code;
+};
+
+var issueClaimCode = function(principal, callback) {
+    if (!principal.is('device')) return callback(null,null); 
+
+    var wasCollision = true;
+    var claimCode = null;
+    async.whilst(
+        function() { return wasCollision; },
+        function(callback) {
+            claimCode = generateClaimCode();
+            checkClaimCode(claimCode, function(collision) {
+                wasCollision = collision;
+                callback();
+            });
+        },           
+        function(err) {
+           if (err) return callback(err); 
+           callback(null, claimCode);
+        }
+    );
+
 };
 
 var hashPassword = function(password, saltBuf, callback) {
@@ -182,6 +232,7 @@ var hashPassword = function(password, saltBuf, callback) {
                   function(err, hash) {
                       if (err) return callback(err);
 
+ 
                       var hashBuf = new Buffer(hash, 'binary');
                       callback(null, hashBuf);
                   }
@@ -383,6 +434,7 @@ module.exports = {
     create: create,
     find: find,
     findById: findById,
+    generateClaimCode: generateClaimCode,
     impersonate: impersonate,
     initialize: initialize,
     removeById: removeById,
