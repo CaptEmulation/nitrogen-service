@@ -8,7 +8,7 @@ var async = require('async')
   , utils = require('../utils');
 
 var DEVICE_AUTH_FAILURE_MESSAGE = "The device authentication details provided were not accepted.";
-var USER_AUTH_FAILURE_MESSAGE = "The email or password provided were not found or incorrect.";
+var USER_AUTH_FAILURE_MESSAGE = "The email or password provided were not accepted.";
 
 var authenticationError = function(msg) {
     return new utils.ServiceError({
