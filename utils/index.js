@@ -22,7 +22,7 @@ var handleError = function(res, err) {
     if (err instanceof ServiceError) {
         var statusCode = err.statusCode || 400;
 
-        return sendFailedResponse(res, statusCode, JSON.stringify(err));
+        return sendFailedResponse(res, statusCode, err);
     }
 
     if (err === 400) return sendFailedResponse(res, 400, err);

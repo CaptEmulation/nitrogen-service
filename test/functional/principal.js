@@ -25,7 +25,6 @@ describe('principals endpoint', function() {
             if (principal.name !== 'subscription_test') return;
 
             subscriptionPassed = true;
-            console.log('$$$$$$$$$: stopping principal test notification');
             socket.emit('stop', { id: subscriptionId });
 
             if (subscriptionPassed && restPassed) {
@@ -178,9 +177,8 @@ describe('principals endpoint', function() {
                 assert.equal(body.accessToken, undefined);
                 assert.notEqual(body.error, undefined);
 
-                var errorJson = JSON.parse(body.error);
-                assert.equal(errorJson.statusCode, 401);
-                assert.notEqual(errorJson.message, undefined);
+                assert.equal(body.error.statusCode, 401);
+                assert.notEqual(body.error.message, undefined);
 
                 done();
             });

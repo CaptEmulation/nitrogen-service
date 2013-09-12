@@ -23,10 +23,10 @@ exports.create = function(req, res) {
 	var principal = new models.Principal(req.body);
 
 	services.principals.create(principal, function(err, principal) {
-		if (err) return res.send(400, { error: err });
+		if (err) return utils.handleError(res, err);
 
         services.accessTokens.create(principal, function(err, accessToken) {
-            if (err) return res.send(400, { error: err });
+            if (err) return utils.handleError(res, err);
 
             var principalJSON = principal.toObject();
 

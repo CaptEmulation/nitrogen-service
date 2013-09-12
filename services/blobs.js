@@ -37,9 +37,7 @@ var findById = function(blobId, callback) {
 };
 
 var initialize = function(callback) {
-    config.blob_provider.initialize(function(err) {
-        callback();
-    });
+    config.blob_provider.initialize(callback);
 };
 
 var remove = function(principal, query, callback) {
