@@ -4,14 +4,15 @@ var BaseSchema = require('./baseSchema')
 
 var principalSchema = new BaseSchema();
 principalSchema.add({
-	type: { type: String },        // user, device
+    type: { type: String },       
     name: { type: String },        // user friendly name for this principal
 
     public: { type: Boolean, default: false },
     owner: { type: Schema.Types.ObjectId, ref: 'Principal' },
+    claim_code: { type: String },
 
-	last_ip: { type: String },
-	last_connection: { type: Date, default: Date.now },
+    last_ip: { type: String },
+    last_connection: { type: Date, default: Date.now },
 
     capabilities: { type: Array },
 
@@ -21,12 +22,13 @@ principalSchema.add({
 
 // user items
 
-	email: { type: String },
-	password_hash: { type: String },  // hashed and stored in base64
-	salt: { type: String }            // stored in base64
+    email: { type: String },
+    password_hash: { type: String },  // hashed and stored in base64
+    salt: { type: String }            // stored in base64
 });
 
 principalSchema.index({ capabilities: 1 });
+principalSchema.index({ claim_code: 1 });
 principalSchema.index({ email: 1 });
 principalSchema.index({ last_ip: 1 });
 principalSchema.index({ owner: 1 });

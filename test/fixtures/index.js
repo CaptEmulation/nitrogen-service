@@ -11,6 +11,8 @@ var removeAll = function (modelType, callback) {
 };
 
 var createDeviceFixtures = function(callback) {
+    console.log("FIXTURES: creating device fixtures");
+
     var device = new models.Principal({ type: 'device',
                                         name: 'existing_device',
                                         public: true });
@@ -25,6 +27,7 @@ var createDeviceFixtures = function(callback) {
             if (err) throw err;
 
             fixtures.accessTokens.device = accessToken;
+            console.log("FIXTURES: creating device fixtures: FINISHED");
             callback();
 
         });
@@ -33,15 +36,19 @@ var createDeviceFixtures = function(callback) {
 };
 
 var createSystemUserFixtures = function(callback) {
+    console.log("FIXTURES: creating system user fixtures");
     services.accessTokens.findOrCreateToken(services.principals.systemPrincipal, function(err, accessToken) {
         if (err) throw err;
 
         fixtures.accessTokens.system = accessToken;
+        console.log("FIXTURES: creating system user fixtures: FINISHED");
         callback();
     });
 };
 
 var createAgentFixtures = function(callback) {
+    console.log("FIXTURES: creating agent fixtures");
+
     var agent = new models.Agent({
         action: ";",
         execute_as: fixtures.principals.user.id,
@@ -52,11 +59,15 @@ var createAgentFixtures = function(callback) {
         if (err) throw err;
 
         fixtures.agents.nop = agent;
+        console.log("FIXTURES: creating agent fixtures finished");
+
         callback();
     });
 };
 
 var createUserFixtures = function(callback) {
+    console.log("FIXTURES: creating user fixtures");
+
     var user = new models.Principal({ type: 'user',
                                       email: 'user@server.org',
                                       public: true,
@@ -83,6 +94,7 @@ var createUserFixtures = function(callback) {
                 if (err) throw err;
 
                 fixtures.principals.anotherUser = user;
+                console.log("FIXTURES: creating user fixtures: FINISHED");
 
                 callback();
             });
@@ -91,6 +103,8 @@ var createUserFixtures = function(callback) {
 };
 
 var createBlobFixture = function(callback) {
+    console.log("FIXTURES: creating blob fixtures");
+
     var fixture_path = 'test/fixtures/images/image.jpg';
 
     fs.stat(fixture_path, function(err, stats) {
@@ -106,12 +120,17 @@ var createBlobFixture = function(callback) {
             if (err) throw err;
 
             fixtures.blobs.removableBlob = blob;
+
+            console.log("FIXTURES: creating blob fixtures: FINISHED");
+
             callback();
         });
     });
 };
 
 var createDeviceIpMessageFixture = function(callback) {
+    console.log("FIXTURES: creating device ip fixtures");
+
     var message = new models.Message({ from: fixtures.principals.device.id,
                                        type: "ip",
                                        public: true,
@@ -121,6 +140,7 @@ var createDeviceIpMessageFixture = function(callback) {
         if (err) throw err;
 
         fixtures.messages.deviceIp = messages[0];
+        console.log("FIXTURES: creating device ip fixtures: FINISHED");
         callback();
     });
 };
