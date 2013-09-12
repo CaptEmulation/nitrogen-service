@@ -42,7 +42,15 @@ function matchUnownedDevices(message, devices, users) {
 }
 
 function processIpMessage(message) {
-    nitrogen.Principal.find(session, { last_ip: message.body.ip_address }, {}, function(err, principalsAtIp) {
+    var yesterday = new Date();
+    yesterday.setDate(-1);
+
+    var filter = {
+        last_ip: message.body.ip_address,
+        last_connection: { $gt: yesterday }
+    };
+
+    nitrogen.Principal.find(session, filter, {}, function(err, principalsAtIp) {
         if (err) return log.error('matcher: error looking for principals at this ip address: ' + err);
         var devices = [];
         var users = [];

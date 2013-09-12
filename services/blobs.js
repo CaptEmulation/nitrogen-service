@@ -36,6 +36,12 @@ var findById = function(blobId, callback) {
     models.Blob.findOne({"_id": blobId}, callback);
 };
 
+var initialize = function(callback) {
+    config.blob_provider.initialize(function(err) {
+        callback();
+    });
+};
+
 var remove = function(principal, query, callback) {
     if (!principal || !principal.is('system')) {
         return callback(utils.authorizationError());
@@ -70,6 +76,7 @@ var stream = function(principal, blobId, stream, callback) {
 module.exports = {
     create: create,
     findById: findById,
+    initialize: initialize,
     remove: remove,
     stream: stream
 };

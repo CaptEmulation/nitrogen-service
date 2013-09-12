@@ -8,6 +8,7 @@ describe('agents endpoint', function() {
 
     it('index should be not be accessible anonymously', function(done) {
         request(config.agents_endpoint, function(err, resp, body) {
+            assert.equal(err, undefined);
             assert.equal(resp.statusCode, 401);
             done();
         });

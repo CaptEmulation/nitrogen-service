@@ -11,6 +11,7 @@ exports.initialize = function(callback) {
     async.series([
         exports.principals.initialize,
         exports.agents.initialize,
-        exports.messages.initialize
+        exports.messages.initialize,
+        exports.blobs.initialize
     ], callback);
 };

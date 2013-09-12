@@ -13,14 +13,10 @@ function AzureBlobProvider(config) {
         return;
     }
 
-    this.azureBlobService = azure.createBlobService(azure_storage_account,
-                                                    azure_storage_key, azure_storage_endpoint);
-
-    this.azureBlobService.createContainerIfNotExists(
-        "blobs",
-        function(err) {
-            if (err) log.error("Azure Blob Provider: Not able to create/confirm blob container: " + err);
-        }
+    this.azureBlobService = azure.createBlobService(
+        azure_storage_account,
+        azure_storage_key,
+        azure_storage_endpoint
     );
 }
 
@@ -32,13 +28,17 @@ AzureBlobProvider.prototype.create = function(blob, stream, callback) {
         });
 };
 
-AzureBlobProvider.prototype.stream = function(blob, stream, callback) {
-    this.azureBlobService.getBlobToStream(BLOB_CONTAINER, blob.id, stream, callback);
+AzureBlobProvider.prototype.initialize = function(callback) {
+    this.azureBlobService.createContainerIfNotExists(BLOB_CONTAINER, callback);
 };
 
 AzureBlobProvider.prototype.remove = function(blob, callback) {
     log.info("removing blob with id: " + blob.id);
     this.azureBlobService.deleteBlob(BLOB_CONTAINER, blob.id, callback);
+};
+
+AzureBlobProvider.prototype.stream = function(blob, stream, callback) {
+    this.azureBlobService.getBlobToStream(BLOB_CONTAINER, blob.id, stream, callback);
 };
 
 module.exports = AzureBlobProvider;

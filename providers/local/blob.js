@@ -8,7 +8,6 @@ function LocalBlobProvider(config) {
         return;
     }
     
-    fs.mkdir(config.blob_storage_path);
     this.config = config;
 }
 
@@ -24,6 +23,17 @@ LocalBlobProvider.prototype.create = function(blob, readStream, callback) {
 
 LocalBlobProvider.prototype.makePath = function(blob) {
     return path.join(this.config.blob_storage_path, blob.id);
+};
+
+LocalBlobProvider.prototype.initialize = function(callback) {
+    var self = this;
+    fs.exists(this.config.blob_storage_path, function(exists) {
+        if (!exists) {
+            fs.mkdir(self.config.blob_storage_path, callback);
+        } else {
+            callback();
+        }
+    });
 };
 
 LocalBlobProvider.prototype.stream = function(blob, stream, callback) {
@@ -43,7 +53,6 @@ LocalBlobProvider.prototype.stream = function(blob, stream, callback) {
 };
 
 LocalBlobProvider.prototype.remove = function(blob, callback) {
-    log.info("removing blob with id: " + blob.id);
     fs.unlink(this.makePath(blob), callback);
 };
 

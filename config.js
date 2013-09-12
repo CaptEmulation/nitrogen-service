@@ -59,15 +59,18 @@ config.access_token_lifetime = 14; // days
 
 config.device_secret_bytes = 128;
 
-if (process.env.AZURE_STORAGE_ACCOUNT && process.env.AZURE_STORAGE_KEY) {
-    config.blob_provider = new providers.azure.AzureBlobProvider(config);
-}
+config.blob_storage_path = './storage';
+config.blob_provider = new providers.local.LocalBlobProvider(config);
+
+//if (process.env.AZURE_STORAGE_ACCOUNT && process.env.AZURE_STORAGE_KEY) {
+//    config.blob_provider = new providers.azure.AzureBlobProvider(config);
+//}
 
 //if (process.env.AZURE_SERVICEBUS_NAMESPACE && process.env.AZURE_SERVICEBUS_ACCESS_KEY) {
 //    config.pubsub_provider = new providers.azure.AzurePubSubProvider(config);
 //}
 
-config.pubsub_provider = new providers.memory.MemoryPubSubProvider(config);
+config.pubsub_provider = new providers.local.MemoryPubSubProvider(config);
 
 config.request_log_format = ':remote-addr - - [:date] ":method :url HTTP/:http-version" :status :res[content-length] :response-time ":referrer" ":user-agent"';
 
@@ -87,5 +90,7 @@ log.add(winston.transports.Console, { colorize: true, timestamp: true });
 // If you'd like additional indexes applied to messages, you can specify them here.
 config.message_indexes = [
 ];
+
+config.claim_code_length = 8;
 
 module.exports = config;
