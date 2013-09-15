@@ -2,7 +2,7 @@
 	"title": "claim",
 	"type": "object",
 	"properties": {
-		"principal": {
+		"claim_code": {
 			"type": "string",
 			"required": true
 		}

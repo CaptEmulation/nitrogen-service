@@ -37,4 +37,29 @@ describe('agent service', function() {
         });
     });
 
+    it('claim agent can claim devices', function(done) {
+        services.principals.update(services.principals.systemPrincipal, fixtures.models.principals.device.id, { owner: null, claim_code: 'TAKE-1234' }, function(err, principal) {
+            assert.equal(principal.owner, null);
+            assert.equal(principal.claim_code, 'TAKE-1234');
+
+            var claim = new models.Message({
+                type: 'claim',
+                from: fixtures.models.principals.user.id,
+                body: {
+                    claim_code: 'TAKE-1234'
+                }
+            });
+
+            services.messages.create(claim, function(err, message) {
+                setTimeout(function() {
+                    services.principals.findById(services.principals.systemPrincipal, fixtures.models.principals.device.id, function(err, principal) {
+                        assert.ifError(err);
+                        assert.equal(principal.owner, fixtures.models.principals.user.id);
+                        done();
+                    });
+                }, 200);                
+            });
+        });
+    });
+
 });

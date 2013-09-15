@@ -1,46 +1,24 @@
-function processClaim(message) {
-    if (message.response_to) {
-        log.info("claimAgent: claim agent processing message: " + message.id + " : " + message.to);
-        nitrogen.Message.find(session, { _id: message.response_to[0] }, {}, function(err, ipMatches) {
-
-            if (err || ipMatches.length == 0) {
-                log.error("claimAgent: couldn't find ip_match claim was in response to, ignoring request.");
-                return;
-            }
-
-            var ipMatch = ipMatches[0];
-
-            if (ipMatch.to !== message.from) {
-                log.error("claimAgent: user trying to claim principal does not match ip match message, ignoring.");
-                return;
-            }
-
-            assignOwnerToPrincipal(message);
-        });        
+session.onMessage({ type: 'claim' }, function(message) {
+    if (!message.body.claim_code) {
+        log.error("claimAgent: failed principal claim with NULL code (shouldn't happen).");
+        return;
     }
-}
 
-function assignOwnerToPrincipal(message) {
-    nitrogen.Principal.find(session, { _id: message.body.principal }, {}, function(err, claimedPrincipals) {
-        if (err || !claimedPrincipals || claimedPrincipals.length == 0) {
-            log.error("claimAgent: couldn't find principal that claim was targeted to: " + err);
-            return;
+    nitrogen.Principal.find(session, { claim_code: message.body.claim_code }, {}, function(err, principals) {
+        if (err || principals.length === 0) {
+            log.info("claimAgent: failed principal claim with code: " + message.body.code);
+            return;            
         }
 
-        var claimedPrincipal = claimedPrincipals[0];
-
-        if (claimedPrincipal.owner) {
-            log.warn("claimAgent: principal " + claimedPrincipal.id + " is already owned by " + claimedPrincipal.owner + ": ignoring claim request.");
-            return;
-        }
-
+        var claimedPrincipal = principals[0];
+        
         claimedPrincipal.owner = message.from;
-        claimedPrincipal.update(session, function(err, principal) {
+        claimedPrincipal.claim_code = null;
+
+        claimedPrincipal.save(session, function(err, principal) {
             if (err) log.error("claimAgent: updating claimed principal failed: " + err);
 
             log.info("claimAgent: successfully set " + message.from + " as the owner of " + principal.id);
         });
     });
-}
-
-session.onMessage({ type: 'claim'}, processClaim);
+});

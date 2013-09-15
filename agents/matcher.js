@@ -2,19 +2,17 @@ function pairDeviceWithOwner(device, owner) {
     log.info('device id: ' + device.id + ' automatically matched to owner: ' + owner.id);
 
     device.owner = owner.id;
+    device.claim_code = null;
+    
     device.save(session);
 }
 
 function matchUnownedDevices(message, devices, users) {
-    log.info('matcher: matchingDevices');
-
     nitrogen.Principal.find(session, { _id: message.from }, {}, function(err, fromPrincipals) {
         if (err) return log.error("matcher: error finding principal: " + err);
         if (fromPrincipals.length === 0) return log.warn("matcher: didn't find principal with id (possibly deleted in the meantime?): " + message.from);
 
         var fromPrincipal = fromPrincipals[0];
-
-        /* for device 'ip' messages we only generate one ip_match message from the user to that device. */
 
         if (fromPrincipal.is('user')) {
             async.each(devices, function(device, callback) {
@@ -26,11 +24,7 @@ function matchUnownedDevices(message, devices, users) {
             }, function(err) {
                 if (err) log.error("matcher: matchUnownedDevices finished with an error: " + err);
             });
-
         } else {
-            /* create an ip_match message for this device. */
-            log.info('matcher: isDevice');
-
             var device = fromPrincipal;
             if (!device.owner) {
                 pairDeviceWithOwner(device, users[0]);
