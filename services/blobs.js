@@ -41,7 +41,7 @@ var initialize = function(callback) {
 };
 
 var remove = function(principal, query, callback) {
-    if (!principal || !principal.is('system')) {
+    if (!principal || !principal.is('service')) {
         return callback(utils.authorizationError());
     }
 

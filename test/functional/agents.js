@@ -16,7 +16,7 @@ describe('agents endpoint', function() {
 
     it('index should return all agents', function(done) {
         request({ url: config.agents_endpoint,
-                  headers: { Authorization: fixtures.models.accessTokens.system.toAuthHeader() },
+                  headers: { Authorization: fixtures.models.accessTokens.service.toAuthHeader() },
                              json: true }, function(err,resp,body) {
             assert.ifError(err);
             assert.equal(resp.statusCode, 200);
@@ -66,7 +66,7 @@ describe('agents endpoint', function() {
         );
     });
 
-    it('should not allow updates to an agent by a non system principals that isnt execute_as', function(done) {
+    it('should not allow updates to an agent by a non service principals that isnt execute_as', function(done) {
         request.put(config.agents_endpoint + "/" + fixtures.models.agents.nop.id,
             { headers: { Authorization: fixtures.models.accessTokens.device.toAuthHeader() },
                 json: fixtures.models.agents.nop }, function(err, resp, body) {

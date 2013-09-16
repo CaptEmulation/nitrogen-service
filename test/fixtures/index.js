@@ -35,13 +35,13 @@ var createDeviceFixtures = function(callback) {
 
 };
 
-var createSystemUserFixtures = function(callback) {
-    console.log("FIXTURES: creating system user fixtures");
-    services.accessTokens.findOrCreateToken(services.principals.systemPrincipal, function(err, accessToken) {
+var createServiceUserFixtures = function(callback) {
+    console.log("FIXTURES: creating service user fixtures");
+    services.accessTokens.findOrCreateToken(services.principals.servicePrincipal, function(err, accessToken) {
         if (err) throw err;
 
-        fixtures.accessTokens.system = accessToken;
-        console.log("FIXTURES: creating system user fixtures: FINISHED");
+        fixtures.accessTokens.service = accessToken;
+        console.log("FIXTURES: creating service user fixtures: FINISHED");
         callback();
     });
 };
@@ -55,7 +55,7 @@ var createAgentFixtures = function(callback) {
         name: "nop"
     });
 
-    services.agents.create(services.principals.systemPrincipal, agent, function(err, agent) {
+    services.agents.create(services.principals.servicePrincipal, agent, function(err, agent) {
         if (err) throw err;
 
         fixtures.agents.nop = agent;
@@ -157,7 +157,7 @@ exports.reset = function(callback) {
             createDeviceFixtures,
             createAgentFixtures,
             createDeviceIpMessageFixture,
-            createSystemUserFixtures
+            createServiceUserFixtures
         ];
 
         if (config.blob_provider) {

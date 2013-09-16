@@ -11,7 +11,7 @@ describe('agent service', function() {
         services.principals.updateLastConnection(fixtures.models.principals.user, "127.0.0.1");
 
         setTimeout(function() {
-            services.principals.findById(services.principals.systemPrincipal, fixtures.models.principals.device.id, function(err, principal) {
+            services.principals.findById(services.principals.servicePrincipal, fixtures.models.principals.device.id, function(err, principal) {
                 assert.ifError(err);
                 assert.equal(principal.owner, fixtures.models.principals.user.id);
                 done();
@@ -21,14 +21,14 @@ describe('agent service', function() {
     });
 
     it('matcher does not match 2 users at same ip address for 2nd user', function(done) {
-        services.principals.update(services.principals.systemPrincipal, fixtures.models.principals.device.id, { owner: null }, function(err, principal) {
+        services.principals.update(services.principals.servicePrincipal, fixtures.models.principals.device.id, { owner: null }, function(err, principal) {
             assert.equal(principal.owner, null);
 
             services.principals.updateLastConnection(fixtures.models.principals.user, "127.0.0.1");
             services.principals.updateLastConnection(fixtures.models.principals.anotherUser, "127.0.0.1");
 
             setTimeout(function() {
-                services.principals.findById(services.principals.systemPrincipal, fixtures.models.principals.device.id, function(err, principal) {
+                services.principals.findById(services.principals.servicePrincipal, fixtures.models.principals.device.id, function(err, principal) {
                     assert.ifError(err);
                     assert.equal(principal.owner, null);
                     done();
@@ -38,7 +38,7 @@ describe('agent service', function() {
     });
 
     it('claim agent can claim devices', function(done) {
-        services.principals.update(services.principals.systemPrincipal, fixtures.models.principals.device.id, { owner: null, claim_code: 'TAKE-1234' }, function(err, principal) {
+        services.principals.update(services.principals.servicePrincipal, fixtures.models.principals.device.id, { owner: null, claim_code: 'TAKE-1234' }, function(err, principal) {
             assert.equal(principal.owner, null);
             assert.equal(principal.claim_code, 'TAKE-1234');
 
@@ -52,7 +52,7 @@ describe('agent service', function() {
 
             services.messages.create(claim, function(err, message) {
                 setTimeout(function() {
-                    services.principals.findById(services.principals.systemPrincipal, fixtures.models.principals.device.id, function(err, principal) {
+                    services.principals.findById(services.principals.servicePrincipal, fixtures.models.principals.device.id, function(err, principal) {
                         assert.ifError(err);
                         assert.equal(principal.owner, fixtures.models.principals.user.id);
                         done();

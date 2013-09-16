@@ -61,7 +61,7 @@ var createMany = function(messages, callback) {
 };
 
 var filterForPrincipal = function(principal, filter) {
-    if (principal && principal.is('system')) return filter;
+    if (principal && principal.is('service')) return filter;
 
     var visibilityClauses = [ { public: true } ];
     if (principal) {
@@ -115,8 +115,8 @@ var loadSchemas = function(callback) {
 };
 
 var remove = function(principal, query, callback) {
-    // TODO: will need more complicated authorization mechanism for non system users.
-    if (!principal || !principal.is('system')) return callback(403);
+    // TODO: will need more complicated authorization mechanism for non service users.
+    if (!principal || !principal.is('service')) return callback(403);
 
     find(principal, query, {}, function (err, messages) {
         if (err) return callback(messages);
@@ -135,11 +135,11 @@ var removeLinkedResources = function(message, callback) {
     if (!message.link) return callback();
 
     log.info("removing linked resources with link: " + message.link);
-    services.blobs.remove(services.principals.systemPrincipal, { link: message.link }, callback);
+    services.blobs.remove(services.principals.servicePrincipal, { link: message.link }, callback);
 };
 
 var removeOne = function(principal, message, callback) {
-    if (!principal || !principal.is('system')) return callback("Only system can delete messages");
+    if (!principal || !principal.is('service')) return callback("Only service can delete messages");
 
     removeLinkedResources(message, function(err) {
         if (err) return callback(err);
@@ -158,8 +158,8 @@ var translate = function(message) {
         message.expires = models.Message.NEVER_EXPIRE;
     }
 
-    if (message.to === 'system') {
-        message.to = services.principals.systemPrincipal.id;
+    if (message.to === 'service') {
+        message.to = services.principals.servicePrincipal.id;
     }
 };
 
@@ -174,13 +174,13 @@ var validate = function(message, callback) {
         if (err) return callback(err);
         if (!result.valid) return callback(result.errors);
 
-        services.principals.findById(services.principals.systemPrincipal, message.from, function(err, fromPrincipal) {
+        services.principals.findById(services.principals.servicePrincipal, message.from, function(err, fromPrincipal) {
             if (err) return callback(err);
             if (!fromPrincipal) return callback("Message must have an existing from principal.");
 
             if (!message.to) return callback(null, fromPrincipal, null);
 
-            services.principals.findById(services.principals.systemPrincipal, message.to, function(err, toPrincipal) {
+            services.principals.findById(services.principals.servicePrincipal, message.to, function(err, toPrincipal) {
                 if (err) return callback(err);
                 if (!toPrincipal) return callback('Principal in to: field (' + message.to +') of message not found.');
 

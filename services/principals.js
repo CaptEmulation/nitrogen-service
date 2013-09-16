@@ -28,7 +28,7 @@ var authenticate = function(authBody, callback) {
 };
 
 var authenticateUser = function(email, password, callback) {
-    findByEmail(services.principals.systemPrincipal, email, function(err, principal) {
+    findByEmail(services.principals.servicePrincipal, email, function(err, principal) {
         if (err) return callback(err);
         if (!principal) return callback(authenticationError(USER_AUTH_FAILURE_MESSAGE));
 
@@ -48,7 +48,7 @@ var authenticateUser = function(email, password, callback) {
 };
 
 var authenticateDevice = function(principalId, secret, callback) {
-    findById(services.principals.systemPrincipal, principalId, function(err, principal) {
+    findById(services.principals.servicePrincipal, principalId, function(err, principal) {
         if (err) return callback(err);
         if (!principal) return callback(new utils.ServiceError({
             statusCode: 401,
@@ -79,7 +79,7 @@ var create = function(principal, callback) {
             createCredentials(principal, function(err, principal) {
                 if (err) return callback(err);
 
-                if (principal.is('user') || principal.is('system')) {
+                if (principal.is('user') || principal.is('service')) {
                     principal.id = new mongoose.Types.ObjectId;
                     principal.owner = principal.id;
                 }
@@ -98,15 +98,15 @@ var create = function(principal, callback) {
 };
 
 var checkForExistingPrincipal = function(principal, callback) {
-    if (!services.principals.systemPrincipal) {
-        log.error('principal service: not able to check for existing user because no system principal.');
+    if (!services.principals.servicePrincipal) {
+        log.error('principal service: not able to check for existing user because no service principal.');
         return callback(null, null);
     }
 
     if (principal.is('user')) {
-        findByEmail(services.principals.systemPrincipal, principal.email, callback);
+        findByEmail(services.principals.servicePrincipal, principal.email, callback);
     } else {
-        findById(services.principals.systemPrincipal, principal.id, callback);
+        findById(services.principals.servicePrincipal, principal.id, callback);
     }
 };
 
@@ -155,7 +155,7 @@ var createUserCredentials = function(principal, callback) {
 };
 
 var filterForPrincipal = function(principal, filter) {
-    if (principal && principal.is('system')) return filter;
+    if (principal && principal.is('service')) return filter;
 
     var visibilityFilter = [{ public: true }];
     if (principal) {
@@ -179,7 +179,7 @@ var findById = function(principal, id, callback) {
 }
 
 var checkClaimCode = function(code, callback) {
-    find(services.principals.systemPrincipal, { claim_code: code }, {}, function (err, principals) {
+    find(services.principals.servicePrincipal, { claim_code: code }, {}, function (err, principals) {
         if (err) return callback(true);
         callback(principals.length > 0);  
     });
@@ -232,7 +232,6 @@ var hashPassword = function(password, saltBuf, callback) {
                   function(err, hash) {
                       if (err) return callback(err);
 
- 
                       var hashBuf = new Buffer(hash, 'binary');
                       callback(null, hashBuf);
                   }
@@ -250,9 +249,9 @@ var hashSecret = function(secret, callback) {
 };
 
 var impersonate = function(principal, impersonatedPrincipalId, callback) {
-    if (principal.type != "system" && principal.id != impersonatedPrincipalId) return callback(utils.authorizationError());
+    if (!principal.is('service') && principal.id !== impersonatedPrincipalId) return callback(utils.authorizationError());
 
-    findById(services.principals.systemPrincipal, impersonatedPrincipalId, function(err, impersonatedPrincipal) {
+    findById(services.principals.servicePrincipal, impersonatedPrincipalId, function(err, impersonatedPrincipal) {
         if (err) return callback(err);
         if (!impersonatedPrincipal) return callback(utils.notFoundError());
 
@@ -268,37 +267,37 @@ var impersonate = function(principal, impersonatedPrincipalId, callback) {
 var initialize = function(callback) {
 
     // we don't use services find() here because it is a chicken and an egg visibility problem.
-    // we aren't system so we can't find system. :)
+    // we aren't service so we can't find service. :)
 
-    models.Principal.find({ type: 'system' }, null, {}, function(err, principals) {
+    models.Principal.find({ type: 'service' }, null, {}, function(err, principals) {
         if (err) return callback(err);
 
-        log.info("found " + principals.length + " system principals");
+        log.info("found " + principals.length + " service principals");
 
         if (principals.length == 0) {
-            log.info("creating system principal");
+            log.info("creating service principal");
 
-            var systemPrincipal = new models.Principal({
-                name: 'System',
+            var servicePrincipal = new models.Principal({
+                name: 'Service',
                 public: false,
-                type: 'system',
+                type: 'service',
                 admin: true
             });
 
-            create(systemPrincipal, function(err, systemPrincipal) {
+            create(servicePrincipal, function(err, servicePrincipal) {
                 if (err) return callback(err);
 
-                services.principals.systemPrincipal = systemPrincipal;
+                services.principals.servicePrincipal = servicePrincipal;
                 return callback();
             });
         } else {
-            services.principals.systemPrincipal = principals[0];
+            services.principals.servicePrincipal = principals[0];
 
-            // TODO: remove once existing system principals migrated.
-            if (!services.principals.systemPrincipal.admin) {
-                services.principals.systemPrincipal.admin = true;
-                update(services.principals.systemPrincipal,
-                       services.principals.systemPrincipal.id,
+            // TODO: remove once existing service principals migrated.
+            if (!services.principals.servicePrincipal.admin) {
+                services.principals.servicePrincipal.admin = true;
+                update(services.principals.servicePrincipal,
+                       services.principals.servicePrincipal.id,
                        { admin: true }, callback);
             } else {
                 return callback();
@@ -315,12 +314,12 @@ var removeById = function(authorizingPrincipal, id, callback) {
     findById(authorizingPrincipal, id, function (err, principal) {
         if (err) return callback(err);
         if (!authorizingPrincipal.id === principal.id && !authorizingPrincipal.id === principal &&
-            !authorizingPrincipal.id !== services.principals.systemPrincipal.id) return callback(new utils.ServiceError({
+            !authorizingPrincipal.id !== services.principals.servicePrincipal.id) return callback(new utils.ServiceError({
             statusCode: 400,
             message: "Principal.removeById: Principal not authorized to make change."
         }));
 
-        services.messages.remove(services.principals.systemPrincipal, { from: principal.id }, function(err, removed) {
+        services.messages.remove(services.principals.servicePrincipal, { from: principal.id }, function(err, removed) {
             if (err) return callback(err);
 
             models.Principal.remove({ _id: id }, callback);
@@ -341,19 +340,21 @@ var update = function(authorizingPrincipal, id, updates, callback) {
 
     findById(authorizingPrincipal, id, function(err, principal) {
         if (err) return callback(err);
+
         if (!principal) return callback(new utils.ServiceError({
             statusCode: 400,
             message: "Principal.update: Can't find authorizing principal."
         }));
-        if (!authorizingPrincipal.is('system') && authorizingPrincipal.id != principal.id && authorizingPrincipal.id != principal.owner) {
+
+        if (!authorizingPrincipal.is('service') && authorizingPrincipal.id !== principal.id && authorizingPrincipal.id !== principal.owner) {
             return callback(new utils.ServiceError({
                 statusCode: 400,
                 message: "Principal.update: Principal not authorized to make change."
             }));
         }
 
-        // if its not the system, you can only update the name.
-        if (!authorizingPrincipal.is('system')) {
+        // if its not the service, you can only update the name.
+        if (!authorizingPrincipal.is('service')) {
             updates = { name: updates.name };
         }
 
@@ -382,7 +383,7 @@ var updateLastConnection = function(principal, ip) {
             type: 'ip',
             from: principal,
             public: false,
-            to: services.principals.systemPrincipal.id,
+            to: services.principals.servicePrincipal.id,
             body: {
                 ip_address: ip
             }
@@ -395,14 +396,14 @@ var updateLastConnection = function(principal, ip) {
 
     principal.last_connection = updates.last_connection = new Date();
 
-    update(services.principals.systemPrincipal, principal.id, updates, function(err, principal) {
+    update(services.principals.servicePrincipal, principal.id, updates, function(err, principal) {
         if (err) return log.error("updating last connection failed: " + err);
     });
 };
 
 var validate = function(principal, callback) {
-    if (!principal.is('device') && !principal.is('user') && !principal.is('system')) {
-        var err = 'Principal type must be one of device, user, or system. found: ' + principal.type;
+    if (!principal.is('device') && !principal.is('user') && !principal.is('service')) {
+        var err = 'Principal type must be one of device, user, or service. found: ' + principal.type;
         log.error(err);
         return callback(err);
     }
@@ -453,5 +454,5 @@ module.exports = {
     verifySecret: verifySecret,
     verifyPassword: verifyPassword,
 
-    systemPrincipal: null
+    servicePrincipal: null
 };

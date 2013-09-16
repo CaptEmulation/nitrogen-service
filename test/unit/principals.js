@@ -21,7 +21,8 @@ describe('principals service', function() {
 
             services.principals.verifyPassword(passwordFixture, user, function(err) {
                 assert.ifError(err);
-                 services.principals.verifyPassword("NOTCORRECT", user, function(err) {
+
+                services.principals.verifyPassword("NOTCORRECT", user, function(err) {
                      assert.notEqual(err, null);
                      done();
                 });
@@ -68,9 +69,9 @@ describe('principals service', function() {
         });
     });
 
-    it('system can update a principal', function(done) {
+    it('service can update a principal', function(done) {
         fixtures.models.principals.device.name = 'my camera';
-        services.principals.update(services.principals.systemPrincipal, fixtures.models.principals.device.id, { name: "my camera"}, function(err, principal) {
+        services.principals.update(services.principals.servicePrincipal, fixtures.models.principals.device.id, { name: "my camera"}, function(err, principal) {
             assert.ifError(err);
             assert.equal(principal.name, 'my camera');
 
@@ -78,7 +79,7 @@ describe('principals service', function() {
         });
     });
 
-    it('system principals can update a principals name', function(done) {
+    it("any principals can update a principal's name", function(done) {
         services.principals.update(fixtures.models.principals.device, fixtures.models.principals.device.id, { name: "my camera" }, function(err, principal) {
             assert.ifError(err);
             assert.equal(principal.name, 'my camera');

@@ -73,7 +73,7 @@ describe('messages endpoint', function() {
         });
     });
 
-    it('delete should be only accessible to system principal', function(done) {
+    it('delete should be only accessible to service principal', function(done) {
         var query = encodeURIComponent(JSON.stringify({ "_id" : fixtures.models.messages.deviceIp.id }));
         request.del({ url: config.messages_endpoint + "?q=" + query,
                       json: true,
@@ -144,7 +144,7 @@ describe('messages endpoint', function() {
                             var query = encodeURIComponent(JSON.stringify({ "_id" : message_id }));
                             request.del({ url: config.messages_endpoint + "?q=" + query,
                                     json: true,
-                                    headers: { Authorization: fixtures.models.accessTokens.system.toAuthHeader() } },
+                                    headers: { Authorization: fixtures.models.accessTokens.service.toAuthHeader() } },
                                     function(del_err, del_resp, del_body) {
 
                                     assert.equal(del_err, null);

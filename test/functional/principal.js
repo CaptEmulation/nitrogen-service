@@ -14,7 +14,7 @@ describe('principals endpoint', function() {
             restPassed = false;
 
         var socket = io.connect(config.subscriptions_endpoint, {
-            query: "auth=" + encodeURIComponent(fixtures.models.accessTokens.system.token),
+            query: "auth=" + encodeURIComponent(fixtures.models.accessTokens.service.token),
             'force new connection': true
         });
 
@@ -105,7 +105,7 @@ describe('principals endpoint', function() {
 	        assert.equal(resp.statusCode, 200);
             assert.equal(body.principals.length > 0, true);
             body.principals.forEach(function(principal) {
-                assert.notEqual(principal.type, 'system');
+                assert.notEqual(principal.type, 'service');
             });
 
 	        done();
@@ -188,7 +188,7 @@ describe('principals endpoint', function() {
         fixtures.models.principals.device.name = "my camera";
 
         request.put(config.principals_endpoint + "/" + fixtures.models.principals.device.id,
-            { headers: { Authorization: fixtures.models.accessTokens.system.toAuthHeader() },
+            { headers: { Authorization: fixtures.models.accessTokens.service.toAuthHeader() },
               json: fixtures.models.principals.device }, function(err, resp, body) {
                 assert.ifError(err);
                 assert.equal(resp.statusCode, 200);
@@ -200,9 +200,9 @@ describe('principals endpoint', function() {
         );
     });
 
-    it('should allow system to impersonate user principal', function(done) {
+    it('should allow service to impersonate user principal', function(done) {
         request.post(config.principals_endpoint + '/impersonate',
-            { headers: { Authorization: fixtures.models.accessTokens.system.toAuthHeader() },
+            { headers: { Authorization: fixtures.models.accessTokens.service.toAuthHeader() },
               json: fixtures.models.principals.user }, function(err, resp, body) {
                 assert.equal(resp.statusCode, 200);
                 assert.notEqual(body.accessToken.token, undefined);

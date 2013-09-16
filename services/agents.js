@@ -12,14 +12,14 @@ var async = require('async')
 var AGENT_NOT_FOUND = "Agent not found.";
 var PRINCIPAL_REQUIRED = "Principal required to complete operation.";
 
-var buildSystemClientSession = function(config, callback) {
-    if (!services.principals.systemPrincipal) return callback("System principal not available.");
+var buildServiceClientSession = function(config, callback) {
+    if (!services.principals.servicePrincipal) return callback("Service principal not available.");
 
-    services.accessTokens.findOrCreateToken(services.principals.systemPrincipal, function(err, accessToken) {
+    services.accessTokens.findOrCreateToken(services.principals.servicePrincipal, function(err, accessToken) {
         if (err) return callback(err);
 
         var service = new nitrogen.Service(config);
-        var clientPrincipal = new nitrogen.Principal(services.principals.systemPrincipal);
+        var clientPrincipal = new nitrogen.Principal(services.principals.servicePrincipal);
         clientPrincipal.id = accessToken.principal.id;
 
         var socket = service.connectSocket(clientPrincipal, accessToken);
@@ -36,7 +36,7 @@ var create = function(principal, agent, callback) {
         message: PRINCIPAL_REQUIRED
     }));
 
-    if (!principal.is('system'))
+    if (!principal.is('service'))
         agent.execute_as = principal.id;
 
     agent.save(function(err, agent) {
@@ -79,7 +79,7 @@ var execute = function(agents, callback) {
 };
 
 var filterForPrincipal = function(principal, filter) {
-    if (principal && principal.is('system')) return filter;
+    if (principal && principal.is('service')) return filter;
 
     if (!principal.isAdmin()) {
         filter["$and"] = [ { execute_as: principal._id } ];
@@ -118,20 +118,20 @@ var initialize = function(callback) {
             fs.readFile(agentPath, function (err, action) {
                 if (err) return callback(err);
 
-                find(services.principals.systemPrincipal, { name: file, execute_as: services.principals.systemPrincipal.id }, function (err, agents) {
+                find(services.principals.servicePrincipal, { name: file, execute_as: services.principals.servicePrincipal.id }, function (err, agents) {
                     if (err) return callback(err);
 
                     if (agents.length > 0) {
                         log.info("found existing agent for built-in agent: " + file + ": updating with latest action.");
 
-                        update(services.principals.systemPrincipal, agents[0].id, { action: action }, callback);
+                        update(services.principals.servicePrincipal, agents[0].id, { action: action }, callback);
                     } else {
                         log.info("no existing agent for built-in agent: " + file + ": creating.");
                         var agent = new models.Agent({ action: action,
                                                        enabled: true,
-                                                       execute_as: services.principals.systemPrincipal.id,
+                                                       execute_as: services.principals.servicePrincipal.id,
                                                        name: file });
-                        create(services.principals.systemPrincipal, agent, callback);
+                        create(services.principals.servicePrincipal, agent, callback);
                     }
                 });
             });
@@ -159,10 +159,10 @@ var prepareAgents = function(session, agents, callback) {
 };
 
 var start = function(config, callback) {
-    buildSystemClientSession(config, function(err, session) {
-        if (err) return callback("build system client session failed: " + err);
+    buildServiceClientSession(config, function(err, session) {
+        if (err) return callback("build service client session failed: " + err);
 
-        find(services.principals.systemPrincipal, {}, {}, function (err, agents) {
+        find(services.principals.servicePrincipal, {}, {}, function (err, agents) {
             if (err) return callback("agent fetch failed: " + err);
 
             prepareAgents(session, agents, function(err, preparedAgents) {

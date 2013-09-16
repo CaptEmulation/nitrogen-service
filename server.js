@@ -34,7 +34,7 @@ mongoose.connection.once('open', function () {
 
     services.initialize(function(err) {
         if (err) return log.error("service failed to initialize: " + err);
-        if (!services.principals.systemPrincipal) return log.error("system principal not available after initialize.");
+        if (!services.principals.servicePrincipal) return log.error("Service principal not available after initialize.");
 
         server.listen(config.internal_port);
         services.subscriptions.attach(server);
