@@ -3,10 +3,24 @@ var fs = require('fs')
   , mongoose = require('mongoose')
   , ServiceError = require('./serviceError');
 
+var authenticationError = function(msg) {
+    return new ServiceError({
+        statusCode: 401,
+        message: msg
+    });
+};
+
 var authorizationError = function() {
     return new ServiceError({
         statusCode: 403,
         message: "Principal is not authorized to perform the requested operation."
+    });
+};
+
+var badRequestError = function(message) {
+    return new ServiceError({
+        statusCode: 400,
+        message: message
     });
 };
 
@@ -29,6 +43,13 @@ var handleError = function(res, err) {
     if (err === 403) return sendFailedResponse(res, 403, err);
     if (err === 404) return sendFailedResponse(res, 404, err);
     if (err) return sendFailedResponse(res, 400, err);
+};
+
+var internalError = function(message) {
+    return new ServiceError({
+        statusCode: 500,
+        message: message
+    });
 };
 
 var ipFromRequest = function(req) {
@@ -79,6 +100,13 @@ var pipeFile = function(filename) {
     };
 };
 
+var principalRequired = function() {
+    return new ServiceError({
+        statusCode: 400,
+        message: "Principal required to perform the requested operation."
+    });
+};
+
 var sendFailedResponse = function(res, statusCode, err) {
     res.contentType('application/json');
     res.send(statusCode, { error: err });
@@ -119,14 +147,18 @@ var translateQuery = function(obj, options) {
 };
 
 module.exports = {
+    authenticationError: authenticationError,
     authorizationError: authorizationError,
+    badRequestError: badRequestError,
     dateDaysFromNow: dateDaysFromNow,
     ipFromRequest: ipFromRequest,
+    internalError: internalError,
     handleError: handleError,
     notFoundError: notFoundError,
     parseQuery: parseQuery,
     parseOptions: parseOptions,
     pipeFile: pipeFile,
+    principalRequired: principalRequired,
     sendFailedResponse: sendFailedResponse,
     ServiceError: ServiceError,
     stringEndsWith: stringEndsWith,

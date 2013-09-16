@@ -93,10 +93,15 @@ var createUserFixtures = function(callback) {
             services.principals.create(anotherUser, function(err, user) {
                 if (err) throw err;
 
-                fixtures.principals.anotherUser = user;
-                console.log("FIXTURES: creating user fixtures: FINISHED");
+                fixtures.principals.anotherUser = anotherUser;
+                services.accessTokens.create(anotherUser, function(err, accessToken) {
+                    if (err) throw err;
 
-                callback();
+                    fixtures.accessTokens.anotherUser = accessToken;
+
+                    console.log("FIXTURES: creating user fixtures: FINISHED");
+                    callback();
+                });
             });
         });
     });

@@ -31,18 +31,25 @@ if (config.blob_provider) {
 
                                 var blob_url = config.blobs_endpoint + '/' + body_json.blob.id;
 
-                                request.get(blob_url, { headers: { 'Authorization': fixtures.models.accessTokens.device.toAuthHeader() } }, function(err,resp,body) {
+                                // owner should be able to access blob
+                                request.get(blob_url, 
+                                  { headers: { 'Authorization': fixtures.models.accessTokens.device.toAuthHeader() } }, function(err,resp,body) {
                                     assert.ifError(err);
                                     assert.equal(resp.statusCode, 200);
                                     assert.equal(resp.body.length, 28014);
 
-                                    done();
+                                    // other users shouldn't be able to access blob
+                                    request.get(blob_url, { headers: { 'Authorization': fixtures.models.accessTokens.anotherUser.toAuthHeader() } }, function(err,resp,body) {
+                                        assert.ifError(err);
+
+                                        assert.equal(resp.statusCode, 403);
+                                        done();
+                                    });
                                 });
                             }
                         )
                     );
             });
-
         });
 
         it('should return 404 for unknown blobs', function(done) {
@@ -62,7 +69,13 @@ if (config.blob_provider) {
             });
         });
 
+        it('should not allow unauthorized access to blobs', function(done) {
+            request(config.blobs_endpoint + '/51195d5f11600000deadbeef', function(err,resp,body) {
+                assert.equal(resp.statusCode, 401);
+
+                done();
+            });
+        });
 
     });
-
 }

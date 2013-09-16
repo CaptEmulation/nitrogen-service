@@ -7,12 +7,7 @@ var async = require('async')
   , utils = require('../utils');
 
 var create = function(principal, blob, stream, callback) {
-    if (!config.blob_provider) {
-        return callback(new utils.ServiceError({
-            statusCode: 400,
-            message: 'No blob provider configured.'
-        }));
-    }
+    if (!config.blob_provider) return callback(utils.internalError('No blob provider configured.'));
 
     // TODO: authorization of principal to create blob here.
 
@@ -60,12 +55,12 @@ var remove = function(principal, query, callback) {
 var stream = function(principal, blobId, stream, callback) {
     findById(blobId, function(err, blob) {
         if (err) return callback(err);
-        if (!blob) return callback(null);
+        if (!blob) return callback(utils.notFoundError());
 
         // TODO: rethink blob authorization
-//        if (!blob.owner.equals(principal._id) && !blob.owner.equals(principal.owner)) {
-//            return callback(utils.authorizationError());
-//        }
+        if (!blob.owner.equals(principal._id) && !blob.owner.equals(principal.owner)) {
+            return callback(utils.authorizationError());
+        }
 
         config.blob_provider.stream(blob, stream, callback);
     });

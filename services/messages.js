@@ -100,7 +100,7 @@ var loadSchema = function(type, callback) {
     fs.readFile(schemaPath + "/" + type, function (err, schemaText) {
         if (err) return callback(err);
 
-	log.info('loading schema: ' + type);
+        log.info('loading schema: ' + type);
         schemas[type] = JSON.parse(schemaText);
         callback(null);
     });
@@ -116,7 +116,7 @@ var loadSchemas = function(callback) {
 
 var remove = function(principal, query, callback) {
     // TODO: will need more complicated authorization mechanism for non service users.
-    if (!principal || !principal.is('service')) return callback(403);
+    if (!principal || !principal.is('service')) return callback(utils.authorizationError());
 
     find(principal, query, {}, function (err, messages) {
         if (err) return callback(messages);
@@ -139,7 +139,7 @@ var removeLinkedResources = function(message, callback) {
 };
 
 var removeOne = function(principal, message, callback) {
-    if (!principal || !principal.is('service')) return callback("Only service can delete messages");
+    if (!principal || !principal.is('service')) return callback(utils.authorizationError());
 
     removeLinkedResources(message, function(err) {
         if (err) return callback(err);
@@ -165,10 +165,10 @@ var translate = function(message) {
 
 var validate = function(message, callback) {
     if (!message.from)
-        return callback("Message must have a from principal.");
+        return callback(utils.badRequestError('Message must have a from principal.'));
 
     if (!message.type)
-        return callback("Message must have a message type.");
+        return callback(utils.badRequestError('Message must have a message type.'));
 
     validateSchema(message, function(err, result) {
         if (err) return callback(err);
@@ -176,13 +176,13 @@ var validate = function(message, callback) {
 
         services.principals.findById(services.principals.servicePrincipal, message.from, function(err, fromPrincipal) {
             if (err) return callback(err);
-            if (!fromPrincipal) return callback("Message must have an existing from principal.");
+            if (!fromPrincipal) return callback(utils.badRequestError('Message must have an existing from principal.'));
 
             if (!message.to) return callback(null, fromPrincipal, null);
 
             services.principals.findById(services.principals.servicePrincipal, message.to, function(err, toPrincipal) {
                 if (err) return callback(err);
-                if (!toPrincipal) return callback('Principal in to: field (' + message.to +') of message not found.');
+                if (!toPrincipal) return callback(utils.badRequestError('Principal in to: field (' + message.to +') of message not found.'));
 
                 callback(null, fromPrincipal, toPrincipal);
             });
@@ -192,7 +192,7 @@ var validate = function(message, callback) {
 
 var validateSchema = function(message, callback) {
     if (message.isCustomType()) return callback(null, { valid: true });
-    if (!(message.type in schemas)) return callback("Message type not recognized.  Custom message types must be prefixed by _");
+    if (!(message.type in schemas)) return callback(utils.badRequestError('Message type not recognized.  Custom message types must be prefixed by _'));
 
     var results = revalidator.validate(message.body, schemas[message.type]);
     if (!results.valid) {

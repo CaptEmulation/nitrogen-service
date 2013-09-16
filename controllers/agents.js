@@ -19,7 +19,7 @@ exports.index = function(req, res) {
     var options = utils.parseOptions(req);
 
     services.agents.find(req.user, query, options, function(err, agents) {
-        if (err) return res.send(400, err);
+        if (err) return utils.handleError(res, err);
 
         res.send({"agents": agents});
     });

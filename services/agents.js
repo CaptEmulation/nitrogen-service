@@ -9,11 +9,10 @@ var async = require('async')
   , utils = require('../utils')
   , vm = require('vm');
 
-var AGENT_NOT_FOUND = "Agent not found.";
-var PRINCIPAL_REQUIRED = "Principal required to complete operation.";
+var SERVICE_PRINCIPAL_NOT_AVAILABLE = "Service principal not available.";
 
 var buildServiceClientSession = function(config, callback) {
-    if (!services.principals.servicePrincipal) return callback("Service principal not available.");
+    if (!services.principals.servicePrincipal) return callback(utils.internalError("Service principal not available."));
 
     services.accessTokens.findOrCreateToken(services.principals.servicePrincipal, function(err, accessToken) {
         if (err) return callback(err);
@@ -31,10 +30,7 @@ var buildServiceClientSession = function(config, callback) {
 };
 
 var create = function(principal, agent, callback) {
-    if (!principal) return callback(new utils.ServiceError({
-        statusCode: 401,
-        message: PRINCIPAL_REQUIRED
-    }));
+    if (!principal) return callback(utils.principalRequired());
 
     if (!principal.is('service'))
         agent.execute_as = principal.id;
@@ -95,8 +91,10 @@ var find = function(principal, filter, options, callback) {
 var findById = function(principal, agentId, callback) {
     models.Agent.findOne(filterForPrincipal(principal, { "_id": agentId }), function(err, agent) {
         if (err) return callback(err);
-        if (!agent) return callback(404);
-        if (!principal.isAdmin() && agent.execute_as != principal.id) return callback(403);
+
+        if (!agent) return callback(utils.notFoundError());
+
+        if (!principal.isAdmin() && agent.execute_as != principal.id) return callback(utils.authorizationError());
 
         return callback(null, agent);
     });
@@ -160,10 +158,10 @@ var prepareAgents = function(session, agents, callback) {
 
 var start = function(config, callback) {
     buildServiceClientSession(config, function(err, session) {
-        if (err) return callback("build service client session failed: " + err);
+        if (err) return callback(err);
 
         find(services.principals.servicePrincipal, {}, {}, function (err, agents) {
-            if (err) return callback("agent fetch failed: " + err);
+            if (err) return callback(err);
 
             prepareAgents(session, agents, function(err, preparedAgents) {
                 if (err) return callback(err);
@@ -171,7 +169,7 @@ var start = function(config, callback) {
                 execute(preparedAgents, function(err) {
                     if (err) log.error("agent execution failed with error: " + err);
 
-                    callback();
+                    callback(err);
                 });
             });
         });
@@ -181,12 +179,9 @@ var start = function(config, callback) {
 var update = function(principal, id, updates, callback) {
     findById(principal, id, function(err, agent) {
         if (err) return callback(err);
-        if (!agent) return callback(new utils.ServiceError({
-            statusCode: 404,
-            message: AGENT_NOT_FOUND
-        }));
+        if (!agent) return callback(utils.notFoundError());
 
-        if (!principal.isAdmin() && principal.id != agent.execute_as) return callback(403);
+        if (!principal.isAdmin() && principal.id != agent.execute_as) return callback(util.authorizationError());
 
         models.Agent.update({ _id: id }, { $set: updates }, function(err, updated) {
             if (err) return callback(err);

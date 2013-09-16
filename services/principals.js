@@ -10,33 +10,26 @@ var async = require('async')
 var DEVICE_AUTH_FAILURE_MESSAGE = "The device authentication details provided were not accepted.";
 var USER_AUTH_FAILURE_MESSAGE = "The email or password provided were not accepted.";
 
-var authenticationError = function(msg) {
-    return new utils.ServiceError({
-        statusCode: 401,
-        message: msg
-    });
-};
-
 var authenticate = function(authBody, callback) {
     if (authBody.email && authBody.password) {
         authenticateUser(authBody.email, authBody.password, callback);
     } else if (authBody.id && authBody.secret) {
         authenticateDevice(authBody.id, authBody.secret, callback);
     } else {
-        callback("Please sign in with your email and password.");
+        callback(utils.authenticationError('Please sign in with your email and password.'));
     }
 };
 
 var authenticateUser = function(email, password, callback) {
     findByEmail(services.principals.servicePrincipal, email, function(err, principal) {
         if (err) return callback(err);
-        if (!principal) return callback(authenticationError(USER_AUTH_FAILURE_MESSAGE));
+        if (!principal) return callback(utils.authenticationError(USER_AUTH_FAILURE_MESSAGE));
 
         log.info("found user email: " + email + " verifying password.");
         verifyPassword(password, principal, function(err) {
             if (err) return callback(err);
 
-            log.info("verified password, creating access token.");
+            log.info("verified password, fetching access token.");
             services.accessTokens.findOrCreateToken(principal, function(err, accessToken) {
                 if (err) return callback(err);
 
@@ -50,10 +43,7 @@ var authenticateUser = function(email, password, callback) {
 var authenticateDevice = function(principalId, secret, callback) {
     findById(services.principals.servicePrincipal, principalId, function(err, principal) {
         if (err) return callback(err);
-        if (!principal) return callback(new utils.ServiceError({
-            statusCode: 401,
-            message: DEVICE_AUTH_FAILURE_MESSAGE
-        }));
+        if (!principal) return callback(utils.authenticationError(DEVICE_AUTH_FAILURE_MESSAGE));
 
         verifySecret(secret, principal, function(err) {
             if (err) return callback(err);
@@ -74,7 +64,7 @@ var create = function(principal, callback) {
 
         checkForExistingPrincipal(principal, function(err, foundPrincipal) {
             if (err) return callback(err);
-            if (foundPrincipal) return callback("A user with that email already exists.  Please sign in with your email and password.");
+            if (foundPrincipal) return callback(utils.badRequestError('A user with that email already exists.  Please sign in with your email and password.'));
 
             createCredentials(principal, function(err, principal) {
                 if (err) return callback(err);
@@ -119,7 +109,9 @@ var createCredentials = function(principal, callback) {
 };
 
 var createSecretCredentials = function(principal, callback) {
-    if (!config.device_secret_bytes) return callback("Service is missing configuration.  Please add value for missing device_secret_bytes element.");
+    if (!config.device_secret_bytes) return callback(
+        utils.internalError('Service is missing configuration.  Please add value for missing device_secret_bytes element.')
+    );
 
     crypto.randomBytes(config.device_secret_bytes, function(err, secretBuf) {
         if (err) return callback(err);
@@ -312,10 +304,7 @@ var removeById = function(authorizingPrincipal, id, callback) {
         if (err) return callback(err);
         if (authorizingPrincipal.id !== principal.id && 
             authorizingPrincipal.id === services.principals.servicePrincipal.id) {
-            return callback(new utils.ServiceError({
-                statusCode: 400,
-                message: "Principal.removeById: Principal not authorized to make change."
-            }));
+            return callback(utils.authorizationError());
         }
 
         services.messages.remove(services.principals.servicePrincipal, { from: principal.id }, function(err, removed) {
@@ -327,29 +316,17 @@ var removeById = function(authorizingPrincipal, id, callback) {
 };
 
 var update = function(authorizingPrincipal, id, updates, callback) {
-    if (!authorizingPrincipal) return callback(new utils.ServiceError({
-        statusCode: 400,
-        message: "Principal.update: Missing required argument authorizingPrincipal."
-    }));
+    if (!authorizingPrincipal) return callback(utils.principalRequired());
 
-    if (!id) return callback(new utils.ServiceError({
-        statusCode: 400,
-        message: "Principal.update: Missing required argument id."
-    }));
+    if (!id) return callback(utils.badRequestError('Principal.update: Missing required argument id.'));
 
     findById(authorizingPrincipal, id, function(err, principal) {
         if (err) return callback(err);
 
-        if (!principal) return callback(new utils.ServiceError({
-            statusCode: 400,
-            message: "Principal.update: Can't find authorizing principal."
-        }));
+        if (!principal) return callback(utils.badRequestError("Principal.update: Can't find authorizing principal."));
 
         if (!authorizingPrincipal.is('service') && authorizingPrincipal.id !== principal.id && authorizingPrincipal.id !== principal.owner) {
-            return callback(new utils.ServiceError({
-                statusCode: 400,
-                message: "Principal.update: Principal not authorized to make change."
-            }));
+            return callback(utils.badRequestError("Principal.update: Principal not authorized to make change."));
         }
 
         // if its not the service, you can only update the name.
@@ -404,12 +381,12 @@ var validate = function(principal, callback) {
     if (!principal.is('device') && !principal.is('user') && !principal.is('service')) {
         var err = 'Principal type must be one of device, user, or service. found: ' + principal.type;
         log.error(err);
-        return callback(err);
+        return callback(utils.badRequestError(err));
     }
 
     if (principal.is('user')) {
-        if (!principal.email) return callback("user principal must have email");
-        if (!principal.password) return callback("user principal must have password");        
+        if (!principal.email) return callback(utils.badRequestError("user principal must have email"));
+        if (!principal.password) return callback(utils.badRequestError("user principal must have password"));        
     }
 
     callback(null);
@@ -421,7 +398,7 @@ var verifyPassword = function(password, user, callback) {
     hashPassword(password, saltBuf, function(err, hashedPasswordBuf) {
         if (err) return callback(err);
         if (user.password_hash != hashedPasswordBuf.toString('base64'))
-            return callback(authenticationError(USER_AUTH_FAILURE_MESSAGE));
+            return callback(utils.authenticationError(USER_AUTH_FAILURE_MESSAGE));
         else
             return callback(null);
     });
@@ -432,7 +409,7 @@ var verifySecret = function(secret, principal, callback) {
         if (err) return callback(err);
         if (hashedSecret != principal.secret_hash) {
             log.info("verification of secret for principal: " + principal.id + " failed");
-            return callback(authenticationError(DEVICE_AUTH_FAILURE_MESSAGE));
+            return callback(utils.authenticationError(DEVICE_AUTH_FAILURE_MESSAGE));
         }
 
         callback(null);
