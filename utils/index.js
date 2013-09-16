@@ -37,9 +37,9 @@ var ipFromRequest = function(req) {
 
     var ipParts = req.ip.split(":");
     if (ipParts.length)
-    	return ipParts[0];
+        return ipParts[0];
     else
-    	return req.ip;
+        return req.ip;
 };
 
 var notFoundError = function() {
@@ -77,7 +77,7 @@ var pipeFile = function(filename) {
 
             fs.createReadStream(filename).pipe(res);
         });
-    }
+    };
 };
 
 var sendFailedResponse = function(res, statusCode, err) {
