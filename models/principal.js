@@ -7,6 +7,7 @@ principalSchema.add({
     type: { type: String },       
     name: { type: String },        // user friendly name for this principal
 
+    admin: { type: Boolean, default: false },
     public: { type: Boolean, default: false },
     owner: { type: Schema.Types.ObjectId, ref: 'Principal' },
     claim_code: { type: String },
@@ -71,6 +72,6 @@ Principal.prototype.is = function(type) {
 };
 
 // TODO: Mechanism to enable promoting users to an admin role. For now, punt and make all users admins.
-Principal.prototype.isAdmin = function() { return this.is('user') || this.is('system'); };
+Principal.prototype.isAdmin = function() { return this.admin; };
 
 module.exports = Principal;

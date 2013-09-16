@@ -270,7 +270,7 @@ var initialize = function(callback) {
     // we don't use services find() here because it is a chicken and an egg visibility problem.
     // we aren't system so we can't find system. :)
 
-    models.Principal.find({ type: "system" }, null, {}, function(err, principals) {
+    models.Principal.find({ type: 'system' }, null, {}, function(err, principals) {
         if (err) return callback(err);
 
         log.info("found " + principals.length + " system principals");
@@ -281,7 +281,8 @@ var initialize = function(callback) {
             var systemPrincipal = new models.Principal({
                 name: 'System',
                 public: false,
-                type: 'system'
+                type: 'system',
+                admin: true
             });
 
             create(systemPrincipal, function(err, systemPrincipal) {
@@ -292,7 +293,16 @@ var initialize = function(callback) {
             });
         } else {
             services.principals.systemPrincipal = principals[0];
-            return callback();
+
+            // TODO: remove once existing system principals migrated.
+            if (!services.principals.systemPrincipal.admin) {
+                services.principals.systemPrincipal.admin = true;
+                update(services.principals.systemPrincipal,
+                       services.principals.systemPrincipal.id,
+                       { admin: true }, callback);
+            } else {
+                return callback();
+            }
         }
     });
 };
