@@ -20,7 +20,7 @@ var create = function(principal, blob, stream, callback) {
         if (err) return callback(err);
 
         blob.owner = principal;
-        blob.link = new mongoose.Types.ObjectId;
+        blob.link = new mongoose.Types.ObjectId();
 
         blob.save(function(err, blob) {
             if (err) return callback(err);

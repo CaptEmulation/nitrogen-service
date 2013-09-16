@@ -21,10 +21,10 @@ describe('utils', function() {
             }
         };
 
-        var translatedObject = utils.translateQuery(testObjectWithHierarchy, { dateFields: ['shouldBeDate'] });
+        var hierarchyObject = utils.translateQuery(testObjectWithHierarchy, { dateFields: ['shouldBeDate'] });
 
-        assert.equal(typeof translatedObject.hasADate.justAString, "string");
-        assert.equal(typeof translatedObject.hasADate.shouldBeDate, "object");
+        assert.equal(typeof hierarchyObject.hasADate.justAString, "string");
+        assert.equal(typeof hierarchyObject.hasADate.shouldBeDate, "object");
 
         done();
     });

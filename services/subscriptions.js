@@ -65,7 +65,7 @@ var create = function(subscription, callback) {
     subscription.permanent = !!subscription.name;
     if (!subscription.permanent) {
         // assign a random name and id if this is a non-permanent subscription.
-        subscription.id = subscription.name = new mongoose.Types.ObjectId;
+        subscription.id = subscription.name = new mongoose.Types.ObjectId();
     }
 
     config.pubsub_provider.createSubscription(subscription, function(err) {

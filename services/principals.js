@@ -80,7 +80,7 @@ var create = function(principal, callback) {
                 if (err) return callback(err);
 
                 if (principal.is('user') || principal.is('service')) {
-                    principal.id = new mongoose.Types.ObjectId;
+                    principal.id = new mongoose.Types.ObjectId();
                     principal.owner = principal.id;
                 }
 
@@ -176,7 +176,7 @@ var findByEmail = function(principal, email, callback) {
 
 var findById = function(principal, id, callback) {
     models.Principal.findOne(filterForPrincipal(principal, { "_id": id }), callback);
-}
+};
 
 var checkClaimCode = function(code, callback) {
     find(services.principals.servicePrincipal, { claim_code: code }, {}, function (err, principals) {
@@ -186,20 +186,17 @@ var checkClaimCode = function(code, callback) {
 };
 
 var generateClaimCode = function() {
-    var code = '';
+    var characterCode = '';
+    var numberCode = '';
+
     var characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     for (var i=0; i < config.claim_code_length / 2; i++) {
         var idx = Math.floor(Math.random() * characters.length);
-        code += characters[idx]; 
+        characterCode += characters[idx];
+        numberCode += Math.floor(Math.random() * 10); 
     }
 
-    code += '-';
-
-    for (var i=0; i < config.claim_code_length / 2; i++) {
-        code += Math.floor(Math.random() * 10);    
-    }
-
-    return code;
+    return characterCode + '-' + numberCode;
 };
 
 var issueClaimCode = function(principal, callback) {
@@ -274,7 +271,7 @@ var initialize = function(callback) {
 
         log.info("found " + principals.length + " service principals");
 
-        if (principals.length == 0) {
+        if (principals.length === 0) {
             log.info("creating service principal");
 
             var servicePrincipal = new models.Principal({
@@ -313,11 +310,13 @@ var notifySubscriptions = function(principal, callback) {
 var removeById = function(authorizingPrincipal, id, callback) {
     findById(authorizingPrincipal, id, function (err, principal) {
         if (err) return callback(err);
-        if (!authorizingPrincipal.id === principal.id && !authorizingPrincipal.id === principal &&
-            !authorizingPrincipal.id !== services.principals.servicePrincipal.id) return callback(new utils.ServiceError({
-            statusCode: 400,
-            message: "Principal.removeById: Principal not authorized to make change."
-        }));
+        if (!authorizingPrincipal.id === principal.id && 
+            !authorizingPrincipal.id !== services.principals.servicePrincipal.id) {
+            return callback(new utils.ServiceError({
+                statusCode: 400,
+                message: "Principal.removeById: Principal not authorized to make change."
+            }));
+        }
 
         services.messages.remove(services.principals.servicePrincipal, { from: principal.id }, function(err, removed) {
             if (err) return callback(err);

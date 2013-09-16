@@ -82,7 +82,7 @@ var filterForPrincipal = function(principal, filter) {
     if (principal && principal.is('service')) return filter;
 
     if (!principal.isAdmin()) {
-        filter["$and"] = [ { execute_as: principal._id } ];
+        filter.$and = [ { execute_as: principal._id } ];
     }
 
     return filter;

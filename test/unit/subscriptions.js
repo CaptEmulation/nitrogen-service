@@ -24,7 +24,7 @@ describe('subscriptions service', function() {
                     assert.equal(startingCount, endingCount);
                     done();
                 });
-            })
+            });
         });
     });
 
@@ -48,7 +48,7 @@ describe('subscriptions service', function() {
                     assert.equal(startingCount + 1, endingCount);
                     done();
                 });
-            })
+            });
         });
     });
 });

@@ -1,6 +1,6 @@
 var app = require('../../server')
-  ,	assert = require('assert')
-  ,	config = require('../../config')
+  , assert = require('assert')
+  , config = require('../../config')
   , fixtures = require('../fixtures')
   , io = require('socket.io-client')
   , log = require('../../log')
@@ -17,18 +17,18 @@ describe('messages endpoint', function() {
         });
     });
 
-	it('index should return all messages', function(done) {
-	    request({ url: config.messages_endpoint,
+    it('index should return all messages', function(done) {
+        request({ url: config.messages_endpoint,
                   headers: { Authorization: fixtures.models.accessTokens.device.toAuthHeader() },
                   json: true }, function(err,resp,body) {
-	        assert.equal(resp.statusCode, 200);
+            assert.equal(resp.statusCode, 200);
 
             assert.notEqual(body.messages, undefined);
             assert.equal(body.messages.length > 0, true);
 
-	        done();
-	    });
-	});
+            done();
+        });
+    });
 
     it('index query should return only those messages', function(done) {
         request({ url: config.messages_endpoint + "?type=ip",
@@ -89,8 +89,8 @@ describe('messages endpoint', function() {
     });
 
     it('should create and fetch a message', function(done) {
-		var subscriptionPassed = false,
-			restPassed = false;
+        var subscriptionPassed = false,
+            restPassed = false;
 
         var socket = io.connect(config.subscriptions_endpoint, {
             query: "auth=" + encodeURIComponent(fixtures.models.accessTokens.device.token),

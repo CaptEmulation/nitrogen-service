@@ -6,23 +6,22 @@ var async = require('async')
 
 var messageSchema = new BaseSchema();
 messageSchema.add({
-    type:           { type: String },                 // schema type
-    ver:            { type: Number, default: 0.1 },    // schema version
+    type:           { type: String },                                  // schema type
+    ver:            { type: Number, default: 0.1 },                    // schema version
 
-    // a link ties this message to another resource.
-    link:           { type: Schema.Types.ObjectId },          // link to other resources (eg. blob)
-    created_at:     { type: Date, default: Date.now },  // created_at (assigned by service)
-    expires:        { type: Date },                        // expires
-    ts:             { type: Date, default: Date.now },          // timestamp
+    link:           { type: Schema.Types.ObjectId },                   // link to other resources (eg. blob)
+    created_at:     { type: Date, default: Date.now },
+    expires:        { type: Date },                                    // expires
+    ts:             { type: Date, default: Date.now },                 // timestamp
 
-    public:         { type: Boolean },
+    public:         { type: Boolean },                                 // is this message visible to all principals
 
-	from:           { type: Schema.Types.ObjectId, ref: 'Principal' },  	    // principal who sent message
-	to:             { type: Schema.Types.ObjectId, ref: 'Principal' },  	    // message target (if any)
+    from:           { type: Schema.Types.ObjectId, ref: 'Principal' }, // principal who sent message
+    to:             { type: Schema.Types.ObjectId, ref: 'Principal' }, // principal message is to (optional)
     response_to:    [{ type: Schema.Types.ObjectId, ref: 'Message' }], // message(s) this is in response to
 
     tags:           [{ type: String}],
-	body:           { type: Schema.Types.Mixed, default: {} },
+    body:           { type: Schema.Types.Mixed, default: {} },
 
     // internal fields
 

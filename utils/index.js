@@ -18,7 +18,6 @@ var dateDaysFromNow = function(days) {
 };
 
 var handleError = function(res, err) {
-
     if (err instanceof ServiceError) {
         var statusCode = err.statusCode || 400;
 
@@ -104,9 +103,7 @@ var translateQuery = function(obj, options) {
         else if (options.objectIdFields && options.objectIdFields.indexOf(prop) != -1) {
 
             if (Object.prototype.toString.call(obj[prop]) === '[object Array]') {
-                obj[prop] = obj[prop].map(function(objectIdString) {
-                    return mongoose.Types.ObjectId.fromString(objectIdString);
-                });
+                obj[prop] = obj[prop].map(mongoose.Types.ObjectId.fromString);
             } else {
                 obj[prop] = mongoose.Types.ObjectId.fromString(obj[prop]);
             }

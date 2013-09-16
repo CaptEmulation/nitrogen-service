@@ -1,5 +1,5 @@
 var app = require('../../server')
-  ,	assert = require('assert')
+  , assert = require('assert')
   , config = require('../../config')
   , fixtures = require('../fixtures')
   , io = require('socket.io-client')
@@ -9,65 +9,65 @@ var app = require('../../server')
 
 describe('principals endpoint', function() {
 
-	it('should create and fetch a device principal', function(done) {
-        var subscriptionPassed = false,
-            restPassed = false;
+    it('should create and fetch a device principal', function(done) {
+          var subscriptionPassed = false,
+              restPassed = false;
 
-        var socket = io.connect(config.subscriptions_endpoint, {
-            query: "auth=" + encodeURIComponent(fixtures.models.accessTokens.service.token),
-            'force new connection': true
-        });
+          var socket = io.connect(config.subscriptions_endpoint, {
+              query: "auth=" + encodeURIComponent(fixtures.models.accessTokens.service.token),
+              'force new connection': true
+          });
 
-        var subscriptionId = 'sub2';
-        socket.emit('start', { id: subscriptionId, type: 'principal' });
+          var subscriptionId = 'sub2';
+          socket.emit('start', { id: subscriptionId, type: 'principal' });
 
-        socket.on(subscriptionId, function(principal) {
-            if (principal.name !== 'subscription_test') return;
+          socket.on(subscriptionId, function(principal) {
+              if (principal.name !== 'subscription_test') return;
 
-            subscriptionPassed = true;
-            socket.emit('stop', { id: subscriptionId });
+              subscriptionPassed = true;
+              socket.emit('stop', { id: subscriptionId });
 
-            if (subscriptionPassed && restPassed) {
-                done();
-            }
-        });
+              if (subscriptionPassed && restPassed) {
+                  done();
+              }
+          });
 
-        setTimeout(function() {
-            request.post(config.principals_endpoint,
-                { json: { type: 'device',
-                          name: "subscription_test" } }, function(post_err, post_resp, post_body) {
-                  assert.ifError(post_err);
-                  assert.equal(post_resp.statusCode, 200);
+          setTimeout(function() {
+              request.post(config.principals_endpoint,
+                  { json: { type: 'device',
+                            name: "subscription_test" } }, function(post_err, post_resp, post_body) {
+                    assert.ifError(post_err);
+                    assert.equal(post_resp.statusCode, 200);
 
-                  assert.equal(!!post_body.principal.secret, true);
-                  assert.equal(post_body.principal.secret_hash, undefined);
-                  assert.equal(post_body.principal.name, "subscription_test");
-                  assert.ok(Date.now() < Date.parse(post_body.accessToken.expires_at));
+                    assert.equal(!!post_body.principal.secret, true);
+                    assert.equal(post_body.principal.secret_hash, undefined);
+                    assert.equal(post_body.principal.name, "subscription_test");
+                    assert.ok(Date.now() < Date.parse(post_body.accessToken.expires_at));
 
-                  assert.equal(post_body.principal.id, post_body.accessToken.principal);
+                    assert.equal(post_body.principal.id, post_body.accessToken.principal);
 
-                  principalId = post_body.principal.id;
-                  token = post_body.accessToken.token;
+                    principalId = post_body.principal.id;
+                    token = post_body.accessToken.token;
 
-                  request({ url: config.principals_endpoint + '/' + post_body.principal.id,
-                            json: true,
-                            headers: { Authorization: "Bearer " + post_body.accessToken.token } }, function(get_err, get_resp, get_body) {
-                        assert.equal(get_err, null);
-                        assert.equal(get_resp.statusCode, 200);
+                    request({ url: config.principals_endpoint + '/' + post_body.principal.id,
+                              json: true,
+                              headers: { Authorization: "Bearer " + post_body.accessToken.token } }, function(get_err, get_resp, get_body) {
+                          assert.equal(get_err, null);
+                          assert.equal(get_resp.statusCode, 200);
 
-                        assert.equal(get_body.principal.secret, undefined);
-                        assert.equal(get_body.principal.name, "subscription_test");
-                        assert.notEqual(get_body.principal.last_connection, undefined);
-                        assert.notEqual(get_body.principal.last_ip, undefined);
+                          assert.equal(get_body.principal.secret, undefined);
+                          assert.equal(get_body.principal.name, "subscription_test");
+                          assert.notEqual(get_body.principal.last_connection, undefined);
+                          assert.notEqual(get_body.principal.last_ip, undefined);
 
-                        restPassed = true;
-                        if (subscriptionPassed && restPassed) {
-                            done();
-                        }
-                  });
-            });
-        }, 200);
-	});
+                          restPassed = true;
+                          if (subscriptionPassed && restPassed) {
+                              done();
+                          }
+                    });
+              });
+          }, 200);
+    });
 
     it('should be able to remove principal', function(done) {
         request.post(config.principals_endpoint,
@@ -95,22 +95,22 @@ describe('principals endpoint', function() {
             assert.equal(get_resp.statusCode, 401);
             done();
         });
-    })
+    });
 
-	it('should fetch all principals', function(done) {
-	    request.get({ url: config.principals_endpoint,
-                      headers: { Authorization: fixtures.models.accessTokens.device.toAuthHeader() },
-                      json: true }, function(err, resp, body) {
+    it('should fetch all principals', function(done) {
+        request.get({ url: config.principals_endpoint,
+                        headers: { Authorization: fixtures.models.accessTokens.device.toAuthHeader() },
+                        json: true }, function(err, resp, body) {
 
-	        assert.equal(resp.statusCode, 200);
-            assert.equal(body.principals.length > 0, true);
-            body.principals.forEach(function(principal) {
-                assert.notEqual(principal.type, 'service');
-            });
+            assert.equal(resp.statusCode, 200);
+              assert.equal(body.principals.length > 0, true);
+              body.principals.forEach(function(principal) {
+                  assert.notEqual(principal.type, 'service');
+              });
 
-	        done();
-	    });
-	});
+            done();
+        });
+    });
 
     it('should fetch only user principals', function(done) {
         request.get({ url: config.principals_endpoint,

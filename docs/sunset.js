@@ -120,8 +120,7 @@ SunriseSunset.prototype = {
     },
 
     localMeanTime: function() {
-        var cosH = (this.cos(this.zenith) - (this.sinDec() * this.sin(this.latitude)))
-            / (this.cosDec() * this.cos(this.latitude));
+        var cosH = (this.cos(this.zenith) - (this.sinDec() * this.sin(this.latitude))) / (this.cosDec() * this.cos(this.latitude));
 
         if (cosH >  1) {
             return "the sun never rises on this location (on the specified date)";
