@@ -310,8 +310,8 @@ var notifySubscriptions = function(principal, callback) {
 var removeById = function(authorizingPrincipal, id, callback) {
     findById(authorizingPrincipal, id, function (err, principal) {
         if (err) return callback(err);
-        if (!authorizingPrincipal.id === principal.id && 
-            !authorizingPrincipal.id !== services.principals.servicePrincipal.id) {
+        if (authorizingPrincipal.id !== principal.id && 
+            authorizingPrincipal.id === services.principals.servicePrincipal.id) {
             return callback(new utils.ServiceError({
                 statusCode: 400,
                 message: "Principal.removeById: Principal not authorized to make change."
