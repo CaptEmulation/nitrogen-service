@@ -281,16 +281,7 @@ var initialize = function(callback) {
             });
         } else {
             services.principals.servicePrincipal = principals[0];
-
-            // TODO: remove once existing service principals migrated.
-            if (!services.principals.servicePrincipal.admin) {
-                services.principals.servicePrincipal.admin = true;
-                update(services.principals.servicePrincipal,
-                       services.principals.servicePrincipal.id,
-                       { admin: true }, callback);
-            } else {
-                return callback();
-            }
+            return callback();
         }
     });
 };
