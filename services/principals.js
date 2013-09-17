@@ -268,7 +268,7 @@ var initialize = function(callback) {
 
             var servicePrincipal = new models.Principal({
                 name: 'Service',
-                public: false,
+                public: true,
                 type: 'service',
                 admin: true
             });
@@ -293,8 +293,10 @@ var notifySubscriptions = function(principal, callback) {
 var removeById = function(authorizingPrincipal, id, callback) {
     findById(authorizingPrincipal, id, function (err, principal) {
         if (err) return callback(err);
-        if (authorizingPrincipal.id !== principal.id && 
-            authorizingPrincipal.id === services.principals.servicePrincipal.id) {
+        if (!authorizingPrincipal.equals(principal) &&
+            !authorizingPrincipal.owns(principal) &&
+            !authorizingPrincipal.is('service')) {
+            log.warn('failed to remove service principal');
             return callback(utils.authorizationError());
         }
 
@@ -309,16 +311,16 @@ var removeById = function(authorizingPrincipal, id, callback) {
 var update = function(authorizingPrincipal, id, updates, callback) {
     if (!authorizingPrincipal) return callback(utils.principalRequired());
 
-    if (!id) return callback(utils.badRequestError('Principal.update: Missing required argument id.'));
+    if (!id) return callback(utils.badRequestError('Missing required argument id.'));
 
     findById(authorizingPrincipal, id, function(err, principal) {
         if (err) return callback(err);
 
-        if (!principal) return callback(utils.badRequestError("Principal.update: Can't find authorizing principal."));
+        if (!principal) return callback(utils.badRequestError("Can't find authorizing principal."));
 
         if (!authorizingPrincipal.is('service') &&
-            authorizingPrincipal.id.toString() !== principal.id.toString() &&
-            authorizingPrincipal.id.toString() !== principal.owner.toString()) {
+            !authorizingPrincipal.equals(principal) &&
+            !authorizingPrincipal.owns(principal)) {
             log.warn('Principal.update: Principal ' + authorizingPrincipal.id + ' attempted to make unauthorized change to ' + principal.id);
             return callback(utils.authorizationError());
         }

@@ -71,6 +71,14 @@ Principal.prototype.is = function(type) {
     return this.type === type;
 };
 
+Principal.prototype.equals = function(principal) {
+    return principal.id.toString() === this.id.toString();
+};
+
+Principal.prototype.owns = function(principal) {
+    return principal.owner.toString() === this.id.toString();
+};
+
 // TODO: Mechanism to enable promoting users to an admin role. For now, punt and make all users admins.
 Principal.prototype.isAdmin = function() { return this.admin; };
 

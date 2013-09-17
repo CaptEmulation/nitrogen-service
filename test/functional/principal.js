@@ -103,10 +103,7 @@ describe('principals endpoint', function() {
                         json: true }, function(err, resp, body) {
 
             assert.equal(resp.statusCode, 200);
-              assert.equal(body.principals.length > 0, true);
-              body.principals.forEach(function(principal) {
-                  assert.notEqual(principal.type, 'service');
-              });
+            assert.equal(body.principals.length > 0, true);
 
             done();
         });

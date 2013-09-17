@@ -107,6 +107,20 @@ describe('principals service', function() {
         });
     });
 
+    it('should reject user deleting the service principal', function(done) {
+        services.principals.removeById(fixtures.models.principals.user, services.principals.servicePrincipal.id, function(err) {
+            assert.equal(!!err, true);
+            done();
+        });
+    });
+
+    it('should allow user deleting a device it owns', function(done) {
+        services.principals.removeById(fixtures.models.principals.user, fixtures.models.principals.device.id, function(err) {
+            assert.ifError(err);
+            done();
+        });
+    });
+
     it('should reject creating a if user that already exists', function(done) {
         var user = new models.Principal({ type: 'user',
                                           email: fixtures.models.principals.user.email,
