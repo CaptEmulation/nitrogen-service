@@ -355,7 +355,6 @@ var updateLastConnection = function(principal, ip) {
             type: 'ip',
             from: principal,
             public: false,
-            to: services.principals.servicePrincipal.id,
             body: {
                 ip_address: ip
             }
