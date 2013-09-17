@@ -316,8 +316,11 @@ var update = function(authorizingPrincipal, id, updates, callback) {
 
         if (!principal) return callback(utils.badRequestError("Principal.update: Can't find authorizing principal."));
 
-        if (!authorizingPrincipal.is('service') && authorizingPrincipal.id !== principal.id && authorizingPrincipal.id !== principal.owner) {
-            return callback(utils.badRequestError("Principal.update: Principal not authorized to make change."));
+        if (!authorizingPrincipal.is('service') &&
+            authorizingPrincipal.id.toString() !== principal.id.toString() &&
+            authorizingPrincipal.id.toString() !== principal.owner.toString()) {
+            log.warn('Principal.update: Principal ' + authorizingPrincipal.id + ' attempted to make unauthorized change to ' + principal.id);
+            return callback(utils.authorizationError());
         }
 
         // if its not the service, you can only update the name.
