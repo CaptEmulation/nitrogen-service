@@ -6,6 +6,12 @@ var async = require('async')
   , services = require('../services')
   , utils = require('../utils');
 
+var canView = function(principal, blob) {
+    // TODO: need to rethink blob visibility to make it visible to the owner of the device and the device itself.
+    return true; 
+    //return principal.owns(blob) || principal.isAdmin();
+};
+
 var create = function(principal, blob, stream, callback) {
     if (!config.blob_provider) return callback(utils.internalError('No blob provider configured.'));
 
@@ -57,10 +63,7 @@ var stream = function(principal, blobId, stream, callback) {
         if (err) return callback(err);
         if (!blob) return callback(utils.notFoundError());
 
-        // TODO: rethink blob authorization
-        if (!blob.owner.equals(principal._id) && !blob.owner.equals(principal.owner)) {
-            return callback(utils.authorizationError());
-        }
+        if (!canView(principal, blob)) return callback(utils.authorizationError());
 
         config.blob_provider.stream(blob, stream, callback);
     });
