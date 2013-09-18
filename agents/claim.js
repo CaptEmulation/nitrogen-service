@@ -6,7 +6,7 @@ session.onMessage({ type: 'claim' }, function(message) {
 
     nitrogen.Principal.find(session, { claim_code: message.body.claim_code }, {}, function(err, principals) {
         if (err || principals.length === 0) {
-            log.info("claimAgent: failed principal claim with code: " + message.body.code);
+            log.info("claimAgent: didn't find principal with claim code: " + message.body.claim_code);
             return;            
         }
 

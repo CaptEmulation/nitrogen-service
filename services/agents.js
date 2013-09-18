@@ -9,8 +9,6 @@ var async = require('async')
   , utils = require('../utils')
   , vm = require('vm');
 
-var SERVICE_PRINCIPAL_NOT_AVAILABLE = "Service principal not available.";
-
 var buildServiceClientSession = function(config, callback) {
     if (!services.principals.servicePrincipal) return callback(utils.internalError("Service principal not available."));
 
