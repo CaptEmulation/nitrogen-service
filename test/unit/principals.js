@@ -19,6 +19,10 @@ describe('principals service', function() {
             assert.notEqual(user.password_hash, passwordFixture);
             assert.equal(user.email, "user@gmail.com");
 
+            var principalJson = user.toJSON();
+            assert.equal(principalJson.password_hash, undefined);
+            assert.equal(principalJson.salt, undefined);
+
             services.principals.verifyPassword(passwordFixture, user, function(err) {
                 assert.ifError(err);
 

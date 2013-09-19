@@ -41,6 +41,7 @@ describe('principals endpoint', function() {
 
                     assert.equal(!!post_body.principal.secret, true);
                     assert.equal(post_body.principal.secret_hash, undefined);
+                    assert.equal(post_body.principal.salt, undefined);
                     assert.equal(post_body.principal.name, "subscription_test");
                     assert.ok(Date.now() < Date.parse(post_body.accessToken.expires_at));
 
@@ -57,6 +58,7 @@ describe('principals endpoint', function() {
 
                           assert.equal(get_body.principal.secret, undefined);
                           assert.equal(get_body.principal.name, "subscription_test");
+                          assert.equal(post_body.principal.salt, undefined);
                           assert.notEqual(get_body.principal.last_connection, undefined);
                           assert.notEqual(get_body.principal.last_ip, undefined);
 
