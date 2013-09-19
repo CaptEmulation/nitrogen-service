@@ -3,13 +3,9 @@
 	"type": "object",
 	"properties": {
 		"command": {
+            "enum": [ "snapshot", "motion" ],
 			"type": "string",
 			"required": true
-		},
-        "message": {
-            "type": "object",
-            "required": false
-        }
-
+		}
 	}
 }

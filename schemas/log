@@ -3,6 +3,7 @@
 	"type": "object",
 	"properties": {
 		"severity": {
+			"enum": [ "debug", "info", "warn", "error" ],
 			"type": "string",
 			"required": true
 		},

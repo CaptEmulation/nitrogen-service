@@ -14,14 +14,15 @@ Every message includes the following fields:
 * response_to: Array of messages this message is in response to.
 * link: If this message references resources, this link will be applied to those resources for cross referencing.
 * body: The body of the message.  If the schema is well known, the body should follow the schema as defined below.
-<!--
-## Control
-* [cameraCommand](cameraCommand.md)
 
-## Measurements
-* [promixity](proximity.md)
-* [temperature](temperature.md)
--->
+## Control
+* [cameraCommand](schemas/cameraCommand.md)
+
+## Internals
+* [claim](schemas/claim.md)
+* [heartbeat](schemas/heartbeat.md)
+* [ip](schemas/ip.md)
+* [log](schemas/log.md)
 
 ## Media
-* [image](image.md)
+* [image](schemas/image.md)
