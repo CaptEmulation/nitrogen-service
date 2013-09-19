@@ -4,13 +4,13 @@ Nitrogen is a platform for building connected devices.  Nitrogen provides the au
 
 ## Device Development Model
 
-Nitrogen at its heart uses messaging between entities to allow them to communicate. Messages can follow a well known schema to enable interoperability between applications or use their own private custom message types for specialized applications.
+Nitrogen at its heart uses messaging between principals. Messages can follow a well known schema to enable interoperability between applications or use their own private custom message types for specialized applications.
 
 For example, a thermometer that measures temperature once every 15 minutes could be implemented in Nitrogen like this:
 
 ``` javascript
 var thermometer = new nitrogen.Device({ nickname: "thermometer",
-                                        capabilities: [ "thermometer" ] });
+                                        capabilities: [ "temperature" ] });
 
 var service = new nitrogen.Service(config);
 service.connect(thermometer, function(err, session, thermometer) {
@@ -56,9 +56,11 @@ service.connect(user, function(err, session, user) {
 
 ## Getting Started
 
-There is a free hosted Nitrogen service running in the cloud if you'd like to get started quickly with building a device.  Go to [https://admin.nitrogen.io](https://admin.nitrogen.io) to sign up for an account and get started.   You can also use a  
+There is a free hosted Nitrogen service running in the cloud if you'd like to get started quickly with building a device.  Go to [https://admin.nitrogen.io](https://admin.nitrogen.io) to sign up for an account and get started.
 
-To get started with a Nitrogen service locally:
+If at any time you run into issues, the IRC channel #nitrogen.js on irc.freenode.net contains folks willing to help or just file an issue with this project.  It is incredibly helpful to know what is hard for beginners to understand so please don't hesitate to reach out.
+
+To run a Nitrogen service locally:
 
 1. Clone or fork this repo: `https://github.com/nitrogenjs/service`
 2. Fetch and install its node.js dependencies: `npm install`
@@ -73,11 +75,12 @@ To get started with a Nitrogen service locally:
 
 ## How to contribute
 
-1.  Feedback:  We'd love feedback on what problems you are using Nitrogen to solve.  Obviously, we'd also like to hear about where you ran into sharp edges and dead ends.   Send us a message or file an issue.
-2.  Pull requests:  If you'd like to tackle an issue, fork the repo, create a clean commit for the fix or enhancement (with tests if necessary), and send us a pull request.
+1.  Feedback:  We'd love feedback on what problems you are using Nitrogen to solve.  Obviously, we'd also like to hear about where you ran into sharp edges and dead ends.   Let us know on IRC or file an issue.
+2.  Pull requests:  If you'd like to tackle an issue, fork the repo, create a clean commit for the fix or enhancement (with tests if new ones are required), and send us a pull request.
+
 ## Other Projects
 
-Nitrogen has three subprojects that you should have a look at as well.
+Nitrogen has three other that you should have a look at as well.
 
 1. [client](https://github.com/nitrogenjs/client): The client library for building Nitrogen devices and applications.
 2. [admin](https://github.com/nitrogenjs/admin): An administrative tool for managing the Nitrogen service.
