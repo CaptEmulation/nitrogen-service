@@ -18,11 +18,11 @@ Let's start the device to do that.  Open a shell, change directory into the `swi
 `node switch.js`
 
 This should print out something that looks something like this:
-`
+```
 warning: couldn't find current store, creating new one.
 This principal (523b37c6d2f87e14040013e1) can be claimed using code: POFX-5039
 switch is now off.
-` 
+``` 
 
 The warning is expected. You didn't previously have a local store for this device so it created one for you. The Nitrogen client stores credential and principal information in its local store so that it has them for authenticating with a Nitrogen service.
 
@@ -38,4 +38,4 @@ The device should now appear in your list of principals. Click on it's id which 
 
 Focus the shell that you are running the device in and press any key. This will toggle the switch by sending a switchState message from the device to the service. If you flip back to the Nitrogen admin browser tab you had open for your switch principal you can see this because the message will have been displayed. Most of the Nitrogen admin application is real time so you can use it to watch what is happening with your devices and applications.
 
-You've connected your first device. The switch example represents a pretty simple example of a device to relays its current state to the service.
+You've connected your first device. The switch example represents a simple example of a device that relays its current state to the service.
