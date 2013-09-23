@@ -7,7 +7,7 @@ function MemoryPubSubProvider() {
 }
 
 MemoryPubSubProvider.prototype.createSubscription = function(subscription, callback) {
-    this.subscriptions[subscription.id] = subscription;
+    this.subscriptions[subscription.clientId] = subscription;
 
     return callback();
 };
@@ -20,7 +20,7 @@ MemoryPubSubProvider.prototype.publish = function(type, item, callback) {
 
         if (subscription.type === type && subscription.callback) {
             sift(subscription.filter, [item]).forEach(function(unfiltered) {
-                log.info('memory pubsub provider publishing to subscription: ' + subscription.id + ' item: ' + JSON.stringify(unfiltered));
+                log.info('memory pubsub provider publishing to subscription: ' + subscription.clientId + ' item: ' + JSON.stringify(unfiltered));
                 subscription.callback(null, unfiltered);
             });
         }
@@ -35,7 +35,7 @@ MemoryPubSubProvider.prototype.receive = function(subscription, callback) {
 };
 
 MemoryPubSubProvider.prototype.removeSubscription = function(subscription, callback) {
-    delete this.subscriptions[subscription.id];
+    delete this.subscriptions[subscription.clientId];
 };
 
 module.exports = MemoryPubSubProvider;

@@ -149,14 +149,6 @@ var start = function(socket, spec) {
     });
 };
 
-var stop = function(subscription) {
-    if (!subscription) return log.error('subscriptions: undefined subscription passed to stop');
-
-    console.log("subscriptions: stopping " + subscription.clientId);
-
-    config.pubsub_provider.removeSubscription(subscription);
-};
-
 var stream = function(socket, subscription) {
     async.whilst(
         function() { return socket.subscriptions[subscription.clientId] !== undefined; },
@@ -169,7 +161,6 @@ var stream = function(socket, subscription) {
 
                 if (item) {
                     console.log('subscriptions:  new message from subscription: ' + subscription.clientId + ' of type: ' + subscription.type + ": " + JSON.stringify(item));
-
                     socket.emit(subscription.clientId, item);
                 }
 
