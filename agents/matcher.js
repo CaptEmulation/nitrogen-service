@@ -35,7 +35,7 @@ function matchUnownedDevices(message, devices, users) {
     });
 }
 
-function processIpMessage(message) {
+session.on({ type: 'message', filter: { type: 'ip' } }, function(message) {
     var yesterday = new Date();
     yesterday.setDate(-1);
 
@@ -64,6 +64,4 @@ function processIpMessage(message) {
 
         matchUnownedDevices(message, devices, users);
     });
-}
-
-session.on({ type: 'message', filter: { type: 'ip' } }, processIpMessage);
+});
