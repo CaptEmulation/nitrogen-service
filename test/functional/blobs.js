@@ -13,42 +13,42 @@ if (config.blob_provider) {
             var fixturePath = 'test/fixtures/images/image.jpg';
 
             fs.stat(fixturePath, function(err, stats) {
-                    assert.ifError(err);
+                assert.ifError(err);
 
-                    fs.createReadStream(fixturePath).
-                    pipe(
-                        request.post({ url: config.blobs_endpoint,
-                                       headers: { 'Content-Type': 'image/jpeg', 'Content-Length': stats.size,
-                                                  'Authorization': fixtures.models.accessTokens.device.toAuthHeader() } },
-                            function (err, resp, body) {
+                fs.createReadStream(fixturePath).
+                pipe(
+                    request.post({ url: config.blobs_endpoint,
+                                   headers: { 'Content-Type': 'image/jpeg', 'Content-Length': stats.size,
+                                              'Authorization': fixtures.models.accessTokens.device.toAuthHeader() } },
+                        function (err, resp, body) {
+                            assert.ifError(err);
+
+                            var body_json = JSON.parse(body);
+                            assert.equal(resp.statusCode, 200);
+                            assert.equal(body_json.blob._id, undefined);
+                            assert.notEqual(body_json.blob.id, undefined);
+                            assert.notEqual(body_json.blob.link, undefined);
+
+                            var blob_url = config.blobs_endpoint + '/' + body_json.blob.id;
+
+                            // owner should be able to access blob
+                            request.get(blob_url,
+                              { headers: { 'Authorization': fixtures.models.accessTokens.device.toAuthHeader() } }, function(err,resp,body) {
                                 assert.ifError(err);
-
-                                var body_json = JSON.parse(body);
                                 assert.equal(resp.statusCode, 200);
-                                assert.equal(body_json.blob._id, undefined);
-                                assert.notEqual(body_json.blob.id, undefined);
-                                assert.notEqual(body_json.blob.link, undefined);
+                                assert.equal(resp.body.length, 28014);
 
-                                var blob_url = config.blobs_endpoint + '/' + body_json.blob.id;
-
-                                // owner should be able to access blob
-                                request.get(blob_url, 
-                                  { headers: { 'Authorization': fixtures.models.accessTokens.device.toAuthHeader() } }, function(err,resp,body) {
+                                // other users shouldn't be able to access blob
+                                request.get(blob_url, { headers: { 'Authorization': fixtures.models.accessTokens.anotherUser.toAuthHeader() } }, function(err,resp,body) {
                                     assert.ifError(err);
-                                    assert.equal(resp.statusCode, 200);
-                                    assert.equal(resp.body.length, 28014);
 
-                                    // other users shouldn't be able to access blob
-                                    request.get(blob_url, { headers: { 'Authorization': fixtures.models.accessTokens.anotherUser.toAuthHeader() } }, function(err,resp,body) {
-                                        assert.ifError(err);
-
-                                        assert.equal(resp.statusCode, 403);
-                                        done();
-                                    });
+                                    assert.equal(resp.statusCode, 403);
+                                    done();
                                 });
-                            }
-                        )
-                    );
+                            });
+                        }
+                    )
+                );
             });
         });
 
