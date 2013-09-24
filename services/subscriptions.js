@@ -13,6 +13,8 @@ var attach = function(server) {
 
     io = require('socket.io').listen(server);
 
+    io.set('log level', 1);
+
     attachAuthFilter();
     attachSubscriptionsEndpoint();
 
@@ -135,6 +137,8 @@ var start = function(socket, spec) {
     });
 
     // compose filter that includes visibility limitations.
+
+    // TODO: this assumes messages are the only type of subscription.
     subscription.filter = services.messages.filterForPrincipal(socket.handshake.principal, subscription.filter);
 
     findOrCreate(subscription, function(err, subscription) {
