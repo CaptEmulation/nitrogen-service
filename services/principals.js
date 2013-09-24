@@ -78,9 +78,11 @@ var create = function(principal, callback) {
                     if (err) return callback(err);
 
                     log.info("created " + principal.type + " principal: " + principal.id);
-                    notifySubscriptions(principal, function(err) {
+
+                    // TODO: principals_realtime:  Disabled until rate limited to prevent update storms.
+                    //notifySubscriptions(principal, function(err) {
                         return callback(err, principal);
-                    });
+                    //});
                 });
             });
         });
@@ -336,9 +338,11 @@ var update = function(authorizingPrincipal, id, updates, callback) {
             findById(authorizingPrincipal, id, function(err, updatedPrincipal) {
                 if (err) return callback(err);
 
-                notifySubscriptions(updatedPrincipal, function(err) {
+                // TODO: principals_realtime:  Disabled until rate limited to prevent update storms.
+
+                //notifySubscriptions(updatedPrincipal, function(err) {
                     return callback(err, updatedPrincipal);
-                });
+                //});
             });
         });
     });

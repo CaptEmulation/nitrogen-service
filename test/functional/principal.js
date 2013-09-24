@@ -10,65 +10,67 @@ var app = require('../../server')
 describe('principals endpoint', function() {
 
     it('should create and fetch a device principal', function(done) {
-          var subscriptionPassed = false,
-              restPassed = false;
 
-          var socket = io.connect(config.subscriptions_endpoint, {
-              query: "auth=" + encodeURIComponent(fixtures.models.accessTokens.service.token),
-              'force new connection': true
+        // TODO: principals_realtime:  Disabled until rate limited to prevent update storms.
+        var subscriptionPassed = true,
+            restPassed = false;
+
+        var socket = io.connect(config.subscriptions_endpoint, {
+          query: "auth=" + encodeURIComponent(fixtures.models.accessTokens.service.token),
+          'force new connection': true
+        });
+
+        var subscriptionId = 'sub2';
+        socket.emit('start', { id: subscriptionId, type: 'principal' });
+
+        socket.on(subscriptionId, function(principal) {
+          if (principal.name !== 'subscription_test') return;
+
+          subscriptionPassed = true;
+          socket.emit('stop', { id: subscriptionId });
+
+          if (subscriptionPassed && restPassed) {
+              done();
+          }
+        });
+
+        setTimeout(function() {
+          request.post(config.principals_endpoint,
+              { json: { type: 'device',
+                        name: "subscription_test" } }, function(post_err, post_resp, post_body) {
+                assert.ifError(post_err);
+                assert.equal(post_resp.statusCode, 200);
+
+                assert.equal(!!post_body.principal.secret, true);
+                assert.equal(post_body.principal.secret_hash, undefined);
+                assert.equal(post_body.principal.salt, undefined);
+                assert.equal(post_body.principal.name, "subscription_test");
+                assert.ok(Date.now() < Date.parse(post_body.accessToken.expires_at));
+
+                assert.equal(post_body.principal.id, post_body.accessToken.principal);
+
+                principalId = post_body.principal.id;
+                token = post_body.accessToken.token;
+
+                request({ url: config.principals_endpoint + '/' + post_body.principal.id,
+                          json: true,
+                          headers: { Authorization: "Bearer " + post_body.accessToken.token } }, function(get_err, get_resp, get_body) {
+                      assert.equal(get_err, null);
+                      assert.equal(get_resp.statusCode, 200);
+
+                      assert.equal(get_body.principal.secret, undefined);
+                      assert.equal(get_body.principal.name, "subscription_test");
+                      assert.equal(post_body.principal.salt, undefined);
+                      assert.notEqual(get_body.principal.last_connection, undefined);
+                      assert.notEqual(get_body.principal.last_ip, undefined);
+
+                      restPassed = true;
+                      if (subscriptionPassed && restPassed) {
+                          done();
+                      }
+                });
           });
-
-          var subscriptionId = 'sub2';
-          socket.emit('start', { id: subscriptionId, type: 'principal' });
-
-          socket.on(subscriptionId, function(principal) {
-              if (principal.name !== 'subscription_test') return;
-
-              subscriptionPassed = true;
-              socket.emit('stop', { id: subscriptionId });
-
-              if (subscriptionPassed && restPassed) {
-                  done();
-              }
-          });
-
-          setTimeout(function() {
-              request.post(config.principals_endpoint,
-                  { json: { type: 'device',
-                            name: "subscription_test" } }, function(post_err, post_resp, post_body) {
-                    assert.ifError(post_err);
-                    assert.equal(post_resp.statusCode, 200);
-
-                    assert.equal(!!post_body.principal.secret, true);
-                    assert.equal(post_body.principal.secret_hash, undefined);
-                    assert.equal(post_body.principal.salt, undefined);
-                    assert.equal(post_body.principal.name, "subscription_test");
-                    assert.ok(Date.now() < Date.parse(post_body.accessToken.expires_at));
-
-                    assert.equal(post_body.principal.id, post_body.accessToken.principal);
-
-                    principalId = post_body.principal.id;
-                    token = post_body.accessToken.token;
-
-                    request({ url: config.principals_endpoint + '/' + post_body.principal.id,
-                              json: true,
-                              headers: { Authorization: "Bearer " + post_body.accessToken.token } }, function(get_err, get_resp, get_body) {
-                          assert.equal(get_err, null);
-                          assert.equal(get_resp.statusCode, 200);
-
-                          assert.equal(get_body.principal.secret, undefined);
-                          assert.equal(get_body.principal.name, "subscription_test");
-                          assert.equal(post_body.principal.salt, undefined);
-                          assert.notEqual(get_body.principal.last_connection, undefined);
-                          assert.notEqual(get_body.principal.last_ip, undefined);
-
-                          restPassed = true;
-                          if (subscriptionPassed && restPassed) {
-                              done();
-                          }
-                    });
-              });
-          }, 200);
+        }, 200);
     });
 
     it('should be able to remove principal', function(done) {
