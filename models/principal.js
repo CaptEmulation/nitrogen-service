@@ -76,7 +76,8 @@ Principal.prototype.equals = function(principal) {
 };
 
 Principal.prototype.owns = function(principal) {
-    return principal.owner.toString() === this.id.toString();
+    return principal.owner && principal.owner.toString() === this.id.toString() ||
+           principal.id.toString() === this.id.toString();
 };
 
 // TODO: Mechanism to enable promoting users to an admin role. For now, punt and make all users admins.

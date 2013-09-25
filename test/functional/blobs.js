@@ -23,27 +23,46 @@ if (config.blob_provider) {
                         function (err, resp, body) {
                             assert.ifError(err);
 
-                            var body_json = JSON.parse(body);
+                            var bodyJson = JSON.parse(body);
                             assert.equal(resp.statusCode, 200);
-                            assert.equal(body_json.blob._id, undefined);
-                            assert.notEqual(body_json.blob.id, undefined);
-                            assert.notEqual(body_json.blob.link, undefined);
+                            assert.equal(bodyJson.blob._id, undefined);
+                            assert.notEqual(bodyJson.blob.id, undefined);
+                            assert.notEqual(bodyJson.blob.link, undefined);
 
-                            var blob_url = config.blobs_endpoint + '/' + body_json.blob.id;
+                            var blobUrl = config.blobs_endpoint + '/' + bodyJson.blob.id;
 
                             // owner should be able to access blob
-                            request.get(blob_url,
+                            request.get(blobUrl,
                               { headers: { 'Authorization': fixtures.models.accessTokens.device.toAuthHeader() } }, function(err,resp,body) {
                                 assert.ifError(err);
                                 assert.equal(resp.statusCode, 200);
                                 assert.equal(resp.body.length, 28014);
-
-                                // other users shouldn't be able to access blob
-                                request.get(blob_url, { headers: { 'Authorization': fixtures.models.accessTokens.anotherUser.toAuthHeader() } }, function(err,resp,body) {
+                                fixtures.models.principals.device.owner = fixtures.models.principals.user.id;
+                                fixtures.models.principals.device.save(function(err) {
                                     assert.ifError(err);
 
-                                    assert.equal(resp.statusCode, 403);
-                                    done();
+                                    // other users shouldn't be able to access blob
+                                    request.get(blobUrl, { headers: { 'Authorization': fixtures.models.accessTokens.anotherUser.toAuthHeader() } }, function(err,resp,body) {
+                                        assert.ifError(err);
+
+                                        assert.equal(resp.statusCode, 403);
+                                        request.get(blobUrl, { headers: { 'Authorization': fixtures.models.accessTokens.user.toAuthHeader() } }, function(err,resp,body) {
+                                            assert.ifError(err);
+
+                                            assert.equal(resp.statusCode, 200);
+
+                                            fixtures.models.principals.device.owner = null;
+                                            fixtures.models.principals.device.save(function(err) {
+                                                assert.ifError(err);
+
+                                                // need to drop last_ip for anotherUser otherwise matching tests won't work b/c there are two users at ip address.
+                                                fixtures.models.principals.anotherUser.last_ip = null;
+                                                fixtures.models.principals.anotherUser.save(function(err) {
+                                                    done();
+                                                });
+                                            });
+                                        });
+                                    });
                                 });
                             });
                         }

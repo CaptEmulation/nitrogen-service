@@ -6,10 +6,17 @@ var async = require('async')
   , services = require('../services')
   , utils = require('../utils');
 
-var canView = function(principal, blob) {
-    // TODO: need to rethink blob visibility to make it visible to the owner of the device and the device itself.
-    return true; 
-    //return principal.owns(blob) || principal.isAdmin();
+var canView = function(principal, blob, callback) {
+    // if this principal is the owner, then this is easy.
+    if (principal.owns(blob)) return callback(true);
+
+    // fetch the owner of the blob to see if the principal owns that.
+    // enables user owes camera owes blob type scenarios.
+    services.principals.findById(services.principals.servicePrincipal, blob.owner, function(err, owningPrincipal) {
+        if (err) return callback(err);
+
+        return callback(principal.owns(owningPrincipal));
+    });
 };
 
 var create = function(principal, blob, stream, callback) {
@@ -63,9 +70,11 @@ var stream = function(principal, blobId, stream, callback) {
         if (err) return callback(err);
         if (!blob) return callback(utils.notFoundError());
 
-        if (!canView(principal, blob)) return callback(utils.authorizationError());
+        canView(principal, blob, function(authorized) {
+            if (!authorized) return callback(utils.authorizationError());
 
-        config.blob_provider.stream(blob, stream, callback);
+            config.blob_provider.stream(blob, stream, callback);
+        });
     });
 };
 
