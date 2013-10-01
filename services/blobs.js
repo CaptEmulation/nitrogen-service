@@ -28,13 +28,15 @@ var create = function(principal, blob, stream, callback) {
         if (err) return callback(err);
 
         blob.owner = principal;
+        blob.id = new mongoose.Types.ObjectId();
         blob.link = new mongoose.Types.ObjectId();
+        blob.url = config.blobs_endpoint + '/' + blob.id;
 
         blob.save(function(err, blob) {
             if (err) return callback(err);
 
-            blob.url = config.blobs_endpoint + '/' + blob.id;
             log.info('created blob with id: ' + blob.id);
+            console.dir(blob);
             callback(null, blob);
         });
     });

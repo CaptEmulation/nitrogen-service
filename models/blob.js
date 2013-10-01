@@ -10,7 +10,9 @@ blobSchema.add({
 	owner: { type: Schema.Types.ObjectId, ref: 'Principal' },
 
     // a link is an unique objectId that ties this blob to a message.
-    link: { type: Schema.Types.ObjectId }
+    link: { type: Schema.Types.ObjectId },
+
+    url: { type: String }
 });
 
 blobSchema.index({ link: 1 });
