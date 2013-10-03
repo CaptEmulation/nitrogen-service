@@ -62,6 +62,10 @@ var ipFromRequest = function(req) {
         return req.ip;
 };
 
+var nop = function(callback) {
+    return callback();
+}
+
 var notFoundError = function() {
     return new ServiceError({
         statusCode: 404,
@@ -154,6 +158,7 @@ module.exports = {
     ipFromRequest: ipFromRequest,
     internalError: internalError,
     handleError: handleError,
+    nop: nop,
     notFoundError: notFoundError,
     parseQuery: parseQuery,
     parseOptions: parseOptions,
