@@ -19,9 +19,10 @@ describe('messages endpoint', function() {
 
     it('index should return all messages', function(done) {
         request({ url: config.messages_endpoint,
-                  headers: { Authorization: fixtures.models.accessTokens.device.toAuthHeader() },
+                  headers: { Authorization: fixtures.models.accessTokens.user.toAuthHeader() },
                   json: true }, function(err,resp,body) {
             assert.equal(resp.statusCode, 200);
+            assert.equal(resp.headers['X-n2-set-access-token'], undefined);
 
             assert.notEqual(body.messages, undefined);
             assert.equal(body.messages.length > 0, true);

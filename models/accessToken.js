@@ -19,7 +19,11 @@ accessTokenSchema.set('toJSON', { transform: BaseSchema.baseObjectTransform });
 var AccessToken = mongoose.model('AccessToken', accessTokenSchema);
 
 AccessToken.prototype.expired = function() {
-    return Date.now() > this.expires_at.getTime();
+    return this.secondsToExpiration() <= 0;
+};
+
+AccessToken.prototype.secondsToExpiration = function() {
+    return (this.expires_at.getTime() - Date.now()) / 1000.0;
 };
 
 AccessToken.prototype.toAuthHeader = function() {

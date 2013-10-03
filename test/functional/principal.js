@@ -108,6 +108,7 @@ describe('principals endpoint', function() {
 
             assert.equal(resp.statusCode, 200);
             assert.equal(body.principals.length > 0, true);
+            assert.notEqual(resp.headers['x-n2-set-access-token'], undefined);
 
             done();
         });

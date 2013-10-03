@@ -17,11 +17,15 @@ var create = function(principal, callback) {
     });
 };
 
+var findByToken = function(token, callback) {
+    models.AccessToken.findOne({"token": token}, callback).populate('principal');
+};
+
 var findOrCreateToken = function(principal, callback) {
     models.AccessToken.find({ "principal": principal.id }, null, {sort: { expires_at: -1 } }, function(err, tokens) {
         if (err) return callback(err);
 
-        if (tokens && tokens.length > 0 && !tokens[0].expired()) {
+        if (tokens && tokens.length > 0 && !isCloseToExpiration(tokens[0])) {
             return callback(null, tokens[0]);
         } else {
             create(principal, function(err, accessToken) {
@@ -33,16 +37,21 @@ var findOrCreateToken = function(principal, callback) {
     }).populate('principal');
 };
 
-var findByToken = function(token, callback) {
-    models.AccessToken.findOne({"token": token}, callback).populate('principal');
+// an access token is close to expiration if less than 10% of its original life exists.
+var isCloseToExpiration = function(accessToken) {
+    return accessToken.secondsToExpiration() < 0.1 * config.access_token_lifetime * 24 * 60 * 60;
 };
 
 var verify = function(token, done) {
+    console.log('verifying token: ' + token);
     findByToken(token, function(err, accessToken) {
         if (err) return done(err);
         if (!accessToken || accessToken.expired()) { return done("Session has expired.", false); }
 
-        done(null, accessToken.principal);
+        var principal = accessToken.principal;
+        principal.accessToken = accessToken;
+
+        done(null, principal);
     });
 };
 
@@ -50,5 +59,6 @@ module.exports = {
     create: create,
     findByToken: findByToken,
     findOrCreateToken: findOrCreateToken,
+    isCloseToExpiration: isCloseToExpiration,
     verify: verify
 };

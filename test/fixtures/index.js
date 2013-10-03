@@ -26,10 +26,13 @@ var createDeviceFixtures = function(callback) {
         services.accessTokens.create(device, function(err, accessToken) {
             if (err) throw err;
 
-            fixtures.accessTokens.device = accessToken;
-            console.log("FIXTURES: creating device fixtures: FINISHED");
-            callback();
-
+            // make access token expire in 15 minutes to force an accessToken refresh
+            var updates = { expires_at: new Date(new Date().getTime() + (15 * 60000))};
+            models.AccessToken.update({ _id: accessToken.id }, { $set: updates }, function (err, updateCount) {
+                fixtures.accessTokens.device = accessToken;
+                console.log("FIXTURES: creating device fixtures: FINISHED: " + updates.expires_at);
+                callback();
+            });
         });
     });
 
