@@ -93,13 +93,26 @@ var findById = function(principal, messageId, callback) {
 
 var initialize = function(callback) {
     if (config.validate_schemas) {
-        findSchemasInTree('./');
+        loadSchemaAndClients('./');
     }
 
     return callback();
 };
 
 var schemas = {};
+var clients = {
+    'nitrogen-min.js': "",
+    'nitrogen.js': ""
+};
+
+var loadClientPlugin = function(fullPath, clientFile) {
+    var clientPath = path.join(fullPath, clientFile);
+
+    if (clientFile === 'nitrogen.js' || clientFile === 'nitrogen-min.js') {
+        log.info('adding client plugin: ' + clientFile + ' from: ' + fullPath);
+        clients[clientFile] += fs.readFileSync(clientPath);
+    }
+};
 
 var loadSchema = function(fullPath, schemaFile) {
     var schemaPath = path.join(fullPath, schemaFile);
@@ -123,14 +136,18 @@ var processDirectoryItem = function(itemPath, item) {
             schemas.forEach(function(schemaFile) {
                 loadSchema(fullPath, schemaFile);
             });
+        } else if (item === 'browser') {
+            var clients = fs.readdirSync(fullPath);
+            clients.forEach(function(clientFile) {
+                loadClientPlugin(fullPath, clientFile);
+            });
         } else {
-//            console.log('decending into ' + fullPath);
-            findSchemasInTree(fullPath);
+            loadSchemaAndClients(fullPath);
         }
     }
 };
 
-var findSchemasInTree = function(path) {
+var loadSchemaAndClients = function(path) {
     var items = fs.readdirSync(path);
     items.forEach(function(item) {
         processDirectoryItem(path, item);
@@ -230,6 +247,7 @@ var validateAll = function(messages, callback) {
 };
 
 module.exports = {
+    clients: clients,
     create: create,
     createMany: createMany,
     filterForPrincipal: filterForPrincipal,
