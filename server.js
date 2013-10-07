@@ -72,7 +72,10 @@ mongoose.connection.once('open', function () {
         app.delete(config.api_prefix + 'v1/messages',    middleware.authenticateRequest, controllers.messages.remove);
 
         app.use('/docs', express.static(path.join(__dirname, 'node_modules/nitrogen/docs')));
-        app.use('/client', express.static(path.join(__dirname, 'node_modules/nitrogen/browser')));
+
+        app.get('/client/nitrogen.js', function(req, res) { res.send(services.messages.clients['nitrogen.js']) });
+        app.get('/client/nitrogen-min.js', function(req, res) { res.send(services.messages.clients['nitrogen-min.js']) });
+
         app.use(express.static(path.join(__dirname, '/static')));
 
         log.info("service has initialized endpoints");
