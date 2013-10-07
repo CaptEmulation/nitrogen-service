@@ -1,7 +1,9 @@
 var async = require('async')
+  , config = require('../config')
   , fs = require('fs')
   , log = require('../log')
   , models = require('../models')
+  , path = require('path')
   , revalidator = require('revalidator')
   , services = require('../services')
   , utils = require('../utils');
@@ -90,27 +92,48 @@ var findById = function(principal, messageId, callback) {
 };
 
 var initialize = function(callback) {
-    loadSchemas(callback);
+    if (config.validate_schemas) {
+        findSchemasInTree('./');
+    }
+
+    return callback();
 };
 
-var schemaPath = "./schemas";
 var schemas = {};
 
-var loadSchema = function(type, callback) {
-    fs.readFile(schemaPath + "/" + type, function (err, schemaText) {
-        if (err) return callback(err);
+var loadSchema = function(fullPath, schemaFile) {
+    var schemaPath = path.join(fullPath, schemaFile);
 
-        log.info('loading schema: ' + type);
-        schemas[type] = JSON.parse(schemaText);
-        callback(null);
-    });
+    log.info('loading schema: ' + schemaFile + ' from: ' + schemaPath);
+    var schemaText = fs.readFileSync(schemaPath);
+    schemas[schemaFile] = JSON.parse(schemaText);
 };
 
-var loadSchemas = function(callback) {
-    schemas = {};
-    fs.readdir(schemaPath, function(err, schemas) {
-        if (err) return callback(err);
-        async.each(schemas, loadSchema, callback);
+var processDirectoryItem = function(itemPath, item) {
+    var fullPath = path.join(itemPath, item);
+
+    var stats = fs.statSync(fullPath);
+    // ignore files
+    if (stats.isDirectory()) {
+
+        // if the directory's name is schemas, we parse all of the contents as schemas.
+        if (item === 'schemas') {
+            log.info('parsing schemas in path: ' + fullPath);
+            var schemas = fs.readdirSync(fullPath);
+            schemas.forEach(function(schemaFile) {
+                loadSchema(fullPath, schemaFile);
+            });
+        } else {
+//            console.log('decending into ' + fullPath);
+            findSchemasInTree(fullPath);
+        }
+    }
+};
+
+var findSchemasInTree = function(path) {
+    var items = fs.readdirSync(path);
+    items.forEach(function(item) {
+        processDirectoryItem(path, item);
     });
 };
 
@@ -170,7 +193,8 @@ var validate = function(message, callback) {
     if (!message.type)
         return callback(utils.badRequestError('Message must have a message type.'));
 
-    validateSchema(message, function(err, result) {
+    var validationFunction = config.validate_schemas ? validateSchema : utils.nop;
+    validationFunction(message, function(err, result) {
         if (err) return callback(err);
         if (!result.valid) return callback(result.errors);
 
@@ -192,7 +216,7 @@ var validate = function(message, callback) {
 
 var validateSchema = function(message, callback) {
     if (message.isCustomType()) return callback(null, { valid: true });
-    if (!(message.type in schemas)) return callback(utils.badRequestError('Message type not recognized.  Custom message types must be prefixed by _'));
+    if (!(message.type in schemas)) return callback(utils.badRequestError('Message type (' + message.type + ') not recognized.  Custom message types must be prefixed by _'));
 
     var results = revalidator.validate(message.body, schemas[message.type]);
     if (!results.valid) {

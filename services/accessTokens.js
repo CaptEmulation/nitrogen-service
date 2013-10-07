@@ -43,7 +43,6 @@ var isCloseToExpiration = function(accessToken) {
 };
 
 var verify = function(token, done) {
-    console.log('verifying token: ' + token);
     findByToken(token, function(err, accessToken) {
         if (err) return done(err);
         if (!accessToken || accessToken.expired()) { return done("Session has expired.", false); }

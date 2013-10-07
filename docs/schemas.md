@@ -16,13 +16,13 @@ Every message includes the following fields:
 * body: The body of the message.  If the schema is well known, the body should follow the schema as defined below.
 
 ## Control
-* [cameraCommand](schemas/cameraCommand.md)
+* [cameraCommand](schema/cameraCommand.md)
 
 ## Internals
-* [claim](schemas/claim.md)
-* [heartbeat](schemas/heartbeat.md)
-* [ip](schemas/ip.md)
-* [log](schemas/log.md)
+* [claim](schema/claim.md)
+* [heartbeat](schema/heartbeat.md)
+* [ip](schema/ip.md)
+* [log](schema/log.md)
 
 ## Media
-* [image](schemas/image.md)
+* [image](schema/image.md)
