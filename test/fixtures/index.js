@@ -144,7 +144,7 @@ var createDeviceIpMessageFixture = function(callback) {
                                        public: true,
                                        body: { ip_address: "127.0.0.1" } });
 
-    services.messages.create(message, function (err, messages) {
+    services.messages.create(services.principals.servicePrincipal, message, function (err, messages) {
         if (err) throw err;
 
         fixtures.messages.deviceIp = messages[0];

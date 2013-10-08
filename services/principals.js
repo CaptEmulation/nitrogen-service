@@ -364,7 +364,7 @@ var updateLastConnection = function(principal, ip) {
             }
         });
 
-        services.messages.create(ipMessage, function(err, message) {
+        services.messages.create(services.principals.servicePrincipal, ipMessage, function(err, message) {
             if (err) log.info("creating ip message failed: " + err);
         });
     }

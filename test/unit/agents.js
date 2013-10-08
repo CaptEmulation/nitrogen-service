@@ -50,7 +50,7 @@ describe('agent service', function() {
                 }
             });
 
-            services.messages.create(claim, function(err, message) {
+            services.messages.create(fixtures.models.principals.user, claim, function(err, message) {
                 setTimeout(function() {
                     services.principals.findById(services.principals.servicePrincipal, fixtures.models.principals.device.id, function(err, principal) {
                         assert.ifError(err);

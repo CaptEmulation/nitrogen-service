@@ -17,7 +17,7 @@ describe('messages service', function() {
             body: { reading: 5.1 }
         });
 
-        services.messages.create(message, function(err, savedMessages) {
+        services.messages.create(fixtures.models.principals.user, message, function(err, savedMessages) {
           assert.ifError(err);
           assert.notEqual(savedMessages[0].id, null);
           assert.equal(savedMessages[0].body_length > 0, true);
@@ -33,7 +33,7 @@ describe('messages service', function() {
         var message = new models.Message({ from: fixtures.models.principals.device.id,
             type: "_test" });
 
-        services.messages.create(message, function(err, savedMessages) {
+        services.messages.create(fixtures.models.principals.user, message, function(err, savedMessages) {
             assert.ifError(err);
             assert.notEqual(savedMessages[0].id, null);
 
@@ -53,7 +53,7 @@ describe('messages service', function() {
         var message = new models.Message({ from: new mongoose.Types.ObjectId(),
                                            type: "_test" });
 
-        services.messages.create(message, function(err, savedMessages) {
+        services.messages.create(fixtures.models.principals.user, message, function(err, savedMessages) {
             assert.notEqual(err, null);
             done();
         });
@@ -62,7 +62,7 @@ describe('messages service', function() {
     it ('rejects message without type', function(done) {
         var message = new models.Message({ from: fixtures.models.principals.device.id });
 
-        services.messages.create(message, function(err, savedMessages) {
+        services.messages.create(fixtures.models.principals.user, message, function(err, savedMessages) {
             assert.notEqual(err, null);
             done();
         });
@@ -71,7 +71,7 @@ describe('messages service', function() {
     it ('rejects message without from', function(done) {
         var message = new models.Message({ type: "_test" });
 
-        services.messages.create(message, function(err, savedMessages) {
+        services.messages.create(fixtures.models.principals.user, message, function(err, savedMessages) {
             assert.notEqual(err, null);
             done();
         });
@@ -87,7 +87,7 @@ describe('messages service', function() {
             }
         });
 
-        services.messages.create(message, function(err, savedMessages) {
+        services.messages.create(fixtures.models.principals.user, message, function(err, savedMessages) {
             assert.equal(err, null);
             done();
         });
@@ -103,7 +103,7 @@ describe('messages service', function() {
             }
         });
 
-        services.messages.create(message, function(err, savedMessages) {
+        services.messages.create(fixtures.models.principals.user, message, function(err, savedMessages) {
             assert.notEqual(err, null);
             done();
         });
@@ -114,7 +114,7 @@ describe('messages service', function() {
             type: "unknownCommand"
         });
 
-        services.messages.create(message, function(err, savedMessages) {
+        services.messages.create(fixtures.models.principals.user, message, function(err, savedMessages) {
             assert.notEqual(err, null);
             done();
         });
@@ -161,7 +161,7 @@ describe('messages service', function() {
                     }
                 });
 
-                services.messages.create(message, function(err, messages) {
+                services.messages.create(fixtures.models.principals.device, message, function(err, messages) {
                     assert.ifError(err);
                     assert.equal(messages.length, 1);
 
@@ -215,7 +215,7 @@ describe('messages service', function() {
                     }
                 });
 
-                services.messages.create(message, function(err, messages) {
+                services.messages.create(fixtures.models.principals.device, message, function(err, messages) {
                     assert.ifError(err);
                     assert.equal(messages.length, 1);
 
