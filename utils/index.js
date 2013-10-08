@@ -6,21 +6,21 @@ var fs = require('fs')
 var authenticationError = function(msg) {
     return new ServiceError({
         statusCode: 401,
-        message: msg
+        message: msg || "Authentication failed for principal."
     });
 };
 
-var authorizationError = function() {
+var authorizationError = function(msg) {
     return new ServiceError({
         statusCode: 403,
-        message: "Principal is not authorized to perform the requested operation."
+        message: msg || "Principal is not authorized to perform the requested operation."
     });
 };
 
-var badRequestError = function(message) {
+var badRequestError = function(msg) {
     return new ServiceError({
         statusCode: 400,
-        message: message
+        message: msg
     });
 };
 
@@ -45,10 +45,10 @@ var handleError = function(res, err) {
     if (err) return sendFailedResponse(res, 400, err);
 };
 
-var internalError = function(message) {
+var internalError = function(msg) {
     return new ServiceError({
         statusCode: 500,
-        message: message
+        message: msg
     });
 };
 

@@ -2,11 +2,17 @@ var async = require('async')
   , config = require('../config')
   , log = require('../log')
   , models = require('../models')
-  , services = require('../services');
+  , services = require('../services')
+  , utils = require('../utils');
 
 var permissions = [];
 
-var authorized = function(principal, action, obj) {
+// permissions
+//  send: send a message
+//  sub: subscribe to this principal
+//  admin: edit / delete this principal
+
+var authorize = function(principal, action, obj, callback) {
     // TODO: memcache this user permission set?
     /*
     var permissions = permissionsHash[principal.id]
@@ -22,7 +28,7 @@ var authorized = function(principal, action, obj) {
         // if we have a match, return the result.
         if (permission.match(principal, action, obj)) {
             log.info('principal: ' + principal.id + ' action: ' + action + ' object: ' + JSON.stringify(obj) + ' authorized => ' + permission.authorized);
-            return permission.authorized;            
+            return callback(!permission.authorized ? utils.authorizationError(permission) : null);            
         }
     }
 
@@ -30,11 +36,17 @@ var authorized = function(principal, action, obj) {
     // add a star permission at lowest priority to override this default.
 
     log.info('no match found: authorized => false');
-    return false;
+    return callback(utils.authorizationError()); 
 };
 
-var create = function(permission, callback) {
+var create = function(principal, permission, callback) {
+    if (!principal) return callback(utils.principalRequired());
 
+    permission.save(function(err, permission) {
+        if (err) return callback(err);
+
+        callback(null, permission);
+    });
 };
 
 /*
@@ -52,29 +64,26 @@ var buildPermissionsHash = function(permissions) {
 */
 
 var initialize = function(callback) {
-    console.log('***************** in permissions.initialize');
     models.Permission.find({}, null, function(err, storedPermissions) {
         if (err) return callback(err);
 
         permissions = permissions.concat(storedPermissions);
 
         config.default_permissions.forEach(function(permission) {
-            console.log('loading default permission: ' + JSON.stringify(permission));
             if (permission.principal === 'service') {
-                console.log('swapping string service principal for actual id.');
-                permission.principal = services.principals.servicePrincipal.id;                
+                permission.principal = services.principals.servicePrincipal.id;
             }
 
             permissions.push(new models.Permission(permission));
         });
 
         permissions.sort(models.Permission.priorityComparison);
-        console.log('permissions total: ' + permissions.length);
+        log.info('loaded ' + permissions.length + ' default permissions in total.');
         return callback();
     });
 };
 
 module.exports = {
-    authorized: authorized,
+    authorize: authorize,
     initialize: initialize
 };

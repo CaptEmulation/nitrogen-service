@@ -25,40 +25,46 @@ var buildVisibleTo = function(message, fromPrincipal, toPrincipal) {
     return visibleTo;
 };
 
-var create = function(message, callback) {
+var create = function(principal, message, callback) {
 
     translate(message);
 
     validate(message, function(err, fromPrincipal, toPrincipal) {
         if (err) return callback(err);
 
-        message.visible_to = buildVisibleTo(message, fromPrincipal, toPrincipal);
-
-        if (message.is("log"))
-            log.log(message.body.severity, message.body.message, { principal: message.from.toString() });
-
-        message.body_length = JSON.stringify(message.body).length;
-        message.created_at = new Date();
-
-        // if no explicit visibility set on message, then the fromPrincipal's visibility is used.
-        if (!message.public)
-            message.public = fromPrincipal.public;
-
-        message.save(function(err, message) {
+        services.permissions.authorize(principal, 'send', message, function(err) {
             if (err) return callback(err);
 
-            services.subscriptions.publish('message', message, function(err) {
-                callback(err, [message]);
+            message.visible_to = buildVisibleTo(message, fromPrincipal, toPrincipal);
+
+            if (message.is('log'))
+                log.log(message.body.severity, message.body.message, { principal: message.from.toString() });
+
+            message.body_length = JSON.stringify(message.body).length;
+            message.created_at = new Date();
+
+            // if no explicit visibility set on message, then the fromPrincipal's visibility is used.
+            if (!message.public)
+                message.public = fromPrincipal.public;
+
+            message.save(function(err, message) {
+                if (err) return callback(err);
+
+                services.subscriptions.publish('message', message, function(err) {
+                    callback(err, [message]);
+                });
             });
         });
     });
 };
 
-var createMany = function(messages, callback) {
+var createMany = function(principal, messages, callback) {
     validateAll(messages, function(err) {
         if (err) return callback(err);
 
-        async.concat(messages, create, callback);
+        async.concat(messages, function(message, cb) {
+            create(principal, message, cb);
+        }, callback);
     });
 };
 

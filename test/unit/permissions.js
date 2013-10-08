@@ -10,17 +10,20 @@ describe('permissions service', function() {
             type: 'ip'
         });
 
-        var result = services.permissions.authorized(services.principals.servicePrincipal, 'send', message);
-        assert.equal(result, true);
+        services.permissions.authorize(services.principals.servicePrincipal, 'send', message, function(err) {
+            assert.equal(err, undefined);
 
-        var result = services.permissions.authorized(fixtures.models.principals.user, 'send', message);
-        assert.equal(result, false);
+            services.permissions.authorize(fixtures.models.principals.user, 'send', message, function(err) {
+                assert.notEqual(err, undefined);
 
-        message.type = 'image';
-        message.body.url = 'http://to.no.where/';
-        var result = services.permissions.authorized(fixtures.models.principals.user, 'send', message);
-        assert.equal(result, true);
+                message.type = 'image';
+                message.body.url = 'http://to.no.where/';
+                services.permissions.authorize(fixtures.models.principals.user, 'send', message, function(err) {
+                    assert.equal(err, undefined);
 
-        done();
+                    done();                    
+                });
+            });
+        });
     });
 });
