@@ -4,9 +4,11 @@ var async = require('async')
   , models = require('../models')
   , mongoose = require('mongoose')
   , services = require('../services')
+  , sift = require('sift')
   , utils = require('../utils');
 
 var io;
+var subscriptions = {};
 
 var attach = function(server) {
     if (!config.pubsub_provider) return log.info('pubsub provider not configured: subscription endpoint not started.');
@@ -55,7 +57,9 @@ var attachSubscriptionsEndpoint = function() {
         });
 
         socket.on('stop', function(spec) {
-            remove(socket.subscriptions[spec.id]);
+            remove(socket.subscriptions[spec.id], function(err) {
+                if (err) log.error(err);
+            });
         });
 
         // TODO: add ability to create messages through the socket connection.
@@ -73,9 +77,11 @@ var create = function(subscription, callback) {
     config.pubsub_provider.createSubscription(subscription, function(err) {
         if (err) callback(err);
 
+        subscriptions[subscription.clientId] = subscription;
+
         // we only save permanent subscriptions to the db, not session ones.
         if (subscription.permanent)
-            subscription.save(callback);
+            save(subscription, callback);
         else
             callback(null, subscription);
     });
@@ -102,7 +108,19 @@ var publish = function(type, item, callback) {
     if (!config.pubsub_provider) return log.error("subscriptions: can't publish without pubsub_provider");
 
     log.info("subscriptions: publishing " + type + ": " + item.id + ": " + JSON.stringify(item));
-    config.pubsub_provider.publish(type, item, callback);
+    async.each(Object.keys(subscriptions), function(subscriptionId, eachCallback) {
+        
+        var subscription = subscriptions[subscriptionId];
+
+        if (subscription.type === type && subscription.callback) {
+            sift(subscription.filter, [item]).forEach(function(unfiltered) {
+                config.pubsub_provider.publish(subscription, item, callback);
+            });
+        }
+
+        eachCallback();
+
+    }, callback);
 };
 
 var remove = function(subscription, callback) {
@@ -113,6 +131,7 @@ var remove = function(subscription, callback) {
     config.pubsub_provider.removeSubscription(subscription, function(err) {
         if (err) return callback(err);
 
+        delete subscriptions[subscription.clientId];
         delete subscription.socket.subscriptions[subscription.clientId];
 
         if (subscription.permanent)
