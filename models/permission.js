@@ -8,7 +8,7 @@ var permissionSchema = new BaseSchema();
 
 permissionSchema.add({
     issuedTo:     { type: Schema.Types.ObjectId, ref: 'Principal' },
-    forPrincipal: { type: Schema.Types.ObjectId, ref: 'Principal' },
+    principalFor: { type: Schema.Types.ObjectId, ref: 'Principal' },
     expires:      { type: Date },
     action:       { type: String },
     filter:       { type: Schema.Types.Mixed, default: {} },
@@ -32,19 +32,24 @@ Permission.prototype.expired = function() {
     return this.expires && Date.now() > this.expires.getTime();
 };
 
-Permission.prototype.match = function(principal, action, obj) {
+Permission.prototype.match = function(requestingPrincipal, principalFor, action, obj) {
     if (this.expired()) {
         log.debug('permission: ' + JSON.stringify(this) + ': expired: match == false');
         return false;
     }
 
-    if (this.principal && !this.principal.equals(principal.id)) {
-        log.debug('permission: ' + JSON.stringify(this) + ': not equal: match == false');
+    if (this.issuedTo && !this.issuedTo.equals(requestingPrincipal.id)) {
+        log.debug('permission: ' + JSON.stringify(this) + ': issuedTo mismatch: match == false');
+        return false;
+    }
+
+    if (this.principalFor && !this.principalFor.equals(principalFor.id)) {
+        log.debug('permission: ' + JSON.stringify(this) + ': principalFor mismatch: match == false');
         return false;
     }
 
     if (this.filter && sift(this.filter, [obj]).length > 0) {
-        log.debug('permission: ' + JSON.stringify(this) + ': matches: match == true');
+        log.debug('permission: ' + JSON.stringify(this) + ': filter matches: match == true');
         return true;
     }
 

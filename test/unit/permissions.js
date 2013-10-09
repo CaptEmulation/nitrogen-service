@@ -10,16 +10,16 @@ describe('permissions service', function() {
             type: 'ip'
         });
 
-        services.permissions.authorize(services.principals.servicePrincipal, 'send', message, function(err) {
-            assert.equal(err, undefined);
+        services.permissions.authorize(services.principals.servicePrincipal, null, 'send', message, function(permission) {
+            assert.equal(permission.authorized, true);
 
-            services.permissions.authorize(fixtures.models.principals.user, 'send', message, function(err) {
-                assert.notEqual(err, undefined);
+            services.permissions.authorize(fixtures.models.principals.user, null, 'send', message, function(permission) {
+                assert.equal(permission.authorized, false);
 
                 message.type = 'image';
                 message.body.url = 'http://to.no.where/';
-                services.permissions.authorize(fixtures.models.principals.user, 'send', message, function(err) {
-                    assert.equal(err, undefined);
+                services.permissions.authorize(fixtures.models.principals.user, fixtures.models.principals.device, 'send', message, function(permission) {
+                    assert.equal(permission.authorized, true);
 
                     done();                    
                 });

@@ -32,8 +32,8 @@ var create = function(principal, message, callback) {
     validate(message, function(err, fromPrincipal, toPrincipal) {
         if (err) return callback(err);
 
-        services.permissions.authorize(principal, 'send', message, function(err) {
-            if (err) return callback(err);
+        services.permissions.authorize(principal, toPrincipal, 'send', message, function(permission) {
+            if (!permission) return callback(utils.authorizationError());
 
             message.visible_to = buildVisibleTo(message, fromPrincipal, toPrincipal);
 

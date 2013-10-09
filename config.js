@@ -113,7 +113,7 @@ config.claim_code_length = 8;
 config.validate_schemas = true;
 
 config.default_permissions = [
-    { principal: 'service', action: 'send', filter: { type: 'ip' }, authorized: true,  priority: 1000 },
+    { issuedTo: 'service', action: 'send', filter: { type: 'ip' }, authorized: true,  priority: 1000 },
     {                       action: 'send', filter: { type: 'ip' }, authorized: false, priority: 1001 },
 //    {                       action: 'send', filter: { to: $nqe null }, authorized: false, priority: 100000 }
     {                       action: 'send',                         authorized: true,  priority: 100001 }

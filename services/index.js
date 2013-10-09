@@ -13,6 +13,7 @@ exports.initialize = function(callback) {
         exports.principals.initialize,
         exports.agents.initialize,
         exports.messages.initialize,
-        exports.blobs.initialize
+        exports.blobs.initialize,
+        exports.permissions.initialize
     ], callback);
 };
