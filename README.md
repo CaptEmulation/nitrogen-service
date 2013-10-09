@@ -70,8 +70,7 @@ To run a Nitrogen service locally:
 
 ## Running tests
 
-1. `npm install -g mocha`
-2. `mocha`
+1. `npm start`
 
 ## How to contribute
 
