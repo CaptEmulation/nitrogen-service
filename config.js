@@ -73,6 +73,8 @@ config.device_secret_bytes = 128;
 config.blob_storage_path = './storage';
 config.blob_provider = new providers.local.LocalBlobProvider(config);
 
+config.cache_provider = new providers.local.MemoryCacheProvider(config);
+
 // You can use Azure's Service Bus as a pubsub provider using this configuration.
 //
 // if (process.env.AZURE_SERVICEBUS_NAMESPACE && process.env.AZURE_SERVICEBUS_ACCESS_KEY) {
@@ -113,6 +115,7 @@ config.validate_schemas = true;
 config.default_permissions = [
     { principal: 'service', action: 'send', filter: { type: 'ip' }, authorized: true,  priority: 1000 },
     {                       action: 'send', filter: { type: 'ip' }, authorized: false, priority: 1001 },
+//    {                       action: 'send', filter: { to: $nqe null }, authorized: false, priority: 100000 }
     {                       action: 'send',                         authorized: true,  priority: 100001 }
 //    {                      action: 'sub',                          authorized: false,  priority: 100002 }
 ];

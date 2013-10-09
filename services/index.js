@@ -11,7 +11,6 @@ exports.subscriptions = require('./subscriptions');
 exports.initialize = function(callback) {
     async.series([
         exports.principals.initialize,
-        exports.permissions.initialize,
         exports.agents.initialize,
         exports.messages.initialize,
         exports.blobs.initialize

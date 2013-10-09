@@ -7,13 +7,17 @@ var BaseSchema = require('./baseSchema')
 var permissionSchema = new BaseSchema();
 
 permissionSchema.add({
-    principal:  { type: Schema.Types.ObjectId, ref: 'Principal' },
-    expires:    { type: Date },
-    action:     { type: String },
-    filter:     { type: Schema.Types.Mixed, default: {} },
-    priority:   { type: Number, default: 1000 },
-    authorized: { type: Boolean }
+    issuedTo:     { type: Schema.Types.ObjectId, ref: 'Principal' },
+    forPrincipal: { type: Schema.Types.ObjectId, ref: 'Principal' },
+    expires:      { type: Date },
+    action:       { type: String },
+    filter:       { type: Schema.Types.Mixed, default: {} },
+    priority:     { type: Number, default: 1000 },
+    authorized:   { type: Boolean }
 });
+
+permissionSchema.index({ issuedTo: 1 });
+permissionSchema.index({ forPrincipal: 1 });
 
 permissionSchema.set('toObject', { transform: BaseSchema.baseObjectTransform });
 permissionSchema.set('toJSON', { transform: BaseSchema.baseObjectTransform });

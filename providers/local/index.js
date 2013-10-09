@@ -1,4 +1,5 @@
 module.exports = {
-    LocalBlobProvider: require('./blob'), 
+    LocalBlobProvider: require('./blob'),
+    MemoryCacheProvider: require('./cache'),
     MemoryPubSubProvider: require('./pubSub')
 };
