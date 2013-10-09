@@ -201,6 +201,6 @@ var stream = function(socket, subscription) {
 module.exports = {
     attach: attach,
     create: create,
-    findOrCreate: findOrCreate,    
+    findOrCreate: findOrCreate,
     publish: publish
 };

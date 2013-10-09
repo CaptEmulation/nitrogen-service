@@ -43,6 +43,7 @@ exports.initialize = function(callback) {
         exports.agents.initialize,
         exports.messages.initialize,
         exports.blobs.initialize,
+        exports.permissions.initialize,
 
         start
     ], callback);
