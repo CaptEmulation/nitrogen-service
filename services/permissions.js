@@ -5,38 +5,33 @@ var async = require('async')
   , services = require('../services')
   , utils = require('../utils');
 
-var permissions = [];
-
 // permissions
 //  send: send a message
 //  sub: subscribe to this principal
 //  admin: edit / delete this principal
 
 var authorize = function(principal, action, obj, callback) {
-    // TODO: memcache this user permission set?
-    /*
-    var permissions = permissionsHash[principal.id]
-                        .concat(permissionsHash['global'])
-                    //  .concat(all_group_permissions_user_is_in)
-                        .sort(models.Permission.priorityComparison);
-    */
+    permissionsFor(principal, function(err, permissions) {
+        if (err) return callback(err);
 
-    // look for a match in the sorted permissions
-    for (var idx = 0; idx < permissions.length; idx++) {
-        var permission = permissions[idx];
+        // TODO: use async for this
+        // look for a match in the sorted permissions
+        for (var idx = 0; idx < permissions.length; idx++) {
+            var permission = permissions[idx];
 
-        // if we have a match, return the result.
-        if (permission.match(principal, action, obj)) {
-            log.info('principal: ' + principal.id + ' action: ' + action + ' object: ' + JSON.stringify(obj) + ' authorized => ' + permission.authorized);
-            return callback(!permission.authorized ? utils.authorizationError(permission) : null);            
+            // if we have a match, return the result.
+            if (permission.match(principal, action, obj)) {
+                log.info('principal: ' + principal.id + ' action: ' + action + ' object: ' + JSON.stringify(obj) + ' authorized => ' + permission.authorized);
+                return callback(permission.authorized ? null : utils.authorizationError(permission));            
+            }
         }
-    }
 
-    // by default, actions are not authorized.
-    // add a star permission at lowest priority to override this default.
+        // by default, actions are not authorized.
+        // add a star permission at lowest priority to override this default.
 
-    log.info('no match found: authorized => false');
-    return callback(utils.authorizationError()); 
+        log.info('no match found: authorized => false');
+        return callback(utils.authorizationError()); 
+    });
 };
 
 var create = function(principal, permission, callback) {
@@ -45,45 +40,39 @@ var create = function(principal, permission, callback) {
     permission.save(function(err, permission) {
         if (err) return callback(err);
 
-        callback(null, permission);
-    });
-};
-
-/*
-var buildPermissionsHash = function(permissions) {
-    permissions.forEach(function(permission) {
-        var principalId = permission.principal.id || 'global';
-
-        if (!permissionsHash[principalId]) {
-            permissionsHash[principalId] = [];
-        }
-
-        permissionsHash[principalId].push(permissions);
-    });
-};
-*/
-
-var initialize = function(callback) {
-    models.Permission.find({}, null, function(err, storedPermissions) {
-        if (err) return callback(err);
-
-        permissions = permissions.concat(storedPermissions);
-
-        config.default_permissions.forEach(function(permission) {
-            if (permission.principal === 'service') {
-                permission.principal = services.principals.servicePrincipal.id;
-            }
-
-            permissions.push(new models.Permission(permission));
+        config.cache_provider.del('principalPermissions', permission.issuedTo, function(err) {
+            callback(err, permission);
         });
-
-        permissions.sort(models.Permission.priorityComparison);
-        log.info('loaded ' + permissions.length + ' default permissions in total.');
-        return callback();
     });
+};
+
+var findByIssuedTo = function(principal, callback) {
+    models.Permission.find({ issuedTo: principal.id }, null, callback);    
+};
+
+var permissionsFor = function(principal, callback) {
+    config.cache_provider.get('principalPermissions', principal.id, function(err, permissions) {
+        if (err) return callback(err);
+        if (permissions) return callback(null, permissions);
+
+        findByIssuedTo(principal, function(err, permissions) {
+            permissions.concat(config.default_permissions.map(function(permission) {
+                return new models.Permission(permission);
+            }));
+
+            config.cache_provider.set('principalPermissions', principal.id, permissions, function(err) {
+                return callback(err, permissions);
+            });
+        });
+    });   
+};
+
+var remove = function(principal, permission, callback) {
+    config.cache_provider.del('principalPermissions', permission.issuedTo, callback);
 };
 
 module.exports = {
     authorize: authorize,
-    initialize: initialize
+    create: create,
+    remove: remove
 };
