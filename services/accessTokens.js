@@ -39,11 +39,10 @@ var findOrCreateToken = function(principal, callback) {
 
 // an access token is close to expiration if less than 10% of its original life exists.
 var isCloseToExpiration = function(accessToken) {
-    return accessToken.secondsToExpiration() < 0.1 * config.access_token_lifetime * 24 * 60 * 60;
+    return accessToken.secondsToExpiration() < config.refresh_token_threshold * config.access_token_lifetime * 24 * 60 * 60;
 };
 
 var verify = function(token, done) {
-    console.log('verifying token: ' + token);
     findByToken(token, function(err, accessToken) {
         if (err) return done(err);
         if (!accessToken || accessToken.expired()) { return done("Session has expired.", false); }

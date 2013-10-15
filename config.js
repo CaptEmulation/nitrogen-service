@@ -52,12 +52,15 @@ config.ops_endpoint = config.api_endpoint + "/ops";
 
 config.password_hash_iterations = 10000;
 config.password_hash_length = 128;
+config.device_secret_bytes = 128;
 config.salt_length_bytes = 64;
 
-config.access_token_bytes = 64;
+config.access_token_bytes = 32;
 config.access_token_lifetime = 14; // days
 
-config.device_secret_bytes = 128;
+// when the token gets within 10% (default) of config.access_token_lifetime,
+// refresh it with a new token via the response header.
+config.refresh_token_threshold = 0.9998;
 
 config.blob_storage_path = './storage';
 config.blob_provider = new providers.local.LocalBlobProvider(config);
@@ -74,7 +77,10 @@ config.pubsub_provider = new providers.local.MemoryPubSubProvider(config);
 
 config.request_log_format = ':remote-addr - - [:date] ":method :url HTTP/:http-version" :status :res[content-length] :response-time ":referrer" ":user-agent"';
 
-if (process.env.LOGGLY_SUBDOMAIN && process.env.LOGGLY_INPUT_TOKEN && process.env.LOGGLY_USERNAME && process.env.LOGGLY_PASSWORD) {
+if (process.env.LOGGLY_SUBDOMAIN && 
+    process.env.LOGGLY_INPUT_TOKEN && 
+    process.env.LOGGLY_USERNAME && 
+    process.env.LOGGLY_PASSWORD) {
     log.add(winston.transports.Loggly, {
         "subdomain": process.env.LOGGLY_SUBDOMAIN,
         "inputToken": process.env.LOGGLY_INPUT_TOKEN,
