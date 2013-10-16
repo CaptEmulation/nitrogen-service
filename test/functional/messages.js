@@ -4,6 +4,7 @@ var app = require('../../server')
   , fixtures = require('../fixtures')
   , io = require('socket.io-client')
   , log = require('../../log')
+  , models = require('../../models')
   , mongoose = require('mongoose')
   , request = require('request')
   , services = require('../../services');
@@ -119,6 +120,7 @@ describe('messages endpoint', function() {
                   { json: [{ from: fixtures.models.principals.device.id,
                     type: "_messageSubscriptionTest1",
                     public: false,
+                    expires: 'never',
                     body: { reading: 5.1 } }],
                     headers: { Authorization: fixtures.models.accessTokens.device.toAuthHeader() } }, function(post_err, post_resp, post_body) {
                     assert.equal(post_err, null);
@@ -140,6 +142,7 @@ describe('messages endpoint', function() {
                             assert.equal(get_resp.statusCode, 200);
 
                             assert.equal(get_body.message.body.reading, 5.1);
+                            assert.equal(Date.parse(get_body.message.expires), models.Message.NEVER_EXPIRE.getTime());
                             assert.notEqual(get_body.message.created_at, 5.1);
 
                             var query = encodeURIComponent(JSON.stringify({ "_id" : message_id }));
