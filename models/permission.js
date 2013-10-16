@@ -12,7 +12,7 @@ permissionSchema.add({
     expires:      { type: Date },
     action:       { type: String },
     filter:       { type: Schema.Types.Mixed, default: {} },
-    priority:     { type: Number, default: 1000 },
+    priority:     { type: Number },
     authorized:   { type: Boolean }
 });
 
@@ -48,8 +48,9 @@ Permission.prototype.match = function(requestingPrincipal, principalFor, action,
         return false;
     }
 
+    log.debug('checking filter: ' + JSON.stringify(this.filter) + ' against: ' + JSON.stringify([obj]));
     if (this.filter && sift(this.filter, [obj]).length > 0) {
-        log.debug('permission: ' + JSON.stringify(this) + ': filter matches: match == true');
+        log.debug('filter matches: match == true');
         return true;
     }
 

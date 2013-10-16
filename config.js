@@ -76,6 +76,12 @@ config.refresh_token_threshold = 0.8;
 //    config.blob_provider = new providers.azure.AzureBlobProvider(config);
 // }
 
+// You can use Azure's Blob storage as a blob provider by uncommenting this configuration.
+//
+// if (process.env.AZURE_STORAGE_ACCOUNT && process.env.AZURE_STORAGE_KEY) {
+//    config.blob_provider = new providers.azure.AzureBlobProvider(config);
+// }
+
 config.blob_storage_path = './storage';
 config.blob_provider = new providers.local.LocalBlobProvider(config);
 
@@ -123,12 +129,17 @@ config.janitor_interval = 60 * 1000;
 // Validate all message schemas to conform to all core and installed schemas.
 config.validate_schemas = true;
 
+// these permissions will always be checked before any other permissions (highest priority)
+config.mandatory_permissions = [
+    { issuedTo: 'service', action: 'send', filter: { type: 'ip' }, authorized: true },
+    {                      action: 'send', filter: { type: 'ip' }, authorized: false }
+];
+
+// these permissions will be checked after any userland ones (lowest priority).
 config.default_permissions = [
-    { issuedTo: 'service', action: 'send', filter: { type: 'ip' }, authorized: true,  priority: 1000 },
-    {                       action: 'send', filter: { type: 'ip' }, authorized: false, priority: 1001 },
-//    {                       action: 'send', filter: { to: $nqe null }, authorized: false, priority: 100000 }
-    {                       action: 'send',                         authorized: true,  priority: 100001 }
-//    {                      action: 'sub',                          authorized: false,  priority: 100002 }
+    {                      action: 'send', filter: { to: { $ne: null } }, authorized: false },
+    {                      action: 'send', authorized: true }
+//    {                      action: 'sub',                          authorized: false }
 ];
 
 module.exports = config;

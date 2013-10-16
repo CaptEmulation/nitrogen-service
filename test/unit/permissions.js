@@ -18,10 +18,15 @@ describe('permissions service', function() {
 
                 message.type = 'image';
                 message.body.url = 'http://to.no.where/';
-                services.permissions.authorize(fixtures.models.principals.user, fixtures.models.principals.device, 'send', message, function(permission) {
+
+                services.permissions.authorize(fixtures.models.principals.user, null, 'send', message, function(permission) {
                     assert.equal(permission.authorized, true);
 
-                    done();                    
+                    message.to = fixtures.models.principals.device.id;
+                    services.permissions.authorize(fixtures.models.principals.user, null, 'send', message, function(permission) {
+                        assert.equal(permission.authorized, false);
+                        done();
+                    });                    
                 });
             });
         });
