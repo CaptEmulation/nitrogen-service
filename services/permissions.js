@@ -69,7 +69,6 @@ var permissionsFor = function(principal, callback) {
             if (err) return callback(err);
 
             permissions = permissions.concat(principalPermissions).concat(defaultPermissions);
-
             config.cache_provider.set('permissions', principal.id, permissions, utils.dateDaysFromNow(1), function(err) {
                 return callback(err, permissions);
             });

@@ -82,6 +82,12 @@ config.refresh_token_threshold = 0.8;
 //    config.blob_provider = new providers.azure.AzureBlobProvider(config);
 // }
 
+// You can use Azure's Blob storage as a blob provider by uncommenting this configuration.
+//
+// if (process.env.AZURE_STORAGE_ACCOUNT && process.env.AZURE_STORAGE_KEY) {
+//    config.blob_provider = new providers.azure.AzureBlobProvider(config);
+// }
+
 config.blob_storage_path = './storage';
 config.blob_provider = new providers.local.LocalBlobProvider(config);
 
