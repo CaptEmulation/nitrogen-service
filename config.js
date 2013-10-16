@@ -58,9 +58,12 @@ config.salt_length_bytes = 64;
 config.access_token_bytes = 32;
 config.access_token_lifetime = 14; // days
 
+// # of days a message should live by default
+config.default_message_lifetime = 365;
+
 // when the token gets within 10% (default) of config.access_token_lifetime,
 // refresh it with a new token via the response header.
-config.refresh_token_threshold = 0.1;
+config.refresh_token_threshold = 0.8;
 
 config.blob_storage_path = './storage';
 config.blob_provider = new providers.local.LocalBlobProvider(config);

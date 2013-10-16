@@ -1,4 +1,5 @@
 var async = require('async')
+  , config = require('../config')
   , fs = require('fs')
   , log = require('../log')
   , models = require('../models')
@@ -150,8 +151,7 @@ var removeOne = function(principal, message, callback) {
 
 var translate = function(message) {
     if (!message.expires) {
-        // TODO: pull this out into a config value.
-        message.expires = utils.dateDaysFromNow(1);
+        message.expires = utils.dateDaysFromNow(config.default_message_lifetime);
     }
 
     if (message.expires === 'never') {

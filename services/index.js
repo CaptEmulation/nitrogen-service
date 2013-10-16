@@ -9,6 +9,8 @@ exports.messages = require('./messages');
 exports.principals = require('./principals');
 exports.subscriptions = require('./subscriptions');
 
+// TODO: when scaled out do we just let all the nodes do this and use the 
+// entropy in the offset timing of that automatically scale these deletes?
 exports.janitor = function(callback) {
     exports.accessTokens.remove({ expires_at: { $lt: new Date() } }, function(err, removed) {
         if (err) callback("janitor message removal failed: " + err);

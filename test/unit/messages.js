@@ -5,7 +5,8 @@ var app = require('../../server')
   , fs = require('fs')
   , models = require('../../models')
   , mongoose = require('mongoose')
-  , services = require('../../services');
+  , services = require('../../services')
+  , utils = require('../../utils');
 
 describe('messages service', function() {
 
@@ -21,6 +22,9 @@ describe('messages service', function() {
           assert.ifError(err);
           assert.notEqual(savedMessages[0].id, null);
           assert.equal(savedMessages[0].body_length > 0, true);
+
+          assert(savedMessages[0].expires > utils.dateDaysFromNow(config.default_message_lifetime-1) && 
+                 savedMessages[0].expires < utils.dateDaysFromNow(config.default_message_lifetime));
 
           services.messages.removeOne(services.principals.servicePrincipal, savedMessages[0], function(err) {
             assert.equal(err, null);
