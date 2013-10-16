@@ -119,7 +119,7 @@ var remove = function(principal, query, callback) {
     if (!principal || !principal.is('service')) return callback(utils.authorizationError());
 
     find(principal, query, {}, function (err, messages) {
-        if (err) return callback(messages);
+        if (err) return callback(err);
 
         // delete linked resources and then the message itself.
         // TODO: what is an appropriate max parallelism here.

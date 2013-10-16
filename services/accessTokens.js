@@ -17,12 +17,16 @@ var create = function(principal, callback) {
     });
 };
 
+var find = function(query, options, callback) {
+    models.AccessToken.find(query, null, options, callback);
+};
+
 var findByToken = function(token, callback) {
     models.AccessToken.findOne({"token": token}, callback).populate('principal');
 };
 
 var findOrCreateToken = function(principal, callback) {
-    models.AccessToken.find({ "principal": principal.id }, null, {sort: { expires_at: -1 } }, function(err, tokens) {
+    find({ "principal": principal.id }, { sort: { expires_at: -1 } }, function(err, tokens) {
         if (err) return callback(err);
 
         if (tokens && tokens.length > 0 && !isCloseToExpiration(tokens[0])) {
@@ -34,12 +38,16 @@ var findOrCreateToken = function(principal, callback) {
                 callback(null, accessToken);
             });
         }
-    }).populate('principal');
+    });
 };
 
 // an access token is close to expiration if less than 10% of its original life exists.
 var isCloseToExpiration = function(accessToken) {
     return accessToken.secondsToExpiration() < config.refresh_token_threshold * config.access_token_lifetime * 24 * 60 * 60;
+};
+
+var remove = function(query, callback) {
+    models.AccessToken.remove(query, callback);
 };
 
 var verify = function(token, done) {
@@ -59,5 +67,6 @@ module.exports = {
     findByToken: findByToken,
     findOrCreateToken: findOrCreateToken,
     isCloseToExpiration: isCloseToExpiration,
+    remove: remove,
     verify: verify
 };

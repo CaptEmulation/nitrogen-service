@@ -60,7 +60,7 @@ config.access_token_lifetime = 14; // days
 
 // when the token gets within 10% (default) of config.access_token_lifetime,
 // refresh it with a new token via the response header.
-config.refresh_token_threshold = 0.9998;
+config.refresh_token_threshold = 0.1;
 
 config.blob_storage_path = './storage';
 config.blob_provider = new providers.local.LocalBlobProvider(config);
@@ -93,10 +93,13 @@ if (process.env.LOGGLY_SUBDOMAIN &&
 
 log.add(winston.transports.Console, { colorize: true, timestamp: true });
 
-// If you'd like additional indexes applied to messages, you can specify them here.
+// if you'd like additional indexes applied to messages, you can specify them here.
 config.message_indexes = [
 ];
 
 config.claim_code_length = 8;
+
+// run the janitor every minute
+config.janitor_interval = 60 * 1000;
 
 module.exports = config;
