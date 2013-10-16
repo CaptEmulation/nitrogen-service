@@ -43,33 +43,35 @@ mongoose.connection.once('open', function () {
 
         // REST endpoints
 
-        app.get(config.api_prefix + 'v1/headwaiter',                                     controllers.headwaiter.index);
+        app.get(config.headwaiter_path,                                            controllers.headwaiter.index);
 
-        app.get(config.api_prefix + 'v1/agents',         middleware.authenticateRequest, controllers.agents.index);
-        app.post(config.api_prefix + 'v1/agents',        middleware.authenticateRequest, controllers.agents.create);
-        app.put(config.api_prefix + 'v1/agents/:id',     middleware.authenticateRequest, controllers.agents.update);
+        app.get(config.agents_path,                middleware.authenticateRequest, controllers.agents.index);
+        app.post(config.agents_path,               middleware.authenticateRequest, controllers.agents.create);
+        app.put(config.agents_path + '/:id',       middleware.authenticateRequest, controllers.agents.update);
 
         if (config.blob_provider) {
-            app.get(config.api_prefix + 'v1/blobs/:id',  middleware.authenticateRequest, controllers.blobs.show);
-            app.post(config.api_prefix + 'v1/blobs',     middleware.authenticateRequest, controllers.blobs.create);
+            app.get(config.blobs_path + '/:id',    middleware.authenticateRequest, controllers.blobs.show);
+            app.post(config.blobs_path,            middleware.authenticateRequest, controllers.blobs.create);
         } else {
             log.warn("not exposing blob endpoints because no blob provider configured (see config.js).");
         }
 
-        app.get(config.api_prefix + 'v1/ops/health',                                     controllers.ops.health);
+        app.get(config.ops_path + '/health',                                       controllers.ops.health);
 
-        app.get(config.api_prefix + 'v1/principals/:id', middleware.authenticateRequest, controllers.principals.show);
-        app.get(config.api_prefix + 'v1/principals',     middleware.authenticateRequest, controllers.principals.index);
-        app.post(config.api_prefix + 'v1/principals',                                    controllers.principals.create);
-        app.post(config.api_prefix + 'v1/principals/auth',                               controllers.principals.authenticate);
-        app.post(config.api_prefix + 'v1/principals/impersonate', middleware.authenticateRequest, controllers.principals.impersonate);
-        app.put(config.api_prefix + 'v1/principals/:id', middleware.authenticateRequest, controllers.principals.update);
-        app.delete(config.api_prefix + 'v1/principals/:id', middleware.authenticateRequest, controllers.principals.remove);
+        app.get(config.permissions_path,           middleware.authenticateRequest, controllers.permissions.index);
 
-        app.get(config.api_prefix + 'v1/messages/:id',   middleware.authenticateRequest, controllers.messages.show);
-        app.get(config.api_prefix + 'v1/messages',       middleware.authenticateRequest, controllers.messages.index);
-        app.post(config.api_prefix + 'v1/messages',      middleware.authenticateRequest, controllers.messages.create);
-        app.delete(config.api_prefix + 'v1/messages',    middleware.authenticateRequest, controllers.messages.remove);
+        app.get(config.principals_path + '/:id',   middleware.authenticateRequest, controllers.principals.show);
+        app.get(config.principals_path,            middleware.authenticateRequest, controllers.principals.index);
+        app.post(config.principals_path,                                           controllers.principals.create);
+        app.post(config.principals_path + '/auth',                                 controllers.principals.authenticate);
+        app.post(config.principals_path + '/impersonate', middleware.authenticateRequest, controllers.principals.impersonate);
+        app.put(config.principals_path + '/:id',   middleware.authenticateRequest, controllers.principals.update);
+        app.delete(config.principals_path + '/:id', middleware.authenticateRequest, controllers.principals.remove);
+
+        app.get(config.messages_path + '/:id',     middleware.authenticateRequest, controllers.messages.show);
+        app.get(config.messages_path,              middleware.authenticateRequest, controllers.messages.index);
+        app.post(config.messages_path,             middleware.authenticateRequest, controllers.messages.create);
+        app.delete(config.messages_path,           middleware.authenticateRequest, controllers.messages.remove);
 
         app.use('/docs', express.static(path.join(__dirname, 'node_modules/nitrogen/docs')));
 

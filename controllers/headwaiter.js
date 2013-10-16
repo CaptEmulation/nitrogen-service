@@ -5,8 +5,8 @@ exports.index = function(req, res) {
         endpoints: {
             agents_endpoint: config.agents_endpoint,
             messages_endpoint: config.messages_endpoint,
-            principals_endpoint: config.principals_endpoint,
-            subscriptions_endpoint: config.subscriptions_endpoint
+            permissions_endpoint: config.permissions_endpoint,
+            principals_endpoint: config.principals_endpoint
         }
     };
 

@@ -5,7 +5,7 @@ var assert = require('assert')
 
 describe('headwaiter endpoint', function() {
     it('should return service endpoints json', function(done) {
-        request.get({url: config.api_endpoint + '/headwaiter', json: true}, function(err,resp,body) {
+        request.get({url: config.headwaiter_uri, json: true}, function(err,resp,body) {
             assert.equal(resp.statusCode, 200);
 
             assert.notEqual(body.endpoints, undefined);

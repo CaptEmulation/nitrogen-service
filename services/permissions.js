@@ -45,8 +45,17 @@ var create = function(principal, permission, callback) {
     });
 };
 
-var findByIssuedTo = function(principal, callback) {
-    models.Permission.find({ issuedTo: principal.id }, null, callback);    
+var filterForPrincipal = function(authPrincipal, filter) {
+    // TODO: think through how permissions should be filtered.
+    return filter;
+};
+
+var find = function(authPrincipal, filter, options, callback) {
+    models.Permission.find(filterForPrincipal(authPrincipal, filter), null, options, callback);
+};
+
+var findByIssuedTo = function(issuedTo, callback) {
+    find(services.principals.servicePrincipal, { issuedTo: issuedTo.id }, null, callback);
 };
 
 var initialize = function(callback) {
@@ -77,7 +86,11 @@ var permissionsFor = function(principal, callback) {
 };
 
 var remove = function(principal, permission, callback) {
-    config.cache_provider.del('permissions', permission.issuedTo, callback);
+    config.cache_provider.del('permissions', permission.issuedTo, function(err) {
+        if (err) return callback(err);
+    
+        permission.remove(callback);
+    });
 };
 
 var translate = function(obj) {
@@ -92,6 +105,7 @@ var translate = function(obj) {
 module.exports = {
     authorize: authorize,
     create: create,
+    find: find,
     initialize: initialize,
     remove: remove
 };

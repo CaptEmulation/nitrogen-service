@@ -37,20 +37,35 @@ config.mongodb_connection_string = config.mongodb_connection_string || process.e
 
 // Endpoint URI configuration
 
-config.api_prefix = "/api/";
-config.path_prefix = config.api_prefix + "v1";
+config.api_path = "/api/";
+config.v1_api_path = config.api_path + "v1";
 
 config.base_endpoint = config.protocol + "://" + config.host + ":" + config.external_port;
-config.api_endpoint = config.base_endpoint + config.path_prefix;
+config.api_endpoint = config.base_endpoint + config.v1_api_path;
 
 config.subscriptions_path = '/';
 config.subscriptions_endpoint = config.base_endpoint + config.subscriptions_path;
 
-config.agents_endpoint = config.api_endpoint + "/agents";
-config.blobs_endpoint = config.api_endpoint + "/blobs";
-config.messages_endpoint = config.api_endpoint + "/messages";
-config.principals_endpoint = config.api_endpoint + "/principals";
-config.ops_endpoint = config.api_endpoint + "/ops";
+config.agents_path = config.v1_api_path + "/agents";
+config.agents_endpoint = config.base_endpoint + config.agents_path;
+
+config.blobs_path = config.v1_api_path + "/blobs";
+config.blobs_endpoint = config.base_endpoint + config.blobs_path;
+
+config.headwaiter_path = config.v1_api_path + "/headwaiter";
+config.headwaiter_uri = config.base_endpoint + config.headwaiter_path;
+
+config.messages_path = config.v1_api_path + "/messages";
+config.messages_endpoint = config.base_endpoint + config.messages_path;
+
+config.ops_path = config.v1_api_path + "/ops";
+config.ops_endpoint = config.base_endpoint + config.ops_path;
+
+config.permissions_path = config.v1_api_path + "/permissions";
+config.permissions_endpoint = config.base_endpoint + config.permissions_path;
+
+config.principals_path = config.v1_api_path + "/principals";
+config.principals_endpoint = config.base_endpoint + config.principals_path;
 
 // Security configuration parameters.  Make sure you know what you are doing before changing 
 // any of these parameters.
