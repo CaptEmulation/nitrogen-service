@@ -49,8 +49,8 @@ describe('principals endpoint', function() {
 
                 assert.equal(post_body.principal.id, post_body.accessToken.principal);
 
-                principalId = post_body.principal.id;
-                token = post_body.accessToken.token;
+                var principalId = post_body.principal.id;
+                var token = post_body.accessToken.token;
 
                 request({ url: config.principals_endpoint + '/' + post_body.principal.id,
                           json: true,
