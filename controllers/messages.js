@@ -1,20 +1,22 @@
 var async = require('async')
   , config = require('../config')
+  , log = require('../log')
   , models = require('../models')
   ,	services = require('../services')
   , utils = require('../utils');
 
 exports.create = function(req, res) {
     async.concat(req.body, function(messageObject, callback) {
+        // translate constants to ObjectIds, apply defaults.
+        services.messages.translate(messageObject);
 
         var message = new models.Message(messageObject);
-
         message.from = req.user.id;
-
         callback(null, [message]);
     }, function (err, messages) {
         services.messages.createMany(req.user, messages, function(err, saved_messages) {
             if (err) return utils.handleError(res, err);
+
             res.send({ "messages": saved_messages });
         });
     });
