@@ -4,17 +4,15 @@ var async = require('async')
   , services = require('../services')
   , utils = require('../utils');
 
-/*
 exports.create = function(req, res) {
-    var permission = new models.Agent(req.body);
+    var permission = new models.Permission(req.body);
 
-    services.agents.create(req.user, agent, function(err, agent) {
+    services.permissions.create(req.user, permission, function(err, permission) {
         if (err) return utils.handleError(res, err);
 
-        res.send({ 'agent': agent });
+        res.send({ 'permission': permission });
     });
 };
-*/
 
 exports.index = function(req, res) {
     var query = utils.parseQuery(req);

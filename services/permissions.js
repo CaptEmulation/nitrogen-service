@@ -5,10 +5,12 @@ var async = require('async')
   , services = require('../services')
   , utils = require('../utils');
 
-// permissions
-//  send: send a message
-//  sub: subscribe to this principal
-//  admin: edit / delete this principal
+// STOPMERGE list:
+// * Remove use of principal.owner throughout code.
+// * Use permissions to determine if principal is admin throughout code.
+// * Filtering permissions down to the ones a principal can see.
+// * Authorization of principal to create a permission for a principal (is it a subset?).
+// * Optimizations on building permissions list for 'authorize'.
 
 var defaultPermissions = [];
 var mandatoryPermissions = [];
@@ -33,9 +35,10 @@ var authorize = function(requestingPrincipal, principalFor, action, obj, callbac
     });
 };
 
-var create = function(principal, permission, callback) {
-    if (!principal) return callback(utils.principalRequired());
+var create = function(authPrincipal, permission, callback) {
+    if (!authPrincipal) return callback(utils.principalRequired());
 
+    // TODO: is authPrincipal authorized to create this permission.
     permission.save(function(err, permission) {
         if (err) return callback(err);
 
@@ -63,8 +66,6 @@ var initialize = function(callback) {
 };
 
 var permissionsFor = function(principal, callback) {
-//    find(services.principals.servicePrincipal, {}, null, callback);
-
     config.cache_provider.get('permissions', principal.id, function(err, permissions) {
         if (err) return callback(err);
 

@@ -21,8 +21,33 @@ describe('permissions endpoint', function() {
             assert.equal(resp.statusCode, 200);
 
             assert.notEqual(body.permissions, undefined);
-//            assert.equal(body.permissions.length > 0, true);
+            assert.equal(body.permissions.length > 0, true);
             done();
         });
     });
+
+    it('should allow creating a permission by a user', function(done) {
+
+        var permission = {
+            issuedTo:     fixtures.models.accessTokens.user.id,
+            principalFor: fixtures.models.accessTokens.user.id,
+            action:       'send',
+            priority:     100000000,
+            authorized:   true        
+        };
+
+        request.post(config.permissions_endpoint,
+            { headers: { Authorization: fixtures.models.accessTokens.user.toAuthHeader() },
+                json: permission }, function(err, resp, body) {
+                assert.ifError(err);
+                assert.equal(resp.statusCode, 200);
+
+                assert.notEqual(body.permission.id, undefined);
+
+                done();
+            }
+        );
+    });
+
+
 });
