@@ -150,17 +150,4 @@ config.janitor_interval = 60 * 1000;
 // Validate all message schemas to conform to all core and installed schemas.
 config.validate_schemas = true;
 
-// these permissions will always be checked before any other permissions (highest priority)
-config.mandatory_permissions = [
-    { issuedTo: 'service', action: 'send', filter: { type: 'ip' }, authorized: true },
-    {                      action: 'send', filter: { type: 'ip' }, authorized: false }
-];
-
-// these permissions will be checked after any userland ones (lowest priority).
-config.default_permissions = [
-    {                      action: 'send', filter: { to: { $ne: null } }, authorized: false },
-    {                      action: 'send', authorized: true }
-//    {                      action: 'sub',                          authorized: false }
-];
-
 module.exports = config;

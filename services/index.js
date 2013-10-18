@@ -5,46 +5,21 @@ var async = require('async')
 exports.accessTokens = require('./accessTokens');
 exports.agents = require('./agents');
 exports.blobs = require('./blobs');
+exports.global = require('./global');
 exports.messages = require('./messages');
 exports.permissions = require('./permissions');
 exports.principals = require('./principals');
 exports.subscriptions = require('./subscriptions');
 
-// TODO: when scaled out do we just let all the nodes do this and use the 
-// entropy in the offset timing of that automatically scale these deletes?
-exports.janitor = function(callback) {
-    exports.accessTokens.remove({ expires_at: { $lt: new Date() } }, function(err, removed) {
-        if (err) callback("janitor message removal failed: " + err);
-        log.info("janitor removed " + removed + " expired access tokens.");
-
-        exports.messages.remove(exports.principals.servicePrincipal, { expires: { $lt: new Date() } }, function(err, removed) {
-            if (err) callback("janitor message removal failed: " + err);
-            log.info("janitor removed " + removed + " expired messages.");
-
-            return callback();
-        });
-    });
-};
-
-var start = function(callback) {
-    setInterval(function() {
-        exports.janitor(function(err) {
-            if (err) log.error(err);
-        });
-    }, 
-    config.janitor_interval);
-
-    return callback();
-};
-
 exports.initialize = function(callback) {
     async.series([
         exports.principals.initialize,
+        exports.global.migrate,
         exports.agents.initialize,
         exports.messages.initialize,
         exports.blobs.initialize,
         exports.permissions.initialize,
 
-        start
+        exports.global.startJanitor
     ], callback);
 };

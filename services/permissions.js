@@ -54,35 +54,32 @@ var find = function(authPrincipal, filter, options, callback) {
     models.Permission.find(filterForPrincipal(authPrincipal, filter), null, options, callback);
 };
 
-var findByIssuedTo = function(issuedTo, callback) {
-    find(services.principals.servicePrincipal, { issuedTo: issuedTo.id }, null, callback);
+var findById = function(authPrincipal, permissionId, callback) {
+    models.Permission.findOne(filterForPrincipal(authPrincipal, { "_id": permissionId }), callback);
 };
 
 var initialize = function(callback) {
-    defaultPermissions = config.default_permissions.map(translate);
-    mandatoryPermissions = config.mandatory_permissions.map(translate);
-
-    callback();
+    return callback();
 };
 
 var permissionsFor = function(principal, callback) {
+//    find(services.principals.servicePrincipal, {}, null, callback);
+
     config.cache_provider.get('permissions', principal.id, function(err, permissions) {
         if (err) return callback(err);
 
         if (permissions) return callback(null, permissions);
 
-        // don't have cached permissions, so build up the permission list.
-        permissions = [].concat(mandatoryPermissions);
-
-        findByIssuedTo(principal, function(err, principalPermissions) {
+        // TODO: this is a super broad query so we'll have to evaluate many many permissions.  
+        // need to think about how to pull a more tightly bounded set of possible permissions for evaluation.
+        find(services.principals.servicePrincipal, { $or : [{ issuedTo: principal.id }, { issuedTo: null }] }, { priority: 1 }, function(err, permissions) {
             if (err) return callback(err);
 
-            permissions = permissions.concat(principalPermissions).concat(defaultPermissions);
             config.cache_provider.set('permissions', principal.id, permissions, utils.dateDaysFromNow(1), function(err) {
                 return callback(err, permissions);
             });
         });
-    });   
+    });
 };
 
 var remove = function(principal, permission, callback) {
@@ -107,5 +104,6 @@ module.exports = {
     create: create,
     find: find,
     initialize: initialize,
-    remove: remove
+    remove: remove,
+    translate: translate
 };

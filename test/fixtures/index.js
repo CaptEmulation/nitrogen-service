@@ -174,7 +174,6 @@ exports.reset = function(callback) {
 
         async.series(fixtureFactories, callback);
     });
-
 };
 
 var fixtures = {
