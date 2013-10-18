@@ -9,7 +9,7 @@ MemoryCacheProvider.buildCompositeKey = function(namespace, key) {
 }
 
 MemoryCacheProvider.prototype.del = function(namespace, key, callback) {
-    delete this.cache[buildCompositeKey(namespace, key)];
+    delete this.cache[MemoryCacheProvider.buildCompositeKey(namespace, key)];
     return callback();
 };
 
