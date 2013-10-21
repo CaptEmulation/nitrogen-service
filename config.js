@@ -134,7 +134,7 @@ if (process.env.LOGGLY_SUBDOMAIN &&
     });
 }
 
-log.add(winston.transports.Console, { colorize: true, timestamp: true });
+log.add(winston.transports.Console, { colorize: true, timestamp: true, level: 'debug' });
 
 // if you'd like additional indexes applied to messages, you can specify them here.
 config.message_indexes = [

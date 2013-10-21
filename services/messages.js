@@ -10,19 +10,29 @@ var async = require('async')
 
 // From and to principals and their owners can see this message.
 // This function builds the unique set of those principals.
-var buildVisibleTo = function(message, fromPrincipal, toPrincipal) {
-    var visibilitySet = {};
+var buildVisibility = function(message, callback) {
+    // if the creator has already marked this as public, shortcircuit.
+    if (message.public) return callback(null, message);
 
-    visibilitySet[message.from] = true;
-    if (fromPrincipal.owner) visibilitySet[fromPrincipal.owner] = true;
-    if (message.to) visibilitySet[message.to] = true;
-    if (toPrincipal && toPrincipal.owner) visibilitySet[toPrincipal.owner] = true;
+    // find all 'subscribe' permissions
+    services.permissions.find({ principal_for: message.from, type: 'subscribe' }, {}, function(err, permissions) {
+        if (err) return callback(err);
 
-    var visibleTo = [];
-    for (var principal in visibilitySet)
-        visibleTo.push(principal);
+        message.public = false;
+        message.visible_to = message.to ? [message.to] : [];
+        permissions.forEach(function(permission) {
+            if (!message.public) {
+                if (permission.issued_to) {
+                    message.visible_to.push(permission.issued_to);
+                } else {
+                    message.visible_to = [];
+                    message.public = true;
+                }
+            }
+        });
 
-    return visibleTo;
+        return callback(null, message);
+    });
 };
 
 var create = function(principal, message, callback) {
@@ -35,23 +45,21 @@ var create = function(principal, message, callback) {
         services.permissions.authorize(principal, toPrincipal, 'send', message, function(permission) {
             if (!permission) return callback(utils.authorizationError());
 
-            message.visible_to = buildVisibleTo(message, fromPrincipal, toPrincipal);
-
             if (message.is('log'))
                 log.log(message.body.severity, message.body.message, { principal: message.from.toString() });
 
-            message.body_length = JSON.stringify(message.body).length;
-            message.created_at = new Date();
-
-            // if no explicit visibility set on message, then the fromPrincipal's visibility is used.
-            if (!message.public)
-                message.public = fromPrincipal.public;
-
-            message.save(function(err, message) {
+            buildVisibility(message, function(err, message) { 
                 if (err) return callback(err);
 
-                services.subscriptions.publish('message', message, function(err) {
-                    callback(err, [message]);
+                message.body_length = JSON.stringify(message.body).length;
+                message.created_at = new Date();
+
+                message.save(function(err, message) {
+                    if (err) return callback(err);
+
+                    services.subscriptions.publish('message', message, function(err) {
+                        callback(err, [message]);
+                    });
                 });
             });
         });

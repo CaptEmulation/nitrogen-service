@@ -29,8 +29,8 @@ describe('permissions endpoint', function() {
     it('should allow creating a permission by a user', function(done) {
 
         var permission = {
-            issuedTo:     fixtures.models.accessTokens.user.id,
-            principalFor: fixtures.models.accessTokens.user.id,
+            issued_to:     fixtures.models.accessTokens.user.id,
+            principal_for: fixtures.models.accessTokens.user.id,
             action:       'send',
             priority:     100000000,
             authorized:   true        

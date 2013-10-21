@@ -9,7 +9,6 @@ principalSchema.add({
 
     admin: { type: Boolean, default: false },
     public: { type: Boolean, default: false },
-    owner: { type: Schema.Types.ObjectId, ref: 'Principal' },
     claim_code: { type: String },
 
     last_ip: { type: String },
@@ -19,13 +18,19 @@ principalSchema.add({
 
 // device items
 
-    secret_hash: { type: String },    // stored in base64
+    secret_hash: { type: String },    // base64
 
 // user items
 
     email: { type: String },
-    password_hash: { type: String },  // hashed and stored in base64
-    salt: { type: String }            // stored in base64
+    password_hash: { type: String },  // base64
+    salt: { type: String },           // base64
+
+// DEPRECIATED FIELDS
+
+    // unused after migration 00002
+    owner: { type: Schema.Types.ObjectId, ref: 'Principal' }
+
 });
 
 principalSchema.index({ capabilities: 1 });

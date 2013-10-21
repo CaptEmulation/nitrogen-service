@@ -11,14 +11,35 @@ session.onMessage({ type: 'claim' }, function(message) {
         }
 
         var claimedPrincipal = principals[0];
-        
-        claimedPrincipal.owner = message.from;
-        claimedPrincipal.claim_code = null;
 
-        claimedPrincipal.save(session, function(err, principal) {
-            if (err) log.error("claimAgent: updating claimed principal failed: " + err);
+        var permissions = [
+/*          new nitrogen.Permission({
+                type: 'admin',
+                issued_to: message.from,
+                principal_for: claimedPrincipal.id,
+                priority: nitrogen.Permission.NORMAL_PRIORITY
+            },
+            new nitrogen.Permission({
+                type: 'send',
+                issued_to: message.from,
+                principal_for: claimedPrincipal.id,
+                priority: nitrogen.Permission.NORMAL_PRIORITY
+            }) */
+        ];
 
-            log.info("claimAgent: successfully set " + message.from + " as the owner of " + principal.id);
+        async.each(permissions, function(permission, cb) {
+            permission.save(cb);
+        }, function(err) {
+            if (err) return log.error("claimAgent: didn't successfully save permissions.");
+
+            claimedPrincipal.owner = message.from;
+            claimedPrincipal.claim_code = null;
+
+            claimedPrincipal.save(session, function(err, principal) {
+                if (err) log.error("claimAgent: updating claimed principal failed: " + err);
+
+                log.info("claimAgent: successfully set " + message.from + " as the owner of " + principal.id);
+            });            
         });
     });
 });

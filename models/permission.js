@@ -7,8 +7,8 @@ var BaseSchema = require('./baseSchema')
 var permissionSchema = new BaseSchema();
 
 permissionSchema.add({
-    issuedTo:     { type: Schema.Types.ObjectId, ref: 'Principal' },
-    principalFor: { type: Schema.Types.ObjectId, ref: 'Principal' },
+    issued_to:     { type: Schema.Types.ObjectId, ref: 'Principal' },
+    principal_for: { type: Schema.Types.ObjectId, ref: 'Principal' },
 
     expires:      { type: Date },
     action:       { type: String },
@@ -17,8 +17,8 @@ permissionSchema.add({
     authorized:   { type: Boolean }
 });
 
-permissionSchema.index({ issuedTo: 1 });
-permissionSchema.index({ forPrincipal: 1 });
+permissionSchema.index({ issued_to: 1 });
+permissionSchema.index({ principal_for: 1 });
 
 permissionSchema.set('toObject', { transform: BaseSchema.baseObjectTransform });
 permissionSchema.set('toJSON', { transform: BaseSchema.baseObjectTransform });
@@ -39,13 +39,13 @@ Permission.prototype.match = function(requestingPrincipal, principalFor, action,
         return false;
     }
 
-    if (this.issuedTo && !this.issuedTo.equals(requestingPrincipal.id)) {
-        log.debug('permission: ' + JSON.stringify(this) + ': issuedTo mismatch: match == false');
+    if (this.issued_to && !this.issued_to.equals(requestingPrincipal.id)) {
+        log.debug('permission: ' + JSON.stringify(this) + ': issued_to mismatch: match == false');
         return false;
     }
 
-    if (this.principalFor && !this.principalFor.equals(principalFor.id)) {
-        log.debug('permission: ' + JSON.stringify(this) + ': principalFor mismatch: match == false');
+    if (this.principal_for && (!principalFor || !this.principal_for.equals(principalFor.id))) {
+        log.debug('permission: ' + JSON.stringify(this) + ': principal_for mismatch: match == false');
         return false;
     }
 

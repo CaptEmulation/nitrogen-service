@@ -6,7 +6,7 @@ exports.up = function(callback) {
     var permissions = [
         // allow service to send 'ip' messages.
         services.permissions.translate({ 
-            issuedTo: 'service', 
+            issued_to: 'service', 
             action: 'send', 
             filter: '{ "type": "ip" }', 
             authorized: true, 
@@ -21,7 +21,7 @@ exports.up = function(callback) {
             priority: 550 
         }),
 
-        /* userland permssions exist between priority 1M-2B */
+        /* userland permissions exist between priority 1M-2B */
 
         // if no other higher priority rules allow it, do not allow messages to be sent to: a principal.
         services.permissions.translate({
