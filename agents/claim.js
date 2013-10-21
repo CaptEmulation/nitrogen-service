@@ -13,22 +13,22 @@ session.onMessage({ type: 'claim' }, function(message) {
         var claimedPrincipal = principals[0];
 
         var permissions = [
-/*          new nitrogen.Permission({
+            new nitrogen.Permission({
                 type: 'admin',
                 issued_to: message.from,
                 principal_for: claimedPrincipal.id,
                 priority: nitrogen.Permission.NORMAL_PRIORITY
-            },
+            }),
             new nitrogen.Permission({
                 type: 'send',
                 issued_to: message.from,
                 principal_for: claimedPrincipal.id,
                 priority: nitrogen.Permission.NORMAL_PRIORITY
-            }) */
+            })
         ];
 
         async.each(permissions, function(permission, cb) {
-            permission.save(cb);
+            permission.create(session, cb);
         }, function(err) {
             if (err) return log.error("claimAgent: didn't successfully save permissions.");
 

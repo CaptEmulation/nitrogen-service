@@ -1,8 +1,36 @@
-function pairDeviceWithOwner(device, owner) {
-    log.info('device id: ' + device.id + ' automatically matched to owner: ' + owner.id);
+function pairDeviceWithOwner(device, principal) {
+    log.info('device id: ' + device.id + ' automatically matched to owner: ' + principal.id);
 
-    device.owner = owner.id;
-    device.claim_code = null;
+    var permissions = [
+        new nitrogen.Permission({
+            type: 'admin',
+            issued_to: principal.id,
+            principal_for: device.id,
+            priority: nitrogen.Permission.NORMAL_PRIORITY
+        }),
+        new nitrogen.Permission({
+            type: 'send',
+            issued_to: principal.id,
+            principal_for: device.id,
+            priority: nitrogen.Permission.NORMAL_PRIORITY
+        }) 
+    ];
+
+    async.each(permissions, function(permission, cb) {
+        permission.create(session, cb);
+    }, function(err) {
+        if (err) return log.error("matcher: didn't successfully save permissions.");
+
+        device.owner = principal.id;
+        device.claim_code = null;
+
+        device.save(session, function(err, principal) {
+            if (err) log.error("matcher: updating claimed principal failed: " + err);
+
+            log.info("matcher: successfully set " + device.id + " as the owner of " + principal.id);
+        });            
+    });
+
     
     device.save(session);
 }
