@@ -21,6 +21,7 @@ function pairDeviceWithOwner(device, principal) {
     }, function(err) {
         if (err) return log.error("matcher: didn't successfully save permissions.");
 
+        // LEGACY: remove
         device.owner = principal.id;
         device.claim_code = null;
 

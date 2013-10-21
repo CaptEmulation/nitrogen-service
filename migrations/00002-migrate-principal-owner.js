@@ -10,20 +10,18 @@ exports.up = function(migrationCallback) {
         async.each(principals, function(principal, principalCallback) {
             if (principal.owner) {
                 var permissions = [
-/*
-                   new nitrogen.Permission({
+                   services.permissions.translate({
                         type: 'admin',
                         issued_to: principal.owner,
                         principal_for: principal.id,
                         priority: nitrogen.Permission.NORMAL_PRIORITY
-                    },
-                    new nitrogen.Permission({
+                    }),
+                    services.permissions.translate({
                         type: 'send',
                         issued_to: principal.owner,
                         principal_for: principal.id,
                         priority: nitrogen.Permission.NORMAL_PRIORITY
                     })
-*/
                 ];
 
                 async.each(permissions, function(permission, permissionCallback) {

@@ -31,7 +31,9 @@ var authorize = function(requestingPrincipal, principalFor, action, obj, callbac
         async.detectSeries(permissions, function(permission, cb) {
             log.debug('checking permission: ' + JSON.stringify(permission));
             cb(permission.match(requestingPrincipal, principalFor, action, obj));
-        }, callback);
+        }, function(permission) {
+            return callback(null, permission);
+        });
     });
 };
 

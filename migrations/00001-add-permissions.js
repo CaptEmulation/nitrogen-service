@@ -13,6 +13,14 @@ exports.up = function(callback) {
             priority: 500 
         }),
 
+        // allow service to admin anything.
+        services.permissions.translate({ 
+            issued_to: 'service', 
+            action: 'admin', 
+            authorized: true, 
+            priority: 525 
+        }),
+
         // disallow anyone else from sending 'ip' messages.
         services.permissions.translate({ 
             action: 'send', 

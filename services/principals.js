@@ -4,6 +4,7 @@ var async = require('async')
   , log = require('../log')
   , models = require('../models')
   , mongoose = require('mongoose')
+  , nitrogen = require('nitrogen')
   , services = require('../services')
   , utils = require('../utils');
 
@@ -69,20 +70,25 @@ var create = function(principal, callback) {
             createCredentials(principal, function(err, principal) {
                 if (err) return callback(err);
 
-                if (principal.is('user') || principal.is('service')) {
-                    principal.id = new mongoose.Types.ObjectId();
-                    principal.owner = principal.id;
-                }
-
-                principal.save(function(err, principal) {
+                createPermissions(principal, function(err) {
                     if (err) return callback(err);
 
-                    log.info("created " + principal.type + " principal: " + principal.id);
+                    // LEGACY:  Remove
+                    if (principal.is('user') || principal.is('service')) {
+                        principal.id = new mongoose.Types.ObjectId();
+                        principal.owner = principal.id;
+                    }
 
-                    // TODO: principals_realtime:  Disabled until rate limited to prevent update storms.
-                    //notifySubscriptions(principal, function(err) {
-                        return callback(err, principal);
-                    //});
+                    principal.save(function(err, principal) {
+                        if (err) return callback(err);
+
+                        log.info("created " + principal.type + " principal: " + principal.id);
+
+                        // TODO: principals_realtime:  Disabled until rate limited to prevent update storms.
+                        //notifySubscriptions(principal, function(err) {
+                            return callback(err, principal);
+                        //});
+                    });
                 });
             });
         });
@@ -108,6 +114,21 @@ var createCredentials = function(principal, callback) {
     } else {
         createSecretCredentials(principal, callback);
     }
+};
+
+var createPermissions = function(principal, callback) {
+    var permissions = [
+        new models.Permission({
+            type: 'admin',
+            issued_to: principal.id,
+            principal_for: principal.id,
+            priority: nitrogen.Permission.NORMAL_PRIORITY
+        })
+    ];
+
+    async.each(permissions, function(permission, cb) { 
+        permission.save(cb);
+    }, callback);
 };
 
 var createSecretCredentials = function(principal, callback) {
@@ -318,33 +339,26 @@ var update = function(authorizingPrincipal, id, updates, callback) {
     findById(authorizingPrincipal, id, function(err, principal) {
         if (err) return callback(err);
 
-        if (!principal) return callback(utils.badRequestError("Can't find authorizing principal."));
+        if (!principal) return callback(utils.badRequestError("Can't find principal for update."));
 
-        if (!authorizingPrincipal.is('service') &&
-            !authorizingPrincipal.equals(principal) &&
-            !authorizingPrincipal.owns(principal)) {
-            log.warn('Principal.update: Principal ' + authorizingPrincipal.id + ' attempted to make unauthorized change to ' + principal.id);
-            return callback(utils.authorizationError());
-        }
+        services.permissions.authorize(authorizingPrincipal, principal, 'admin', principal, function(err, permissions) {
 
-        // if its not the service, you can only update the name.
-        if (!authorizingPrincipal.is('service')) {
-            updates = { name: updates.name };
-        }
-
-        models.Principal.update({ _id: id }, { $set: updates }, function (err, updateCount) {
-            if (err) return callback(err);
-
-            findById(authorizingPrincipal, id, function(err, updatedPrincipal) {
+            models.Principal.update({ _id: id }, { $set: updates }, function (err, updateCount) {
                 if (err) return callback(err);
 
-                // TODO: principals_realtime:  Disabled until rate limited to prevent update storms.
+                findById(authorizingPrincipal, id, function(err, updatedPrincipal) {
+                    if (err) return callback(err);
 
-                //notifySubscriptions(updatedPrincipal, function(err) {
-                    return callback(err, updatedPrincipal);
-                //});
+                    // TODO: principals_realtime:  Disabled until rate limited to prevent update storms.
+
+                    //notifySubscriptions(updatedPrincipal, function(err) {
+                        return callback(err, updatedPrincipal);
+                    //});
+                });
             });
+            
         });
+
     });
 };
 

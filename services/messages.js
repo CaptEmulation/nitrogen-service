@@ -42,7 +42,7 @@ var create = function(principal, message, callback) {
     validate(message, function(err, fromPrincipal, toPrincipal) {
         if (err) return callback(err);
 
-        services.permissions.authorize(principal, toPrincipal, 'send', message, function(permission) {
+        services.permissions.authorize(principal, toPrincipal, 'send', message, function(err, permission) {
             if (!permission) return callback(utils.authorizationError());
 
             if (message.is('log'))
