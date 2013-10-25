@@ -44,7 +44,7 @@ var create = function(principal, message, callback) {
 
         services.permissions.authorize(principal, toPrincipal, 'send', message, function(err, permission) {
             if (err) return callback(err);
-            if (!permission || !permission.authorized) return callback(utils.authorizationError());
+            if (!permission.authorized) return callback(utils.authorizationError());
 
             if (message.is('log'))
                 log.log(message.body.severity, message.body.message, { principal: message.from.toString() });

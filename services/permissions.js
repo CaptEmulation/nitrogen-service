@@ -31,6 +31,12 @@ var authorize = function(requestingPrincipal, principalFor, action, obj, callbac
         }, function(permission) {
             log.info('authorize result: ' + JSON.stringify(permission));
 
+            if (!permission) {
+                permission = { 
+                    authorized: false
+                };
+            }
+            
             return callback(null, permission);
         });
     });

@@ -12,7 +12,7 @@ var canView = function(principal, blob, callback) {
 
         services.permissions.authorize(principal, ownerPrincipal, 'subscribe', {}, function(err, permission) {
             if (err) return callback(err);
-            if (!permission || !permission.authorized) {
+            if (!permission.authorized) {
                 log.info('principal: ' + principal.id + ' attempted unauthorized view of blob: ' + blob.id);
                 return callback(utils.authorizationError(permission));
             }

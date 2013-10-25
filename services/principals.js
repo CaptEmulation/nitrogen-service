@@ -324,18 +324,16 @@ var notifySubscriptions = function(principal, callback) {
 var removeById = function(authorizingPrincipal, id, callback) {
     findById(authorizingPrincipal, id, function (err, principal) {
         if (err) return callback(err);
-        if (!authorizingPrincipal.equals(principal) &&
-            !authorizingPrincipal.owns(principal) &&
-            !authorizingPrincipal.is('service')) {
-            log.warn('failed to remove service principal');
-            return callback(utils.authorizationError());
-        }
+        services.permissions.authorize(authorizingPrincipal, principal, 'admin', principal, function(err, permission) {
+             if (err) return callback(err);
+             if (!permission.authorized) return callback(utils.authorizationError(permission));
 
-        services.messages.remove(services.principals.servicePrincipal, { from: principal.id }, function(err, removed) {
-            if (err) return callback(err);
-
-            models.Principal.remove({ _id: id }, callback);
-        });
+             services.messages.remove(services.principals.servicePrincipal, { from: principal.id }, function(err, removed) {
+                 if (err) return callback(err);
+ 
+                 models.Principal.remove({ _id: id }, callback);
+             });
+         });
     });
 };
 
@@ -349,7 +347,9 @@ var update = function(authorizingPrincipal, id, updates, callback) {
 
         if (!principal) return callback(utils.badRequestError("Can't find principal for update."));
 
-        services.permissions.authorize(authorizingPrincipal, principal, 'admin', principal, function(err, permissions) {
+        services.permissions.authorize(authorizingPrincipal, principal, 'admin', principal, function(err, permission) {
+            if (err) return callback(err);
+            if (!permission.authorized) return callback(utils.authorizationError(permission));
 
             models.Principal.update({ _id: id }, { $set: updates }, function (err, updateCount) {
                 if (err) return callback(err);
