@@ -119,11 +119,19 @@ var createCredentials = function(principal, callback) {
 var createPermissions = function(principal, callback) {
     var permissions = [
         new models.Permission({
-            type: 'admin',
+            action: 'admin',
+            authorized: true,
             issued_to: principal.id,
             principal_for: principal.id,
             priority: nitrogen.Permission.NORMAL_PRIORITY
-        })
+        }),
+        new models.Permission({
+            action: 'subscribe',
+            authorized: true,
+            issued_to: principal.id,
+            principal_for: principal.id,
+            priority: nitrogen.Permission.NORMAL_PRIORITY
+        })        
     ];
 
     async.each(permissions, function(permission, cb) { 

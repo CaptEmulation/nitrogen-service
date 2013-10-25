@@ -14,12 +14,21 @@ session.onMessage({ type: 'claim' }, function(message) {
 
         var permissions = [
             new nitrogen.Permission({
+                authorized: true,
                 type: 'admin',
                 issued_to: message.from,
                 principal_for: claimedPrincipal.id,
                 priority: nitrogen.Permission.NORMAL_PRIORITY
             }),
             new nitrogen.Permission({
+                authorized: true,
+                type: 'subscribe',
+                issued_to: message.id,
+                principal_for: claimedPrincipal.id,
+                priority: nitrogen.Permission.NORMAL_PRIORITY
+            }),
+            new nitrogen.Permission({
+                authorized: true,
                 type: 'send',
                 issued_to: message.from,
                 principal_for: claimedPrincipal.id,

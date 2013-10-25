@@ -7,7 +7,6 @@ principalSchema.add({
     type: { type: String },       
     name: { type: String },        // user friendly name for this principal
 
-    admin: { type: Boolean, default: false },
     public: { type: Boolean, default: false },
     claim_code: { type: String },
 
@@ -29,6 +28,7 @@ principalSchema.add({
 // DEPRECIATED FIELDS
 
     // unused after migration 00002
+    admin: { type: Boolean, default: false },
     owner: { type: Schema.Types.ObjectId, ref: 'Principal' }
 
 });
@@ -80,12 +80,13 @@ Principal.prototype.equals = function(principal) {
     return principal.id.toString() === this.id.toString();
 };
 
+// LEGACY: Depreciated.  Remove after all uses are removed.
 Principal.prototype.owns = function(principal) {
     return principal.owner && principal.owner.toString() === this.id.toString() ||
            principal.id.toString() === this.id.toString();
 };
 
-// TODO: Mechanism to enable promoting users to an admin role. For now, punt and make all users admins.
+// LEGACY: Depreciated.  Remove after all uses are removed.
 Principal.prototype.isAdmin = function() { return this.admin; };
 
 module.exports = Principal;

@@ -7,15 +7,18 @@ var async = require('async')
   , utils = require('../utils');
 
 var canView = function(principal, blob, callback) {
-    // if this principal is the owner, then this is easy.
-    if (principal.owns(blob)) return callback(true);
-
-    // fetch the owner of the blob to see if the principal owns that.
-    // enables user owes camera owes blob type scenarios.
-    services.principals.findById(services.principals.servicePrincipal, blob.owner, function(err, owningPrincipal) {
+    services.principals.findById(services.principals.systemPrincipal, blob.owner, function(err, ownerPrincipal) {
         if (err) return callback(err);
 
-        return callback(principal.owns(owningPrincipal));
+        services.permissions.authorize(principal, ownerPrincipal, 'subscribe', {}, function(err, permission) {
+            if (err) return callback(err);
+            if (!permission || !permission.authorized) {
+                log.info('principal: ' + principal.id + ' attempted unauthorized view of blob: ' + blob.id);
+                return callback(utils.authorizationError(permission));
+            }
+
+            return callback(null);
+        });
     });
 };
 
@@ -71,8 +74,8 @@ var stream = function(principal, blobId, stream, callback) {
         if (err) return callback(err);
         if (!blob) return callback(utils.notFoundError());
 
-        canView(principal, blob, function(authorized) {
-            if (!authorized) return callback(utils.authorizationError());
+        canView(principal, blob, function(err) {
+            if (err) return callback(err);
 
             config.blob_provider.stream(blob, stream, callback);
         });

@@ -49,6 +49,7 @@ var execute = function(agents, callback) {
     async.each(agents, function(agent, callback) {
 
         if (agent && agent.enabled && agent.session) {
+            // TODO: factor this out into some sort of configurable whitelist.
             var context = {
                 async: async,
                 cron: cron,
@@ -75,6 +76,10 @@ var execute = function(agents, callback) {
 var filterForPrincipal = function(principal, filter) {
     if (principal && principal.is('service')) return filter;
 
+    // TODO: use permissions based filtering here.  align to a public / visible_to approach?
+    // 'viewAgent' permission issued_to permission that can view agent by principal with admin capabilities on agent?
+    // adding viewAgent rebuilds visible_to property on agent that is queryable.
+
     if (!principal.isAdmin()) {
         filter.$and = [ { execute_as: principal._id } ];
     }
@@ -92,15 +97,15 @@ var findById = function(principal, agentId, callback) {
 
         if (!agent) return callback(utils.notFoundError());
 
+        // TODO: not needed?  should be filtered out automatically by filterForPrincipal above?
         if (!principal.isAdmin() && agent.execute_as != principal.id) return callback(utils.authorizationError());
 
         return callback(null, agent);
     });
 };
-// TODO: split out everything below into separate service?
 
+// TODO: split out everything below into a separate 'reactor' service?
 var initialize = function(callback) {
-
     var agentDir = "./agents/";
     fs.readdir(agentDir, function(err, agentFiles) {
         if (err) return callback("failed to enumerate built in agents: " + err);

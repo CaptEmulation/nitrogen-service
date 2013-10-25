@@ -31,6 +31,13 @@ var dateDaysFromNow = function(days) {
     return date;
 };
 
+var dateMinutesFromNow = function(minutes) {
+    var date = new Date();
+    date.setDate(new Date().getTime() + minutes * 60000);
+
+    return date;
+};
+
 var handleError = function(res, err) {
     if (err instanceof ServiceError) {
         var statusCode = err.statusCode || 400;
@@ -155,6 +162,7 @@ module.exports = {
     authorizationError: authorizationError,
     badRequestError: badRequestError,
     dateDaysFromNow: dateDaysFromNow,
+    dateMinutesFromNow: dateMinutesFromNow,
     ipFromRequest: ipFromRequest,
     internalError: internalError,
     handleError: handleError,

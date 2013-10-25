@@ -11,7 +11,7 @@ exports.show = function(req, res) {
 };
 
 exports.create = function(req, res) {
-	var blob = new models.Blob({
+    var blob = new models.Blob({
         content_type: req.get('Content-Type'),
         content_length: req.get('Content-Length')
     });

@@ -11,14 +11,19 @@ permissionSchema.add({
     principal_for: { type: Schema.Types.ObjectId, ref: 'Principal' },
 
     expires:      { type: Date },
-    action:       { type: String },
+    action:       { type: String, enum: ['admin', 'subscribe', 'send'] },
     filter:       { type: String, default: "{}" },
-    priority:     { type: Number },
-    authorized:   { type: Boolean }
+    priority:     { type: Number, required: true },
+    authorized:   { type: Boolean, required: true }
 });
 
 permissionSchema.index({ issued_to: 1 });
+permissionSchema.index({ priority: 1 });
 permissionSchema.index({ principal_for: 1 });
+
+permissionSchema.path('authorized').validate(function (value) {
+    return value === false || value === true;
+}, 'Permission must have valid authorized field.');
 
 permissionSchema.set('toObject', { transform: BaseSchema.baseObjectTransform });
 permissionSchema.set('toJSON', { transform: BaseSchema.baseObjectTransform });
@@ -36,6 +41,11 @@ Permission.prototype.expired = function() {
 Permission.prototype.match = function(requestingPrincipal, principalFor, action, obj) {
     if (this.expired()) {
         log.debug('permission: ' + JSON.stringify(this) + ': expired: match == false');
+        return false;
+    }
+
+    if (this.action && this.action !== action) {
+        log.debug('permission: ' + JSON.stringify(this) + ': action mismatch: match == false');
         return false;
     }
 

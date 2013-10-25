@@ -3,12 +3,21 @@ function pairDeviceWithOwner(device, principal) {
 
     var permissions = [
         new nitrogen.Permission({
+            authorized: true,
             type: 'admin',
             issued_to: principal.id,
             principal_for: device.id,
             priority: nitrogen.Permission.NORMAL_PRIORITY
         }),
         new nitrogen.Permission({
+            authorized: true,
+            type: 'subscribe',
+            issued_to: principal.id,
+            principal_for: device.id,
+            priority: nitrogen.Permission.NORMAL_PRIORITY
+        }),
+        new nitrogen.Permission({
+            authorized: true,
             type: 'send',
             issued_to: principal.id,
             principal_for: device.id,

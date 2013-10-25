@@ -12,11 +12,8 @@ var async = require('async')
 // * Authorization of principal to create a permission for a principal (is it a subset?).
 // * Optimizations on building permissions list for 'authorize'.
 
-var defaultPermissions = [];
-var mandatoryPermissions = [];
-
 var authorize = function(requestingPrincipal, principalFor, action, obj, callback) {
-    log.debug('authorizing ' + requestingPrincipal.id + ' for action: ' + action + ' on object: ' + JSON.stringify(obj));
+    log.debug('authorizing ' + requestingPrincipal.id + ' for action: ' + action + ' for principal: ' + principalFor + ' on object: ' + JSON.stringify(obj));
     permissionsFor(requestingPrincipal, function(err, permissions) {
         if (err) return callback(err);
 
@@ -32,6 +29,8 @@ var authorize = function(requestingPrincipal, principalFor, action, obj, callbac
             log.debug('checking permission: ' + JSON.stringify(permission));
             cb(permission.match(requestingPrincipal, principalFor, action, obj));
         }, function(permission) {
+            log.info('authorize result: ' + JSON.stringify(permission));
+
             return callback(null, permission);
         });
     });
@@ -39,6 +38,9 @@ var authorize = function(requestingPrincipal, principalFor, action, obj, callbac
 
 var create = function(authPrincipal, permission, callback) {
     if (!authPrincipal) return callback(utils.principalRequired());
+    if (permission.authorized !== false && permission.authorized !== true) {
+        throw new Error("FUCK THIS");
+    }
 
     // TODO: is authPrincipal authorized to create this permission.
     permission.save(function(err, permission) {
