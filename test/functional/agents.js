@@ -29,7 +29,6 @@ describe('agents endpoint', function() {
     });
 
     it('should allow creating an agent by a user', function(done) {
-
         var agent = models.Agent({
             execute_as: fixtures.models.principals.device.id,
             action: ";",

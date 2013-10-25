@@ -36,6 +36,6 @@
     "socket.io-client": "~0.9.16"
   },
   "scripts": {
-    "start": "mocha"
+    "test": "mocha"
   }
 }

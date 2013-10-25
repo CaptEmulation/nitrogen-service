@@ -74,11 +74,10 @@ describe('principals endpoint', function() {
     });
 
     it('should be able to remove principal', function(done) {
-        request.post(config.principals_endpoint,
-                     { json: {
-                         type: 'device',
-                         name: "subscription_test" }
-                     }, function(err, resp, body) {
+        request.post(config.principals_endpoint, { 
+          json: { type: 'user',
+                  email: 'deluser@server.org',
+                  password: 'sEcReT55' } }, function(err, resp, body) {
 
             assert.ifError(err);
             assert.equal(resp.statusCode, 200);

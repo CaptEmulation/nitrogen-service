@@ -8,8 +8,6 @@ var async = require('async')
   , services = require('../services')
   , utils = require('../utils');
 
-// From and to principals and their owners can see this message.
-// This function builds the unique set of those principals.
 var buildVisibility = function(message, callback) {
     // if the creator has already marked this as public, shortcircuit.
     if (message.public) return callback(null, message);

@@ -1,19 +1,19 @@
 var assert = require('assert')
   , config = require('../../config')
   , fixtures = require('../fixtures')
+  , log = require('../../log')
   , models = require('../../models')
   , services = require('../../services');
 
 describe('agent service', function() {
 
     it('matcher automatically matches case where 1 user and 1 device are at same ip', function(done) {
-
         services.principals.updateLastConnection(fixtures.models.principals.user, "127.0.0.1");
 
         setTimeout(function() {
-            services.principals.findById(services.principals.servicePrincipal, fixtures.models.principals.device.id, function(err, principal) {
+            services.permissions.authorize(fixtures.models.principals.user, fixtures.models.principals.device, 'admin', {}, function(err, permission) {
                 assert.ifError(err);
-                assert.equal(principal.owner, fixtures.models.principals.user.id);
+                assert(permission.authorized);
                 done();
             });
         }, 200);
@@ -21,16 +21,17 @@ describe('agent service', function() {
     });
 
     it('matcher does not match 2 users at same ip address for 2nd user', function(done) {
-        services.principals.update(services.principals.servicePrincipal, fixtures.models.principals.device.id, { owner: null }, function(err, principal) {
-            assert.equal(principal.owner, null);
+        services.permissions.remove(services.principals.servicePrincipal, { action: 'admin', principal_for: fixtures.models.principals.device.id }, function(err, removed) {
+            assert.ifError(err);
 
             services.principals.updateLastConnection(fixtures.models.principals.user, "127.0.0.1");
             services.principals.updateLastConnection(fixtures.models.principals.anotherUser, "127.0.0.1");
 
             setTimeout(function() {
-                services.principals.findById(services.principals.servicePrincipal, fixtures.models.principals.device.id, function(err, principal) {
+                log.error("############## user is admin of device authorize");
+                services.permissions.authorize(fixtures.models.principals.user, fixtures.models.principals.device, 'admin', {}, function(err, permission) {
                     assert.ifError(err);
-                    assert.equal(principal.owner, null);
+                    assert.equal(permission.authorized, false);
                     done();
                 });
             }, 200);
@@ -57,7 +58,7 @@ describe('agent service', function() {
                         assert.equal(principal.owner, fixtures.models.principals.user.id);
                         done();
                     });
-                }, 200);                
+                }, 500);                
             });
         });
     });

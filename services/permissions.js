@@ -44,9 +44,8 @@ var authorize = function(requestingPrincipal, principalFor, action, obj, callbac
 
 var create = function(authPrincipal, permission, callback) {
     if (!authPrincipal) return callback(utils.principalRequired());
-    if (permission.authorized !== false && permission.authorized !== true) {
-        throw new Error("FUCK THIS");
-    }
+    if (!permission.action) return callback(new Error('permission must have action.'));
+    if (permission.authorized !== false && permission.authorized !== true) return callback(new Error('permission must have authorized.'));
 
     // TODO: is authPrincipal authorized to create this permission.
     permission.save(function(err, permission) {
@@ -64,7 +63,7 @@ var filterForPrincipal = function(authPrincipal, filter) {
 };
 
 var find = function(authPrincipal, filter, options, callback) {
-    models.Permission.find(filterForPrincipal(authPrincipal, filter), null, options, callback);
+    return models.Permission.find(filterForPrincipal(authPrincipal, filter), null, options, callback);
 };
 
 var findById = function(authPrincipal, permissionId, callback) {
@@ -93,11 +92,19 @@ var permissionsFor = function(principal, callback) {
     });
 };
 
-var remove = function(principal, permission, callback) {
-    config.cache_provider.del('permissions', permission.issued_to, function(err) {
+var remove = function(authPrincipal, filter, callback) {
+    // TODO: will need more complicated authorization mechanism for non service users.
+    if (!authPrincipal || !authPrincipal.is('service')) return callback(utils.authorizationError());
+
+    find(authPrincipal, filter, {}, function (err, permissions) {
         if (err) return callback(err);
-    
-        permission.remove(callback);
+
+        // invalidate cache entries
+        async.eachLimit(permissions, 50, function(permission, cb) {
+            permission.remove(function(err) {
+                config.cache_provider.del('permissions', permission.issued_to, cb);
+            });
+        }, callback);
     });
 };
 

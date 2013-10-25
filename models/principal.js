@@ -5,7 +5,7 @@ var BaseSchema = require('./baseSchema')
 var principalSchema = new BaseSchema();
 principalSchema.add({
     type: { type: String },       
-    name: { type: String },        // user friendly name for this principal
+    name: { type: String },                                 // user friendly name for this principal
 
     public: { type: Boolean, default: false },
     claim_code: { type: String },
@@ -17,13 +17,13 @@ principalSchema.add({
 
 // device items
 
-    secret_hash: { type: String },    // base64
+    secret_hash: { type: String },                          // base64
 
 // user items
 
     email: { type: String },
-    password_hash: { type: String },  // base64
-    salt: { type: String },           // base64
+    password_hash: { type: String },                        // base64
+    salt: { type: String },                                 // base64
 
 // DEPRECIATED FIELDS
 

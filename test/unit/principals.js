@@ -83,10 +83,10 @@ describe('principals service', function() {
         });
     });
 
-    it("any principals can update a principal's name", function(done) {
-        services.principals.update(fixtures.models.principals.device, fixtures.models.principals.device.id, { name: "my camera" }, function(err, principal) {
+    it("a user principal can update a principal's name", function(done) {
+        services.principals.update(fixtures.models.principals.user, fixtures.models.principals.user.id, { name: "Joe User" }, function(err, principal) {
             assert.ifError(err);
-            assert.equal(principal.name, 'my camera');
+            assert.equal(principal.name, "Joe User");
             done();
         });
     });

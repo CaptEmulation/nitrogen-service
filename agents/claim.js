@@ -15,21 +15,21 @@ session.onMessage({ type: 'claim' }, function(message) {
         var permissions = [
             new nitrogen.Permission({
                 authorized: true,
-                type: 'admin',
+                action: 'admin',
                 issued_to: message.from,
                 principal_for: claimedPrincipal.id,
                 priority: nitrogen.Permission.NORMAL_PRIORITY
             }),
             new nitrogen.Permission({
                 authorized: true,
-                type: 'subscribe',
+                action: 'subscribe',
                 issued_to: message.id,
                 principal_for: claimedPrincipal.id,
                 priority: nitrogen.Permission.NORMAL_PRIORITY
             }),
             new nitrogen.Permission({
                 authorized: true,
-                type: 'send',
+                action: 'send',
                 issued_to: message.from,
                 principal_for: claimedPrincipal.id,
                 priority: nitrogen.Permission.NORMAL_PRIORITY
@@ -41,7 +41,7 @@ session.onMessage({ type: 'claim' }, function(message) {
         }, function(err) {
             if (err) return log.error("claimAgent: didn't successfully save permissions.");
 
-            // LEGACY: remove
+            // LEGACY: remove once migration from owner is done.
             claimedPrincipal.owner = message.from;
             claimedPrincipal.claim_code = null;
 

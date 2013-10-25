@@ -12,21 +12,21 @@ exports.up = function(migrationCallback) {
                 var permissions = [
                    services.permissions.translate({
                         authorized: true,
-                        type: 'admin',
+                        action: 'admin',
                         issued_to: principal.owner,
                         principal_for: principal.id,
                         priority: nitrogen.Permission.NORMAL_PRIORITY
                     }),
                     services.permissions.translate({
                         authorized: true,
-                        type: 'subscribe',
+                        action: 'subscribe',
                         issued_to: principal.owner,
                         principal_for: principal.id,
                         priority: nitrogen.Permission.NORMAL_PRIORITY
                     }),
                     services.permissions.translate({
                         authorized: true,
-                        type: 'send',
+                        action: 'send',
                         issued_to: principal.owner,
                         principal_for: principal.id,
                         priority: nitrogen.Permission.NORMAL_PRIORITY
