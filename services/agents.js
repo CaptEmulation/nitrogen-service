@@ -77,12 +77,8 @@ var filterForPrincipal = function(principal, filter) {
     if (principal && principal.is('service')) return filter;
 
     // TODO: use permissions based filtering here.  align to a public / visible_to approach?
-    // 'viewAgent' permission issued_to permission that can view agent by principal with admin capabilities on agent?
-    // adding viewAgent rebuilds visible_to property on agent that is queryable.
 
-    if (!principal.isAdmin()) {
-        filter.$and = [ { execute_as: principal._id } ];
-    }
+    filter.$and = [ { execute_as: principal._id } ];
 
     return filter;
 };
@@ -94,11 +90,8 @@ var find = function(principal, filter, options, callback) {
 var findById = function(principal, agentId, callback) {
     models.Agent.findOne(filterForPrincipal(principal, { "_id": agentId }), function(err, agent) {
         if (err) return callback(err);
-
         if (!agent) return callback(utils.notFoundError());
-
-        // TODO: not needed?  should be filtered out automatically by filterForPrincipal above?
-        if (!principal.isAdmin() && agent.execute_as != principal.id) return callback(utils.authorizationError());
+        if (agent.execute_as != principal.id) return callback(utils.authorizationError());
 
         return callback(null, agent);
     });
@@ -183,8 +176,7 @@ var update = function(principal, id, updates, callback) {
     findById(principal, id, function(err, agent) {
         if (err) return callback(err);
         if (!agent) return callback(utils.notFoundError());
-
-        if (!principal.isAdmin() && principal.id != agent.execute_as) return callback(util.authorizationError());
+        if (principal.id != agent.execute_as) return callback(util.authorizationError());
 
         models.Agent.update({ _id: id }, { $set: updates }, function(err, updated) {
             if (err) return callback(err);

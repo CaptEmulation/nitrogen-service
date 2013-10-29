@@ -86,7 +86,4 @@ Principal.prototype.owns = function(principal) {
            principal.id.toString() === this.id.toString();
 };
 
-// LEGACY: Depreciated.  Remove after all uses are removed.
-Principal.prototype.isAdmin = function() { return this.admin; };
-
 module.exports = Principal;
