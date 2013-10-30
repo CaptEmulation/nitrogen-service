@@ -86,7 +86,14 @@ var create = function(principal, callback) {
 
                         // TODO: principals_realtime:  Disabled until rate limited to prevent update storms.
                         //notifySubscriptions(principal, function(err) {
-                            return callback(err, principal);
+                            updateVisibleTo(principal.id, function(err, updatedPrincipal) {
+
+                                // pass along secret if this is a device
+                                if (principal.is('device'))
+                                    updatedPrincipal.secret = principal.secret;
+
+                                return callback(err, updatedPrincipal);
+                            });
                         //});
                     });
                 });
@@ -382,7 +389,6 @@ var removeById = function(authorizingPrincipal, id, callback) {
 
 var update = function(authorizingPrincipal, id, updates, callback) {
     if (!authorizingPrincipal) return callback(utils.principalRequired());
-
     if (!id) return callback(utils.badRequestError('Missing required argument id.'));
 
     findById(authorizingPrincipal, id, function(err, principal) {
@@ -411,7 +417,7 @@ var update = function(authorizingPrincipal, id, updates, callback) {
                     //});
                 });
             });
-            
+
         });
 
     });
@@ -444,6 +450,43 @@ var updateLastConnection = function(principal, ip) {
         if (err) return log.error("updating last connection failed: " + err);
     });
 };
+
+var updateVisibleTo = function(principalId, callback) {
+    findById(services.principals.servicePrincipal, principalId, function(err, principal) {
+        if (err) return callback(err);
+
+        log.info("principalId: " + principalId);
+
+        if (!principal.public) {
+            services.permissions.find(services.principals.servicePrincipal,
+                { $and: [
+                    { action: 'view' },
+                    { $or : [
+                        { principal_for: principalId },
+                        { principal_for: null }
+                      ]
+                    }
+                  ]
+                },
+                {},
+                function(err, permissions) {
+                    if (err) return callback(err);
+
+                    log.info("permissions length: " + permissions.length);
+                    principal.visible_to = permissions.map(function(permission) {
+                        log.info("ADDING ISSUED_TO: " + permission.issued_to);
+                        return permission.issued_to;
+                    });
+                    log.info("visible_to: " + JSON.stringify(principal.visible_to));
+
+                    services.principals.update(services.principals.servicePrincipal, principalId, { visible_to: principal.visible_to }, callback);
+                }
+            );
+        } else {
+            return callback(null, principal);
+        }
+    });
+}
 
 var validate = function(principal, callback) {
     if (!principal.is('device') && !principal.is('user') && !principal.is('service')) {
@@ -495,6 +538,7 @@ module.exports = {
     removeById: removeById,
     update: update,
     updateLastConnection: updateLastConnection,
+    updateVisibleTo: updateVisibleTo,
     verifySecret: verifySecret,
     verifyPassword: verifyPassword,
 

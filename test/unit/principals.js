@@ -10,11 +10,14 @@ describe('principals service', function() {
     it('can create and validate a user', function(done) {
         var user = new models.Principal({ type: "user",
                                           email: "user@gmail.com",
+                                          public: false,
                                           password: passwordFixture });
 
         services.principals.create(user, function(err, user) {
             assert.ifError(err);
             assert.notEqual(user.id, undefined);
+            assert.notEqual(user.visible_to, undefined);
+            assert.notEqual(user.visible_to.length, 0);
             assert.notEqual(user.password_hash, undefined);
             assert.notEqual(user.password_hash, passwordFixture);
             assert.equal(user.email, "user@gmail.com");

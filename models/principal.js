@@ -8,6 +8,8 @@ principalSchema.add({
     name: { type: String },                                 // user friendly name for this principal
 
     public: { type: Boolean, default: false },
+    visible_to: [{ type: Schema.Types.ObjectId, ref: 'Principal' }],
+
     claim_code: { type: String },
 
     last_ip: { type: String },

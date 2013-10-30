@@ -58,7 +58,15 @@ var create = function(authPrincipal, permission, callback) {
         if (err) return callback(err);
 
         config.cache_provider.del('permissions', permission.issued_to, function(err) {
-            callback(err, permission);
+            if (err) return callback(err);
+
+            if (permission.action === 'view') {
+                services.principals.updateVisibleTo(permission.principal_for, function(err) {
+                    return callback(err, permission);
+                });
+            } else {
+                return callback(null, permission);
+            }
         });
     });
 };
