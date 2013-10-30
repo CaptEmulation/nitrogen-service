@@ -131,7 +131,14 @@ var createPermissions = function(principal, callback) {
             issued_to: principal.id,
             principal_for: principal.id,
             priority: nitrogen.Permission.NORMAL_PRIORITY
-        })        
+        }),
+        new models.Permission({
+            action: 'view',
+            authorized: true,
+            issued_to: principal.id,
+            principal_for: principal.id,
+            priority: nitrogen.Permission.NORMAL_PRIORITY
+        })                
     ];
 
     if (principal.is('user')) {
@@ -227,13 +234,12 @@ var createUserCredentials = function(principal, callback) {
 var filterForPrincipal = function(principal, filter) {
     if (principal && principal.is('service')) return filter;
 
-    var visibilityFilter = [{ public: true }];
+    var visibilityClauses = [ { public: true } ];
     if (principal) {
-        visibilityFilter.push({ owner: principal._id });
-        visibilityFilter.push({ "_id": principal._id });
+        visibilityClauses.push({ visible_to: principal._id });
     }
 
-    return { $and: [ filter, { $or: visibilityFilter } ] };
+    return { $and: [ filter, { $or: visibilityClauses } ] };
 };
 
 var find = function(principal, filter, options, callback) {
@@ -472,12 +478,9 @@ var updateVisibleTo = function(principalId, callback) {
                 function(err, permissions) {
                     if (err) return callback(err);
 
-                    log.info("permissions length: " + permissions.length);
                     principal.visible_to = permissions.map(function(permission) {
-                        log.info("ADDING ISSUED_TO: " + permission.issued_to);
                         return permission.issued_to;
                     });
-                    log.info("visible_to: " + JSON.stringify(principal.visible_to));
 
                     services.principals.update(services.principals.servicePrincipal, principalId, { visible_to: principal.visible_to }, callback);
                 }
