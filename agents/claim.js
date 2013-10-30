@@ -41,8 +41,6 @@ session.onMessage({ type: 'claim' }, function(message) {
         }, function(err) {
             if (err) return log.error("claimAgent: didn't successfully save permissions.");
 
-            // LEGACY: remove once migration from owner is done.
-            claimedPrincipal.owner = message.from;
             claimedPrincipal.claim_code = null;
 
             claimedPrincipal.save(session, function(err, principal) {

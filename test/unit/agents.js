@@ -46,28 +46,39 @@ describe('agent service', function() {
     });
 
     it('claim agent can claim devices', function(done) {
-        services.principals.update(services.principals.servicePrincipal, fixtures.models.principals.device.id, { owner: null, claim_code: 'TAKE-1234' }, function(err, principal) {
-            assert.equal(principal.owner, null);
-            assert.equal(principal.claim_code, 'TAKE-1234');
+        services.permissions.authorize({
+            principal: fixtures.models.principals.user,
+            principal_for: fixtures.models.principals.device,
+            action: 'admin'
+        }, {}, function(err, permission) {
+            assert.ifError(err);
+            assert.equal(permission.authorized, false);
 
-            var claim = new models.Message({
-                type: 'claim',
-                from: fixtures.models.principals.user.id,
-                body: {
-                    claim_code: 'TAKE-1234'
-                }
-            });
+            services.principals.update(services.principals.servicePrincipal, fixtures.models.principals.device.id, { claim_code: 'TAKE-1234' }, function(err, principal) {
+                assert.equal(principal.claim_code, 'TAKE-1234');
 
-            services.messages.create(fixtures.models.principals.user, claim, function(err, message) {
-                setTimeout(function() {
-                    services.principals.findById(services.principals.servicePrincipal, fixtures.models.principals.device.id, function(err, principal) {
-                        assert.ifError(err);
-                        assert.equal(principal.owner, fixtures.models.principals.user.id);
-                        done();
-                    });
-                }, 500);                
+                var claim = new models.Message({
+                    type: 'claim',
+                    from: fixtures.models.principals.user.id,
+                    body: {
+                        claim_code: 'TAKE-1234'
+                    }
+                });
+
+                services.messages.create(fixtures.models.principals.user, claim, function(err, message) {
+                    setTimeout(function() {
+                        services.permissions.authorize({
+                            principal: fixtures.models.principals.user,
+                            principal_for: fixtures.models.principals.device,
+                            action: 'admin'
+                        }, {}, function(err, permission) {
+                            assert.ifError(err);
+                            assert(permission.authorized);
+                            done();
+                        });
+                    }, 200);                
+                });
             });
         });
     });
-
 });

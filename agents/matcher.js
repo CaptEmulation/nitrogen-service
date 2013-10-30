@@ -32,8 +32,6 @@ function matchDevice(device, principal, callback) {
             return callback("didn't successfully save permissions.");
         }
 
-        // LEGACY: remove once transition from owner is finished.
-        device.owner = principal.id;
         device.claim_code = null;
 
         device.save(session, function(err, principal) {
