@@ -40,7 +40,11 @@ var create = function(principal, message, callback) {
     validate(message, function(err, fromPrincipal, toPrincipal) {
         if (err) return callback(err);
 
-        services.permissions.authorize(principal, toPrincipal, 'send', message, function(err, permission) {
+        services.permissions.authorize({
+            principal: principal,
+            principal_for: toPrincipal, 
+            action: 'send'
+        }, message, function(err, permission) {
             if (err) return callback(err);
             if (!permission.authorized) return callback(utils.authorizationError());
 

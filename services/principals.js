@@ -127,7 +127,7 @@ var createPermissions = function(principal, callback) {
         })        
     ];
 
-    if (principal.is('user') || principal.is('service')) {
+    if (principal.is('user')) {
         permissions.push(new models.Permission({
             action: 'admin',
             authorized: true,
@@ -135,6 +135,43 @@ var createPermissions = function(principal, callback) {
             principal_for: principal.id,
             priority: nitrogen.Permission.NORMAL_PRIORITY
         }));
+    }
+
+    if (principal.is('service')) {
+        permissions = permissions.concat([
+            // allow service to see all principals in the system.
+            services.permissions.translate({ 
+                issued_to: principal.id, 
+                action: 'view', 
+                authorized: true, 
+                priority: 475 
+            }),
+
+            // allow service to send 'ip' messages.
+            services.permissions.translate({ 
+                issued_to: principal.id, 
+                action: 'send', 
+                filter: '{ "type": "ip" }', 
+                authorized: true, 
+                priority: 500 
+            }),
+
+            // allow service to subscribe to any principal's message stream.
+            services.permissions.translate({ 
+                issued_to: principal.id, 
+                action: 'subscribe', 
+                authorized: true, 
+                priority: 515 
+            }),
+
+            // allow service to admin anything.
+            services.permissions.translate({ 
+                issued_to: principal.id, 
+                action: 'admin', 
+                authorized: true, 
+                priority: 525 
+            })
+        ]);
     }
 
     async.each(permissions, function(permission, cb) { 
@@ -303,8 +340,7 @@ var initialize = function(callback) {
             var servicePrincipal = new models.Principal({
                 name: 'Service',
                 public: true,
-                type: 'service',
-                admin: true
+                type: 'service'
             });
 
             create(servicePrincipal, function(err, servicePrincipal) {
@@ -327,7 +363,11 @@ var notifySubscriptions = function(principal, callback) {
 var removeById = function(authorizingPrincipal, id, callback) {
     findById(authorizingPrincipal, id, function (err, principal) {
         if (err) return callback(err);
-        services.permissions.authorize(authorizingPrincipal, principal, 'admin', principal, function(err, permission) {
+        services.permissions.authorize({
+            principal: authorizingPrincipal,
+            principal_for: principal, 
+            action: 'admin'
+        }, principal, function(err, permission) {
              if (err) return callback(err);
              if (!permission.authorized) return callback(utils.authorizationError(permission));
 
@@ -350,7 +390,11 @@ var update = function(authorizingPrincipal, id, updates, callback) {
 
         if (!principal) return callback(utils.badRequestError("Can't find principal for update."));
 
-        services.permissions.authorize(authorizingPrincipal, principal, 'admin', principal, function(err, permission) {
+        services.permissions.authorize({
+            principal: authorizingPrincipal,
+            principal_for: principal,
+            action: 'admin'
+        }, principal, function(err, permission) {
             if (err) return callback(err);
             if (!permission.authorized) return callback(utils.authorizationError(permission));
 

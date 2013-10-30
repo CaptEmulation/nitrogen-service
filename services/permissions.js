@@ -6,15 +6,18 @@ var async = require('async')
   , utils = require('../utils');
 
 // STOPMERGE list:
-// * Remove use of principal.owner throughout code.
-// * Use permissions to determine if principal is admin throughout code.
+// * Remove use of principal.owner
+// *    Implement visible_to
+// *        visible_to should be a list of anyone that has a 'view' permission on this principal
+// *            { (principalFor: principal.id or principalFor: ) and action: 'view' }
+// *            need to recalculate visible_to for any principals that permission intersects
+// *            if null, all principals (shouldn't happen since service principal creation happens first)
 // * Filtering permissions down to the ones a principal can see.
-// * Authorization of principal to create a permission for a principal (is it a subset?).
-// * Optimizations on building permissions list for 'authorize'.
+// * Authorization of principal to create a permission for a principal (does that permission ?).
 
-var authorize = function(requestingPrincipal, principalFor, action, obj, callback) {
-    log.debug('authorizing ' + requestingPrincipal.id + ' for action: ' + action + ' for principal: ' + principalFor + ' on object: ' + JSON.stringify(obj));
-    permissionsFor(requestingPrincipal, function(err, permissions) {
+var authorize = function(request, obj, callback) {
+    log.debug('authorizing ' + request.principal.id + ' for action: ' + request.action + ' for principal: ' + !request.principal_for ? "" : request.principal_for.id + ' on object: ' + JSON.stringify(obj));
+    permissionsFor(request.principal, function(err, permissions) {
         if (err) return callback(err);
 
         // TODO: remove this once permissions is solid.
@@ -27,9 +30,12 @@ var authorize = function(requestingPrincipal, principalFor, action, obj, callbac
         // add a star permission at lowest priority to the default_permissions to override this default.
         async.detectSeries(permissions, function(permission, cb) {
             log.debug('checking permission: ' + JSON.stringify(permission));
-            cb(permission.match(requestingPrincipal, principalFor, action, obj));
+            cb(permission.match(request, obj));
         }, function(permission) {
             log.info('authorize result: ' + JSON.stringify(permission));
+
+            // to simplify logic in callback, if no permission is found, callback with an
+            // unauthorized permission.
 
             if (!permission) {
                 permission = { 

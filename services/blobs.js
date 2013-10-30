@@ -10,7 +10,11 @@ var canView = function(principal, blob, callback) {
     services.principals.findById(services.principals.systemPrincipal, blob.owner, function(err, ownerPrincipal) {
         if (err) return callback(err);
 
-        services.permissions.authorize(principal, ownerPrincipal, 'subscribe', {}, function(err, permission) {
+        services.permissions.authorize({ 
+            principal: principal,
+            principal_for: ownerPrincipal,
+            action: 'subscribe'
+        }, {}, function(err, permission) {
             if (err) return callback(err);
             if (!permission.authorized) {
                 log.info('principal: ' + principal.id + ' attempted unauthorized view of blob: ' + blob.id);

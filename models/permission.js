@@ -11,7 +11,7 @@ permissionSchema.add({
     principal_for: { type: Schema.Types.ObjectId, ref: 'Principal' },
 
     expires:      { type: Date },
-    action:       { type: String, enum: ['admin', 'subscribe', 'send'] },
+    action:       { type: String, enum: ['admin', 'send', 'subscribe', 'view'] },
     filter:       { type: String, default: "{}" },
     priority:     { type: Number, required: true },
     authorized:   { type: Boolean, required: true }
@@ -38,23 +38,23 @@ Permission.prototype.expired = function() {
     return this.expires && Date.now() > this.expires.getTime();
 };
 
-Permission.prototype.match = function(requestingPrincipal, principalFor, action, obj) {
+Permission.prototype.match = function(request, obj) {
     if (this.expired()) {
         log.debug('permission: ' + JSON.stringify(this) + ': expired: match == false');
         return false;
     }
 
-    if (this.action && this.action !== action) {
+    if (this.action && this.action !== request.action) {
         log.debug('permission: ' + JSON.stringify(this) + ': action mismatch: match == false');
         return false;
     }
 
-    if (this.issued_to && !this.issued_to.equals(requestingPrincipal.id)) {
+    if (this.issued_to && !this.issued_to.equals(request.principal.id)) {
         log.debug('permission: ' + JSON.stringify(this) + ': issued_to mismatch: match == false');
         return false;
     }
 
-    if (this.principal_for && (!principalFor || !this.principal_for.equals(principalFor.id))) {
+    if (this.principal_for && (!request.principal_for || !this.principal_for.equals(request.principal_for.id))) {
         log.debug('permission: ' + JSON.stringify(this) + ': principal_for mismatch: match == false');
         return false;
     }

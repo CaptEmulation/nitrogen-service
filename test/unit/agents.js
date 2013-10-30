@@ -11,13 +11,16 @@ describe('agent service', function() {
         services.principals.updateLastConnection(fixtures.models.principals.user, "127.0.0.1");
 
         setTimeout(function() {
-            services.permissions.authorize(fixtures.models.principals.user, fixtures.models.principals.device, 'admin', {}, function(err, permission) {
+            services.permissions.authorize({
+                principal: fixtures.models.principals.user,
+                principal_for: fixtures.models.principals.device,
+                action: 'admin'
+            }, {}, function(err, permission) {
                 assert.ifError(err);
                 assert(permission.authorized);
                 done();
             });
         }, 200);
-
     });
 
     it('matcher does not match 2 users at same ip address for 2nd user', function(done) {
@@ -29,7 +32,11 @@ describe('agent service', function() {
 
             setTimeout(function() {
                 log.error("############## user is admin of device authorize");
-                services.permissions.authorize(fixtures.models.principals.user, fixtures.models.principals.device, 'admin', {}, function(err, permission) {
+                services.permissions.authorize({
+                    principal: fixtures.models.principals.user,
+                    principal_for: fixtures.models.principals.device,
+                    action: 'admin'
+                }, {}, function(err, permission) {
                     assert.ifError(err);
                     assert.equal(permission.authorized, false);
                     done();
