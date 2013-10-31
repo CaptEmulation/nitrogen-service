@@ -40,6 +40,8 @@ exports.up = function(migrationCallback) {
 
                     services.principals.update(services.principals.servicePrincipal, principal.id, {owner: null}, principalCallback); 
                 });
+            } else {
+                return principalCallback();
             }
         }, migrationCallback);
     });

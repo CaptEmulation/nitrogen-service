@@ -73,12 +73,6 @@ var create = function(principal, callback) {
                 createPermissions(principal, function(err) {
                     if (err) return callback(err);
 
-                    // LEGACY:  Remove
-                    if (principal.is('user') || principal.is('service')) {
-                        principal.id = new mongoose.Types.ObjectId();
-                        principal.owner = principal.id;
-                    }
-
                     principal.save(function(err, principal) {
                         if (err) return callback(err);
 

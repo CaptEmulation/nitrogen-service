@@ -8,8 +8,6 @@ principalSchema.add({
     name: { type: String },                                 // user friendly name for this principal
 
     public: { type: Boolean, default: false },
-    visible_to: [{ type: Schema.Types.ObjectId, ref: 'Principal' }],
-
     claim_code: { type: String },
 
     last_ip: { type: String },
@@ -27,9 +25,11 @@ principalSchema.add({
     password_hash: { type: String },                        // base64
     salt: { type: String },                                 // base64
 
+    visible_to:     [{ type: Schema.Types.ObjectId, ref: 'Principal' }],
+
 // DEPRECIATED FIELDS
 
-    // unused after migration 00002
+    // remove after migration 00002 has run
     admin: { type: Boolean, default: false },
     owner: { type: Schema.Types.ObjectId, ref: 'Principal' }
 
@@ -39,9 +39,10 @@ principalSchema.index({ capabilities: 1 });
 principalSchema.index({ claim_code: 1 });
 principalSchema.index({ email: 1 });
 principalSchema.index({ last_ip: 1 });
-principalSchema.index({ owner: 1 });
+//principalSchema.index({ owner: 1 });
 principalSchema.index({ public: 1 });
 principalSchema.index({ type: 1 });
+principalSchema.index({ visible_to: 1 });
 
 principalSchema.virtual('secret').set(function(value) { this._secret = value; });
 principalSchema.virtual('secret').get(function() { return this._secret; });
@@ -80,12 +81,6 @@ Principal.prototype.is = function(type) {
 
 Principal.prototype.equals = function(principal) {
     return principal.id.toString() === this.id.toString();
-};
-
-// LEGACY: Depreciated.  Remove after all uses are removed.
-Principal.prototype.owns = function(principal) {
-    return principal.owner && principal.owner.toString() === this.id.toString() ||
-           principal.id.toString() === this.id.toString();
 };
 
 module.exports = Principal;

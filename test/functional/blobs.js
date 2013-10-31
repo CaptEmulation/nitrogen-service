@@ -18,7 +18,8 @@ if (config.blob_provider) {
                 fs.createReadStream(fixturePath).
                 pipe(
                     request.post({ url: config.blobs_endpoint,
-                                   headers: { 'Content-Type': 'image/jpeg', 'Content-Length': stats.size,
+                                   headers: { 'Content-Type': 'image/jpeg', 
+                                              'Content-Length': stats.size,
                                               'Authorization': fixtures.models.accessTokens.device.toAuthHeader() } },
                         function (err, resp, body) {
                             assert.ifError(err);
@@ -37,7 +38,6 @@ if (config.blob_provider) {
                                 assert.ifError(err);
                                 assert.equal(resp.statusCode, 200);
                                 assert.equal(resp.body.length, 28014);
-                                fixtures.models.principals.device.owner = fixtures.models.principals.user.id;
                                 fixtures.models.principals.device.save(function(err) {
                                     assert.ifError(err);
 
@@ -51,7 +51,6 @@ if (config.blob_provider) {
 
                                             assert.equal(resp.statusCode, 200);
 
-                                            fixtures.models.principals.device.owner = null;
                                             fixtures.models.principals.device.save(function(err) {
                                                 assert.ifError(err);
 
