@@ -38,7 +38,7 @@ function matchDevice(device, principal, callback) {
             if (err) {
                 log.error("matcher: updating claimed principal failed: " + err);
             } else {
-                log.info("matcher: successfully set " + device.id + " as the owner of " + principal.id);
+                log.info("matcher: successfully set " + principal.id + " as the admin of " + device.id);
             }
 
             return callback();
