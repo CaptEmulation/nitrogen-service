@@ -6,14 +6,8 @@ var async = require('async')
   , utils = require('../utils');
 
 // STOPMERGE list:
-// * Remove use of principal.owner
-// *    Implement visible_to
-// *        visible_to should be a list of anyone that has a 'view' permission on this principal
-// *            { (principalFor: principal.id or principalFor: ) and action: 'view' }
-// *            need to recalculate visible_to for any principals that permission intersects
-// *            if null, all principals (shouldn't happen since service principal creation happens first)
 // * Filtering permissions down to the ones a principal can see.
-// * Authorization of principal to create a permission for a principal (does that permission ?).
+// * Authorization of principal to create a permission for a principal (does it have the right to grant that permission ?).
 
 var authorize = function(request, obj, callback) {
     log.debug('authorizing ' + request.principal.id + ' for action: ' + request.action + ' for principal: ' + !request.principal_for ? "" : request.principal_for.id + ' on object: ' + JSON.stringify(obj));
