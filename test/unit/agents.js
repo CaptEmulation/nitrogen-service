@@ -66,6 +66,7 @@ describe('agent service', function() {
                 var claim = new models.Message({
                     type: 'claim',
                     from: fixtures.models.principals.user.id,
+                    to: services.principals.servicePrincipal.id,
                     body: {
                         claim_code: 'TAKE-1234'
                     }
@@ -82,7 +83,7 @@ describe('agent service', function() {
                             assert(permission.authorized);
                             done();
                         });
-                    }, 200);                
+                    }, 200);
                 });
             });
         });
