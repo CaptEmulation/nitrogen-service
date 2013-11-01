@@ -10,14 +10,14 @@ var async = require('async')
 // * Authorization of principal to create a permission for a principal (does it have the right to grant that permission ?).
 
 var authorize = function(request, obj, callback) {
-    log.debug('authorizing ' + request.principal.id + ' for action: ' + request.action + ' for principal: ' + !request.principal_for ? "" : request.principal_for.id + ' on object: ' + JSON.stringify(obj));
+    var principalForId =  !request.principal_for ? "" : request.principal_for.id;
+    log.info('authorizing ' + request.principal.id + ' for action: ' + request.action + ' for principal: ' + principalForId + ' on object: ' + JSON.stringify(obj));
     permissionsFor(request.principal, function(err, permissions) {
         if (err) return callback(err);
 
-        // TODO: remove this once permissions is solid.
-        permissions.forEach(function(permission) {
-            log.debug(JSON.stringify(permission));
-        });
+        //permissions.forEach(function(permission) {
+        //    log.debug(JSON.stringify(permission));
+        //});
 
         // look for a match in the sorted permissions and return that.
         // by default, actions are not authorized.
@@ -26,7 +26,6 @@ var authorize = function(request, obj, callback) {
             log.debug('checking permission: ' + JSON.stringify(permission));
             cb(permission.match(request, obj));
         }, function(permission) {
-            log.info('authorize result: ' + JSON.stringify(permission));
 
             // to simplify logic in callback, if no permission is found, callback with an
             // unauthorized permission.
@@ -37,6 +36,7 @@ var authorize = function(request, obj, callback) {
                 };
             }
             
+            log.info('authorize result: ' + JSON.stringify(permission));
             return callback(null, permission);
         });
     });
@@ -48,6 +48,7 @@ var create = function(authPrincipal, permission, callback) {
     if (permission.authorized !== false && permission.authorized !== true) return callback(new Error('permission must have authorized.'));
 
     // TODO: is authPrincipal authorized to create this permission.
+
     permission.save(function(err, permission) {
         if (err) return callback(err);
 
