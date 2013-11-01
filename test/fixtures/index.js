@@ -1,6 +1,7 @@
 var async = require('async')
   , config = require('../../config')
   , fs = require('fs')
+  , log = require('../../log')
   , models = require('../../models')
   , services = require('../../services');
 
@@ -11,7 +12,7 @@ var removeAll = function (modelType, callback) {
 };
 
 var createDeviceFixtures = function(callback) {
-    console.log("FIXTURES: creating device fixtures");
+    log.debug("creating device fixtures");
 
     var device = new models.Principal({ type: 'device',
                                         name: 'existing_device',
@@ -30,7 +31,7 @@ var createDeviceFixtures = function(callback) {
             var updates = { expires_at: new Date(new Date().getTime() + (15 * 60000))};
             models.AccessToken.update({ _id: accessToken.id }, { $set: updates }, function (err, updateCount) {
                 fixtures.accessTokens.device = accessToken;
-                console.log("FIXTURES: creating device fixtures: FINISHED: " + updates.expires_at);
+                log.debug("creating device fixtures: FINISHED: " + updates.expires_at);
                 callback();
             });
         });
@@ -39,18 +40,18 @@ var createDeviceFixtures = function(callback) {
 };
 
 var createServiceUserFixtures = function(callback) {
-    console.log("FIXTURES: creating service user fixtures");
+    log.debug("creating service user fixtures");
     services.accessTokens.findOrCreateToken(services.principals.servicePrincipal, function(err, accessToken) {
         if (err) throw err;
 
         fixtures.accessTokens.service = accessToken;
-        console.log("FIXTURES: creating service user fixtures: FINISHED");
+        log.debug("creating service user fixtures: FINISHED");
         callback();
     });
 };
 
 var createAgentFixtures = function(callback) {
-    console.log("FIXTURES: creating agent fixtures");
+    log.debug("creating agent fixtures");
 
     var agent = new models.Agent({
         action: ";",
@@ -62,14 +63,14 @@ var createAgentFixtures = function(callback) {
         if (err) throw err;
 
         fixtures.agents.nop = agent;
-        console.log("FIXTURES: creating agent fixtures finished");
+        log.debug("creating agent fixtures: FINISHED");
 
         callback();
     });
 };
 
 var createUserFixtures = function(callback) {
-    console.log("FIXTURES: creating user fixtures");
+    log.debug("creating user fixtures");
 
     var user = new models.Principal({ type: 'user',
                                       email: 'user@server.org',
@@ -102,7 +103,7 @@ var createUserFixtures = function(callback) {
 
                     fixtures.accessTokens.anotherUser = accessToken;
 
-                    console.log("FIXTURES: creating user fixtures: FINISHED");
+                    log.debug("creating user fixtures: FINISHED");
                     callback();
                 });
             });
@@ -111,7 +112,7 @@ var createUserFixtures = function(callback) {
 };
 
 var createBlobFixture = function(callback) {
-    console.log("FIXTURES: creating blob fixtures");
+    log.debug("creating blob fixtures");
 
     var fixture_path = 'test/fixtures/images/image.jpg';
 
@@ -129,7 +130,7 @@ var createBlobFixture = function(callback) {
 
             fixtures.blobs.removableBlob = blob;
 
-            console.log("FIXTURES: creating blob fixtures: FINISHED");
+            log.debug("creating blob fixtures: FINISHED");
 
             callback();
         });
@@ -137,7 +138,7 @@ var createBlobFixture = function(callback) {
 };
 
 var createDeviceIpMessageFixture = function(callback) {
-    console.log("FIXTURES: creating device ip fixtures");
+    log.debug("creating device ip fixtures");
 
     var message = new models.Message({ from: fixtures.principals.device.id,
                                        type: "ip",
@@ -148,7 +149,7 @@ var createDeviceIpMessageFixture = function(callback) {
         if (err) throw err;
 
         fixtures.messages.deviceIp = messages[0];
-        console.log("FIXTURES: creating device ip fixtures: FINISHED");
+        log.debug("creating device ip fixtures: FINISHED");
         callback();
     });
 };

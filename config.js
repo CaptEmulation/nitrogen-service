@@ -12,7 +12,10 @@ var config = null;
 
 if (process.env.NODE_ENV === "production") {
     config = {
-        internal_port: process.env.PORT
+        internal_port: process.env.PORT,
+        protocol: 'http',
+        external_port: 3030,
+        internal_port: 3030 
     };
 } else if (process.env.NODE_ENV === "test") {
     config = {
@@ -134,7 +137,7 @@ if (process.env.LOGGLY_SUBDOMAIN &&
     });
 }
 
-log.add(winston.transports.Console, { colorize: true, timestamp: true, level: 'debug' });
+log.add(winston.transports.Console, { colorize: true, timestamp: true, level: 'error' });
 
 // if you'd like additional indexes applied to messages, you can specify them here.
 config.message_indexes = [

@@ -4,7 +4,7 @@ var async = require('async')
 
 function AzurePubSubProvider() {
     if (!process.env.AZURE_SERVICEBUS_NAMESPACE || !process.env.AZURE_SERVICEBUS_ACCESS_KEY) {
-        return console.log("WARNING: Azure service bus namespace or access key not configured.  Set AZURE_SERVICEBUS_NAMESPACE and AZURE_SERVICEBUS_ACCESS_KEY as environment variables to configure the azure pub sub provider.");
+        return log.warn("WARNING: Azure service bus namespace or access key not configured.  Set AZURE_SERVICEBUS_NAMESPACE and AZURE_SERVICEBUS_ACCESS_KEY as environment variables to configure the azure pub sub provider.");
     }
 
     this.serviceBus = azure.createServiceBusService();
@@ -13,7 +13,7 @@ function AzurePubSubProvider() {
     async.each(['messages', 'principals'], function(topic, callback) {
         self.serviceBus.createTopicIfNotExists(topic, callback);
     }, function(err) {
-        if (err) return console.log("Azure PubSub Provider: Not able to create/confirm service bus topics: " + err);
+        if (err) return log.error("Azure PubSub Provider: Not able to create/confirm service bus topics: " + err);
     });
 }
 

@@ -233,7 +233,9 @@ var filterForPrincipal = function(principal, filter) {
         visibilityClauses.push({ visible_to: principal._id });
     }
 
-    return { $and: [ filter, { $or: visibilityClauses } ] };
+    var query = { $and: [ filter, { $or: visibilityClauses } ] };
+    log.info("********** FINAL QUERY: " + JSON.stringify(query));
+    return query;
 };
 
 var find = function(principal, filter, options, callback) {
@@ -455,7 +457,7 @@ var updateVisibleTo = function(principalId, callback) {
     findById(services.principals.servicePrincipal, principalId, function(err, principal) {
         if (err) return callback(err);
 
-        log.info("principalId: " + principalId);
+        log.info("updating visible_to for principal id: " + principalId);
 
         if (!principal.public) {
             services.permissions.find(services.principals.servicePrincipal,

@@ -14,11 +14,18 @@ describe('agent service', function() {
             services.permissions.authorize({
                 principal: fixtures.models.principals.user,
                 principal_for: fixtures.models.principals.device,
-                action: 'admin'
+                action: 'view'
             }, {}, function(err, permission) {
                 assert.ifError(err);
                 assert(permission.authorized);
-                done();
+
+                // user has view permission to see device
+                services.principals.find(fixtures.models.principals.user, { _id: fixtures.models.principals.device.id }, {}, function(err, principals) {
+                    assert.ifError(err);
+                    assert.equal(principals.length, 1);
+
+                    done();
+                });
             });
         }, 200);
     });
@@ -31,7 +38,6 @@ describe('agent service', function() {
             services.principals.updateLastConnection(fixtures.models.principals.anotherUser, "127.0.0.1");
 
             setTimeout(function() {
-                log.error("############## user is admin of device authorize");
                 services.permissions.authorize({
                     principal: fixtures.models.principals.user,
                     principal_for: fixtures.models.principals.device,

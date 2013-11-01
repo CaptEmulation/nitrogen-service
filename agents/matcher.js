@@ -22,7 +22,14 @@ function matchDevice(device, principal, callback) {
             issued_to: principal.id,
             principal_for: device.id,
             priority: nitrogen.Permission.NORMAL_PRIORITY
-        }) 
+        }),
+        new nitrogen.Permission({
+            authorized: true,
+            action: 'view',
+            issued_to: principal.id,
+            principal_for: device.id,
+            priority: nitrogen.Permission.NORMAL_PRIORITY
+        })
     ];
 
     async.each(permissions, function(permission, cb) {

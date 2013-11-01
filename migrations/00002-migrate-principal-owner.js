@@ -4,7 +4,7 @@ var async = require('async')
   , services = require('../services');
 
 exports.up = function(migrationCallback) {
-    services.principals.find(services.principals.servicePrincipal, {}, {}, function(err, principals) {
+    models.Principal.find({}, function(err, principals) {
         if (err) return callback(err);
 
         async.each(principals, function(principal, principalCallback) {
@@ -30,6 +30,13 @@ exports.up = function(migrationCallback) {
                         issued_to: principal.owner,
                         principal_for: principal.id,
                         priority: nitrogen.Permission.NORMAL_PRIORITY
+                    }),
+                    services.permissions.translate({
+                        authorized: true,
+                        action: 'view',
+                        issued_to: principal.owner,
+                        principal_for: principal.id,
+                        priority: nitrogen.Permission.NORMAL_PRIORITY
                     })
                 ];
 
@@ -37,11 +44,14 @@ exports.up = function(migrationCallback) {
                     services.permissions.create(services.principals.servicePrincipal, permission, permissionCallback);
                 }, function(err) {
                     if (err) return principalCallback(err);
+                    services.principals.updateVisibleTo(principal.id, function(err) {
+                        if (err) return principalCallback(err);
 
-                    services.principals.update(services.principals.servicePrincipal, principal.id, {owner: null}, principalCallback); 
+                        services.principals.update(services.principals.servicePrincipal, principal.id, {owner: null}, principalCallback); 
+                    });
                 });
             } else {
-                return principalCallback();
+                services.principals.updateVisibleTo(principal.id, principalCallback);
             }
         }, migrationCallback);
     });

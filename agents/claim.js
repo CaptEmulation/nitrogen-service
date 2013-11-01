@@ -33,6 +33,13 @@ session.onMessage({ type: 'claim' }, function(message) {
                 issued_to: message.from,
                 principal_for: claimedPrincipal.id,
                 priority: nitrogen.Permission.NORMAL_PRIORITY
+            }),
+            new nitrogen.Permission({
+                authorized: true,
+                action: 'view',
+                issued_to: message.from,
+                principal_for: claimedPrincipal.id,
+                priority: nitrogen.Permission.NORMAL_PRIORITY
             })
         ];
 

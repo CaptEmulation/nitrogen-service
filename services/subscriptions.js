@@ -183,7 +183,7 @@ var stream = function(socket, subscription) {
                 // in this case, we just need to check that we are still connected and restart the receive.
 
                 if (item) {
-                    console.log('subscriptions:  new message from subscription: ' + subscription.clientId + ' of type: ' + subscription.type + ": " + JSON.stringify(item));
+                    log.debug('subscriptions:  new message from subscription: ' + subscription.clientId + ' of type: ' + subscription.type + ": " + JSON.stringify(item));
                     socket.emit(subscription.clientId, item);
                 }
 
@@ -193,7 +193,7 @@ var stream = function(socket, subscription) {
         function(err) {
             if (err) log.error(err);
 
-            console.log("subscriptions: stream for " + subscription.clientId + " disconnected.");
+            log.info("subscriptions: stream for " + subscription.clientId + " disconnected.");
         }
     );
 };
