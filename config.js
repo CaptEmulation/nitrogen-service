@@ -76,7 +76,7 @@ config.device_secret_bytes = 128;
 config.salt_length_bytes = 64;
 
 config.access_token_bytes = 32;
-config.access_token_lifetime = 14; // days
+config.access_token_lifetime = 1; // days
 
 // # of days a message should live by default
 config.default_message_lifetime = 365;
@@ -84,18 +84,6 @@ config.default_message_lifetime = 365;
 // when the token gets within 10% (default) of config.access_token_lifetime,
 // refresh it with a new token via the response header.
 config.refresh_token_threshold = 0.8;
-
-// You can use Azure's Blob storage as a blob provider by uncommenting this configuration.
-//
-// if (process.env.AZURE_STORAGE_ACCOUNT && process.env.AZURE_STORAGE_KEY) {
-//    config.blob_provider = new providers.azure.AzureBlobProvider(config);
-// }
-
-// You can use Azure's Blob storage as a blob provider by uncommenting this configuration.
-//
-// if (process.env.AZURE_STORAGE_ACCOUNT && process.env.AZURE_STORAGE_KEY) {
-//    config.blob_provider = new providers.azure.AzureBlobProvider(config);
-// }
 
 // You can use Azure's Blob storage as a blob provider by uncommenting this configuration.
 //
