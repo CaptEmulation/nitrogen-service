@@ -12,8 +12,7 @@ var config = null;
 
 if (process.env.NODE_ENV === "production") {
     config = {
-        internal_port: process.env.PORT,
-        protocol: 'http',
+        internal_port: process.env.PORT
     };
 } else if (process.env.NODE_ENV === "test") {
     config = {
