@@ -120,6 +120,13 @@ var createCredentials = function(principal, callback) {
 var createPermissions = function(principal, callback) {
     var permissions = [
         new models.Permission({
+            action: 'admin',
+            authorized: true,
+            issued_to: principal.id,
+            principal_for: principal.id,
+            priority: nitrogen.Permission.NORMAL_PRIORITY
+        }),
+        new models.Permission({
             action: 'subscribe',
             authorized: true,
             issued_to: principal.id,
@@ -134,16 +141,6 @@ var createPermissions = function(principal, callback) {
             priority: nitrogen.Permission.NORMAL_PRIORITY
         })                
     ];
-
-    if (principal.is('user')) {
-        permissions.push(new models.Permission({
-            action: 'admin',
-            authorized: true,
-            issued_to: principal.id,
-            principal_for: principal.id,
-            priority: nitrogen.Permission.NORMAL_PRIORITY
-        }));
-    }
 
     if (principal.is('service')) {
         permissions = permissions.concat([
@@ -233,9 +230,7 @@ var filterForPrincipal = function(principal, filter) {
         visibilityClauses.push({ visible_to: principal._id });
     }
 
-    var query = { $and: [ filter, { $or: visibilityClauses } ] };
-    log.info("********** FINAL QUERY: " + JSON.stringify(query));
-    return query;
+    return { $and: [ filter, { $or: visibilityClauses } ] };
 };
 
 var find = function(principal, filter, options, callback) {
