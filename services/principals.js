@@ -224,13 +224,16 @@ var createUserCredentials = function(principal, callback) {
 
 var filterForPrincipal = function(principal, filter) {
     if (principal && principal.is('service')) return filter;
+    if (!principal) log.warn("principals service: filterForPrincipal called without principal.");
 
     var visibilityClauses = [ { public: true } ];
     if (principal) {
         visibilityClauses.push({ visible_to: principal._id });
     }
 
-    return { $and: [ filter, { $or: visibilityClauses } ] };
+    var query = { $and: [ filter, { $or: visibilityClauses } ] };
+    //log.info('principal query with visibility: ' + JSON.stringify(query));
+    return query;
 };
 
 var find = function(principal, filter, options, callback) {

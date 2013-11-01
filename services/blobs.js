@@ -7,7 +7,7 @@ var async = require('async')
   , utils = require('../utils');
 
 var canView = function(principal, blob, callback) {
-    services.principals.findById(services.principals.systemPrincipal, blob.owner, function(err, ownerPrincipal) {
+    services.principals.findById(services.principals.servicePrincipal, blob.owner, function(err, ownerPrincipal) {
         if (err) return callback(err);
 
         services.permissions.authorize({ 
@@ -17,7 +17,7 @@ var canView = function(principal, blob, callback) {
         }, {}, function(err, permission) {
             if (err) return callback(err);
             if (!permission.authorized) {
-                log.info('principal: ' + principal.id + ' attempted unauthorized view of blob: ' + blob.id);
+                log.warn('principal: ' + principal.id + ' attempted unauthorized view of blob: ' + blob.id);
                 return callback(utils.authorizationError(permission));
             }
 

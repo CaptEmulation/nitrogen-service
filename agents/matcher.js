@@ -55,7 +55,9 @@ function matchDevice(device, principal, callback) {
 
 function matchIfNoAdmin(device, principal, callback) {
     nitrogen.Permission.find(session, { principal_for: device.id, action: 'admin' }, {}, function(err, permissions) {
-        if (permissions.length === 0) {
+
+        // a principal can be an admin of itself and not matched.
+        if (permissions.length < 2 && (permissions.length === 0 || permissions[0].issued_to === device.id)) {
             matchDevice(device, principal, callback);
         } else {
             log.info('matcher: device id: ' + device.id + ' already has admin(s): not matching.');

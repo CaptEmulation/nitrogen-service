@@ -46,7 +46,10 @@ var create = function(principal, message, callback) {
             action: 'send'
         }, message, function(err, permission) {
             if (err) return callback(err);
-            if (!permission.authorized) return callback(utils.authorizationError());
+            if (!permission.authorized) {
+                log.warn('principal: ' + principal.id + ' attempted unauthorized send of message: ' + JSON.stringify(message));
+                return callback(utils.authorizationError());  
+            } 
 
             if (message.is('log'))
                 log.log(message.body.severity, message.body.message, { principal: message.from.toString() });
