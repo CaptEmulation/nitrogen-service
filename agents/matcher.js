@@ -1,31 +1,9 @@
 function matchDevice(device, principal, callback) {
-    log.info('matcher: device id: ' + device.id + ' has no admins, adding admin rights for principal: ' + principal.id);
+    log.info('matcher: device id: ' + device.id + ' has no admins, giving wildcard rights to principal: ' + principal.id);
 
     var permissions = [
         new nitrogen.Permission({
             authorized: true,
-            action: 'admin',
-            issued_to: principal.id,
-            principal_for: device.id,
-            priority: nitrogen.Permission.NORMAL_PRIORITY
-        }),
-        new nitrogen.Permission({
-            authorized: true,
-            action: 'subscribe',
-            issued_to: principal.id,
-            principal_for: device.id,
-            priority: nitrogen.Permission.NORMAL_PRIORITY
-        }),
-        new nitrogen.Permission({
-            authorized: true,
-            action: 'send',
-            issued_to: principal.id,
-            principal_for: device.id,
-            priority: nitrogen.Permission.NORMAL_PRIORITY
-        }),
-        new nitrogen.Permission({
-            authorized: true,
-            action: 'view',
             issued_to: principal.id,
             principal_for: device.id,
             priority: nitrogen.Permission.NORMAL_PRIORITY
@@ -41,7 +19,7 @@ function matchDevice(device, principal, callback) {
 
         device.claim_code = null;
 
-        device.save(session, function(err, principal) {
+        device.save(session, function(err, savedDevice) {
             if (err) {
                 log.error("matcher: updating claimed principal failed: " + err);
             } else {

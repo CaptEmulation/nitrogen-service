@@ -31,7 +31,10 @@ describe('agent service', function() {
     });
 
     it('matcher does not match 2 users at same ip address for 2nd user', function(done) {
-        services.permissions.remove(services.principals.servicePrincipal, { action: 'admin', principal_for: fixtures.models.principals.device.id }, function(err, removed) {
+        services.permissions.remove(services.principals.servicePrincipal, {
+            issued_to: fixtures.models.principals.user.id,
+            principal_for: fixtures.models.principals.device.id
+        }, function(err, removed) {
             assert.ifError(err);
 
             services.principals.updateLastConnection(fixtures.models.principals.user, "127.0.0.1");

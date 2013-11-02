@@ -70,25 +70,25 @@ var create = function(principal, callback) {
             createCredentials(principal, function(err, principal) {
                 if (err) return callback(err);
 
-                createPermissions(principal, function(err) {
+                principal.save(function(err, principal) {
                     if (err) return callback(err);
 
-                    principal.save(function(err, principal) {
+                    // TODO: yuck.  createPermissions needs servicePrincipal so we need to hotwire this here and now.
+                    if (principal.is('service')) {
+                        services.principals.servicePrincipal = principal;
+                    }
+
+                    createPermissions(principal, function(err) {
                         if (err) return callback(err);
 
                         log.info("created " + principal.type + " principal: " + principal.id);
 
-                        // TODO: principals_realtime:  Disabled until rate limited to prevent update storms.
-                        //notifySubscriptions(principal, function(err) {
-                            updateVisibleTo(principal.id, function(err, updatedPrincipal) {
+                        findById(services.principals.servicePrincipal, principal.id, function(err, updatedPrincipal) {
+                            if (principal.is('device'))
+                                updatedPrincipal.secret = principal.secret;
 
-                                // pass along secret if this is a device
-                                if (principal.is('device'))
-                                    updatedPrincipal.secret = principal.secret;
-
-                                return callback(err, updatedPrincipal);
-                            });
-                        //});
+                            return callback(err, updatedPrincipal);
+                        });
                     });
                 });
             });
@@ -98,7 +98,7 @@ var create = function(principal, callback) {
 
 var checkForExistingPrincipal = function(principal, callback) {
     if (!services.principals.servicePrincipal) {
-        log.error('principal service: not able to check for existing user because no service principal.');
+        log.info('principal service: not able to check for existing user because no service principal.');
         return callback(null, null);
     }
 
@@ -118,70 +118,25 @@ var createCredentials = function(principal, callback) {
 };
 
 var createPermissions = function(principal, callback) {
-    var permissions = [
-        new models.Permission({
-            action: 'admin',
-            authorized: true,
-            issued_to: principal.id,
-            principal_for: principal.id,
-            priority: nitrogen.Permission.NORMAL_PRIORITY
-        }),
-        new models.Permission({
-            action: 'subscribe',
-            authorized: true,
-            issued_to: principal.id,
-            principal_for: principal.id,
-            priority: nitrogen.Permission.NORMAL_PRIORITY
-        }),
-        new models.Permission({
-            action: 'view',
-            authorized: true,
-            issued_to: principal.id,
-            principal_for: principal.id,
-            priority: nitrogen.Permission.NORMAL_PRIORITY
-        })                
-    ];
+    var permission;
 
     if (principal.is('service')) {
-        permissions = permissions.concat([
-            // allow service to see all principals in the system.
-            services.permissions.translate({ 
-                issued_to: principal.id, 
-                action: 'view', 
-                authorized: true, 
-                priority: 475 
-            }),
-
-            // allow service to send 'ip' messages.
-            services.permissions.translate({ 
-                issued_to: principal.id, 
-                action: 'send', 
-                filter: '{ "type": "ip" }', 
-                authorized: true, 
-                priority: 500 
-            }),
-
-            // allow service to subscribe to any principal's message stream.
-            services.permissions.translate({ 
-                issued_to: principal.id, 
-                action: 'subscribe', 
-                authorized: true, 
-                priority: 515 
-            }),
-
-            // allow service to admin anything.
-            services.permissions.translate({ 
-                issued_to: principal.id, 
-                action: 'admin', 
-                authorized: true, 
-                priority: 525 
-            })
-        ]);
+        // service is authorized to do everything.
+        permission = new models.Permission({
+            authorized: true, 
+            issued_to: services.principals.servicePrincipal.id, 
+            priority: 0 
+        });
+    } else {
+        permission = new models.Permission({
+            authorized: true,
+            issued_to: principal.id,
+            principal_for: principal.id,
+            priority: nitrogen.Permission.NORMAL_PRIORITY
+        });                        
     }
 
-    async.each(permissions, function(permission, cb) { 
-        permission.save(cb);
-    }, callback);
+    services.permissions.create(services.principals.servicePrincipal, permission, callback);
 };
 
 var createSecretCredentials = function(principal, callback) {
@@ -452,15 +407,20 @@ var updateLastConnection = function(principal, ip) {
 };
 
 var updateVisibleTo = function(principalId, callback) {
+    log.info("updating visible_to for: " + principalId);
     findById(services.principals.servicePrincipal, principalId, function(err, principal) {
         if (err) return callback(err);
-
+        if (!principal) return callback(new Error('principal.service:updateVisibleTo: passed principal not found'));
         log.info("updating visible_to for principal id: " + principalId);
 
         if (!principal.public) {
             services.permissions.find(services.principals.servicePrincipal,
                 { $and: [
-                    { action: 'view' },
+                    { $or : [
+                        { action: 'view' },
+                        { action: null }
+                      ]
+                    },
                     { $or : [
                         { principal_for: principalId },
                         { principal_for: null }

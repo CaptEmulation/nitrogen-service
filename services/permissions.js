@@ -16,7 +16,7 @@ var authorize = function(request, obj, callback) {
         if (err) return callback(err);
 
         //permissions.forEach(function(permission) {
-        //    log.debug(JSON.stringify(permission));
+        //    log.info(JSON.stringify(permission));
         //});
 
         // look for a match in the sorted permissions and return that.
@@ -44,7 +44,6 @@ var authorize = function(request, obj, callback) {
 
 var create = function(authPrincipal, permission, callback) {
     if (!authPrincipal) return callback(utils.principalRequired());
-    if (!permission.action) return callback(new Error('permission must have action.'));
     if (permission.authorized !== false && permission.authorized !== true) return callback(new Error('permission must have authorized.'));
 
     // TODO: is authPrincipal authorized to create this permission.
@@ -55,10 +54,10 @@ var create = function(authPrincipal, permission, callback) {
         config.cache_provider.del('permissions', permission.issued_to, function(err) {
             if (err) return callback(err);
 
-            if (permission.action === 'view') {
+            if (permission.principal_for && (!permission.action || permission.action === 'view')) {
                 services.principals.updateVisibleTo(permission.principal_for, function(err) {
                     return callback(err, permission);
-                });
+                });   
             } else {
                 return callback(null, permission);
             }

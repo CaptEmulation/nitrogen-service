@@ -1,6 +1,6 @@
 session.onMessage({ type: 'claim' }, function(message) {
     if (!message.body.claim_code) {
-        log.error("claimAgent: failed principal claim with NULL code (shouldn't happen).");
+        log.error("claimAgent: no claim_code provided in claim request sent by " + message.from);
         return;
     }
 
@@ -15,28 +15,6 @@ session.onMessage({ type: 'claim' }, function(message) {
         var permissions = [
             new nitrogen.Permission({
                 authorized: true,
-                action: 'admin',
-                issued_to: message.from,
-                principal_for: claimedPrincipal.id,
-                priority: nitrogen.Permission.NORMAL_PRIORITY
-            }),
-            new nitrogen.Permission({
-                authorized: true,
-                action: 'subscribe',
-                issued_to: message.id,
-                principal_for: claimedPrincipal.id,
-                priority: nitrogen.Permission.NORMAL_PRIORITY
-            }),
-            new nitrogen.Permission({
-                authorized: true,
-                action: 'send',
-                issued_to: message.from,
-                principal_for: claimedPrincipal.id,
-                priority: nitrogen.Permission.NORMAL_PRIORITY
-            }),
-            new nitrogen.Permission({
-                authorized: true,
-                action: 'view',
                 issued_to: message.from,
                 principal_for: claimedPrincipal.id,
                 priority: nitrogen.Permission.NORMAL_PRIORITY
@@ -53,7 +31,7 @@ session.onMessage({ type: 'claim' }, function(message) {
             claimedPrincipal.save(session, function(err, principal) {
                 if (err) log.error("claimAgent: updating claimed principal failed: " + err);
 
-                log.info("claimAgent: successfully set " + message.from + " as the admin of " + principal.id);
+                log.info("claimAgent: successfully gave " + message.from + " wildcard rights to " + principal.id);
             });            
         });
     });
