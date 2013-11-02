@@ -11,7 +11,7 @@ var async = require('async')
 
 var authorize = function(request, obj, callback) {
     var principalForId =  !request.principal_for ? "" : request.principal_for.id;
-    log.info('authorizing ' + request.principal.id + ' for action: ' + request.action + ' for principal: ' + principalForId + ' on object: ' + JSON.stringify(obj));
+    log.debug('authorizing ' + request.principal.id + ' for action: ' + request.action + ' for principal: ' + principalForId + ' on object: ' + JSON.stringify(obj));
     permissionsFor(request.principal, function(err, permissions) {
         if (err) return callback(err);
 
@@ -36,7 +36,7 @@ var authorize = function(request, obj, callback) {
                 };
             }
             
-            log.info('authorize result: ' + JSON.stringify(permission));
+            log.debug('authorize result: ' + JSON.stringify(permission));
             return callback(null, permission);
         });
     });

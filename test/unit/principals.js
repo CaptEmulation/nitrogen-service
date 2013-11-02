@@ -1,8 +1,9 @@
 var assert = require('assert')
   , config = require('../../config')
   , fixtures = require('../fixtures')
+  , log = require('../../log')
   , models = require('../../models')
-  , services = require("../../services");
+  , services = require('../../services');
 
 describe('principals service', function() {
     var passwordFixture = "sEcReT44";
@@ -76,12 +77,32 @@ describe('principals service', function() {
         });
     });
 
-    it('service can update a principal', function(done) {
+    it('service can update name', function(done) {
         fixtures.models.principals.device.name = 'my camera';
         services.principals.update(services.principals.servicePrincipal, fixtures.models.principals.device.id, { name: "my camera"}, function(err, principal) {
             assert.ifError(err);
             assert.equal(principal.name, 'my camera');
 
+            done();
+        });
+    });
+
+    it('service can update visible_to', function(done) {
+        fixtures.models.principals.device.name = 'my camera';
+
+        fixtures.models.principals.device.visible_to.push("52747742e2948d8e7f000001");
+
+        services.principals.update(services.principals.servicePrincipal, fixtures.models.principals.device.id, 
+            { visible_to: fixtures.models.principals.device.visible_to }, function(err, updatedPrincipal) {
+            assert.ifError(err);
+
+            var foundPrincipal = false;
+            updatedPrincipal.visible_to.forEach(function(principalId) {
+                if (principalId.toString() === "52747742e2948d8e7f000001")
+                    foundPrincipal = true;
+            });
+
+            assert(foundPrincipal);
             done();
         });
     });
