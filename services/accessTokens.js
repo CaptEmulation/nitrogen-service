@@ -1,7 +1,8 @@
-var config = require("../config")
+var config = require('../config')
   , crypto = require('crypto')
-  , models = require("../models")
-  , utils = require("../utils");
+  , models = require('../models')
+  , services = require('../services')
+  , utils = require('../utils');
 
 var create = function(principal, callback) {
     var accessToken = new models.AccessToken({
@@ -55,10 +56,12 @@ var verify = function(token, done) {
         if (err) return done(err);
         if (!accessToken || accessToken.expired()) { return done("Session has expired.", false); }
 
-        var principal = accessToken.principal;
-        principal.accessToken = accessToken;
+        services.principals.findById(services.principals.servicePrincipal, accessToken.principal, function(err, principal) {
+            if (err) return done(err);
 
-        done(null, principal);
+            principal.accessToken = accessToken;
+            done(null, principal);
+        });
     });
 };
 
