@@ -5,7 +5,7 @@ var async = require('async')
   , services = require('../services')
   , utils = require('../utils');
 
-// STOPMERGE list:
+// v0.2 TODO list:
 // * Filtering permissions down to the ones a principal can see.
 // * Authorization of principal to create a permission for a principal (does it have the right to grant that permission ?).
 

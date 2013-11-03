@@ -82,6 +82,8 @@ exports.show = function(req, res) {
 };
 
 exports.update = function(req, res) {
+    if (req.body.visible_to) return utils.handleError(res, utils.badRequest("update of principal can't include visible_to"));
+
     services.principals.update(req.user, req.params.id, req.body, function(err, principal) {
         if (err) return utils.handleError(res, err);
 

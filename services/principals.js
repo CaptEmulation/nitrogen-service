@@ -360,6 +360,7 @@ var update = function(authorizingPrincipal, id, updates, callback) {
             if (!permission.authorized) return callback(utils.authorizationError(permission));
 
             models.Principal.update({ _id: id }, { $set: updates }, function (err, updateCount) {
+                log.info("update of principal: " + id + " with updates: " + JSON.stringify(updates) + " has finished");
                 if (err) return callback(err);
 
                 findById(authorizingPrincipal, id, function(err, updatedPrincipal) {
@@ -416,6 +417,7 @@ var updateVisibleTo = function(principalId, callback) {
         if (!principal.public) {
             services.permissions.find(services.principals.servicePrincipal,
                 { $and: [
+                    { authorized: true },
                     { $or : [
                         { action: 'view' },
                         { action: null }
@@ -433,8 +435,11 @@ var updateVisibleTo = function(principalId, callback) {
                     if (err) return callback(err);
 
                     principal.visible_to = permissions.map(function(permission) {
+                        log.info("adding " + permission.issued_to + " to visible principals.");
                         return permission.issued_to;
                     });
+
+                    log.info("final visible_to: " + JSON.stringify(principal.visible_to));
 
                     services.principals.update(services.principals.servicePrincipal, principalId, { visible_to: principal.visible_to }, callback);
                 }
