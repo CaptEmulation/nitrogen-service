@@ -12,7 +12,7 @@ permissionSchema.add({
 
     expires:      { type: Date },
     action:       { type: String, enum: ['admin', 'send', 'subscribe', 'view'] },
-    filter:       { type: String, default: "{}" },
+    filter:       { type: String },
     priority:     { type: Number, required: true },
     authorized:   { type: Boolean, required: true }
 });
@@ -59,20 +59,19 @@ Permission.prototype.match = function(request, obj) {
         return false;
     }
 
-    log.debug('checking filter: ' + JSON.stringify(this.filter) + ' against: ' + JSON.stringify([obj]));
-    if (this.filter) {
-        if (!this.filterObject) {
-            console.dir(this.filter);
-            this.filterObject = JSON.parse(this.filter);
-        }
-
-        if (sift(this.filterObject, [obj]).length > 0) {
-            log.debug('filter matches: match == true');
-            return true;
-        }
+    if (!this.filter) {
+        return true;
     }
 
-    return false;
+    log.debug('checking filter: ' + JSON.stringify(this.filter) + ' against: ' + JSON.stringify([obj]));
+
+    // filter is stored as a string.  if we haven't previously parsed it into an object, do that now.
+    if (!this.filterObject) {
+        console.dir(this.filter);
+        this.filterObject = JSON.parse(this.filter);
+    }
+
+    return sift(this.filterObject, [obj]).length > 0;
 };
 
 Permission.DEFAULT_PRIORITY_BASE = 2000000000;
