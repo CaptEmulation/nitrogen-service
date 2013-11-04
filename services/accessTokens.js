@@ -58,6 +58,7 @@ var verify = function(token, done) {
 
         services.principals.findById(services.principals.servicePrincipal, accessToken.principal, function(err, principal) {
             if (err) return done(err);
+            if (!principal) return done(new Error("AccessToken service.verify: principal for accessToken " + accessToken.id + " not found."));
 
             principal.accessToken = accessToken;
             done(null, principal);
