@@ -4,11 +4,9 @@ var async = require('async')
   , models = require('../models')
   , mongoose = require('mongoose')
   , services = require('../services')
-  , sift = require('sift')
   , utils = require('../utils');
 
 var io;
-var subscriptions = {};
 
 var attach = function(server) {
     if (!config.pubsub_provider) return log.info('pubsub provider not configured: subscription endpoint not started.');
@@ -77,8 +75,6 @@ var create = function(subscription, callback) {
     config.pubsub_provider.createSubscription(subscription, function(err) {
         if (err) callback(err);
 
-        subscriptions[subscription.clientId] = subscription;
-
         // we only save permanent subscriptions to the db, not session ones.
         if (subscription.permanent)
             save(subscription, callback);
@@ -105,22 +101,9 @@ var findOrCreate = function(subscription, callback) {
 };
 
 var publish = function(type, item, callback) {
-    if (!config.pubsub_provider) return log.error("subscriptions: can't publish without pubsub_provider");
+    if (!config.pubsub_provider) return callback(new Error("subscription service: can't publish without pubsub_provider"));
 
-    log.info("subscriptions: publishing " + type + ": " + item.id + ": " + JSON.stringify(item));
-    async.each(Object.keys(subscriptions), function(subscriptionId, eachCallback) {
-        
-        var subscription = subscriptions[subscriptionId];
-
-        if (subscription.type === type && subscription.callback) {
-            sift(subscription.filter, [item]).forEach(function(unfiltered) {
-                config.pubsub_provider.publish(subscription, item, callback);
-            });
-        }
-
-        eachCallback();
-
-    }, callback);
+    config.pubsub_provider.publish(type, item, callback);
 };
 
 var remove = function(subscription, callback) {
@@ -131,7 +114,6 @@ var remove = function(subscription, callback) {
     config.pubsub_provider.removeSubscription(subscription, function(err) {
         if (err) return callback(err);
 
-        delete subscriptions[subscription.clientId];
         delete subscription.socket.subscriptions[subscription.clientId];
 
         if (subscription.permanent)
@@ -183,7 +165,7 @@ var stream = function(socket, subscription) {
                 // in this case, we just need to check that we are still connected and restart the receive.
 
                 if (item) {
-                    log.debug('subscriptions:  new message from subscription: ' + subscription.clientId + ' of type: ' + subscription.type + ": " + JSON.stringify(item));
+                    log.debug('subscription service:  new message from subscription: ' + subscription.clientId + ' of type: ' + subscription.type + ": " + JSON.stringify(item));
                     socket.emit(subscription.clientId, item);
                 }
 
@@ -193,7 +175,7 @@ var stream = function(socket, subscription) {
         function(err) {
             if (err) log.error(err);
 
-            log.info("subscriptions: stream for " + subscription.clientId + " disconnected.");
+            log.info("subscription service: stream for " + subscription.clientId + " disconnected.");
         }
     );
 };
