@@ -128,6 +128,10 @@ var clients = {
 var loadClientPlugin = function(fullPath, clientFile) {
     var clientPath = path.join(fullPath, clientFile);
 
+    // don't add dependencies of dependencies
+    if (fullPath.split('node_modules').length > 2)
+        return;
+
     if (clientFile === 'nitrogen.js' || clientFile === 'nitrogen-min.js') {
         log.info('adding client plugin: ' + clientFile + ' from: ' + fullPath);
         clients[clientFile] += fs.readFileSync(clientPath);
