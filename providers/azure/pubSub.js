@@ -44,8 +44,11 @@ AzurePubSubProvider.sqlFromJsonQuery = function(jsonQuery) {
             subqueries.push(AzurePubSubProvider.buildFromSubArray(jsonQuery[key], " AND "));
         } else if (key === "$or") {
             subqueries.push(AzurePubSubProvider.buildFromSubArray(jsonQuery[key], " OR "));
-        } else 
-            subqueries.push(key + '=' + JSON.stringify(jsonQuery[key]));
+        } else {
+            var value = JSON.stringify(jsonQuery[key]).replace(/"/g, "'");
+            subqueries.push(key + '=' + value);
+        }
+
     }
 
     if (subqueries.length > 0)
@@ -60,14 +63,25 @@ AzurePubSubProvider.prototype.createSubscription = function(subscription, callba
         if (err) return callback(err);
 
         if (subscription.filter) {
-            self.serviceBus.createRule(
+
+            self.serviceBus.deleteRule(
                 subscription.type, 
                 subscription.name, 
-                subscription.name + "_filter", {
-                    sqlExpressionFilter: AzurePubSubProvider.sqlFromJsonQuery(subscription.filter)
-                },
-                callback
-            );  
+                azure.Constants.ServiceBusConstants.DEFAULT_RULE_NAME,
+                function(err) {
+                    if (err) return callback(err);
+
+                    self.serviceBus.createRule(
+                        subscription.type, 
+                        subscription.name, 
+                        subscription.name + "_filter", {
+                            sqlExpressionFilter: AzurePubSubProvider.sqlFromJsonQuery(subscription.filter)
+                        },
+
+                        callback
+                    );  
+                }
+            );
         } else {
             return callback();
         }
@@ -75,7 +89,12 @@ AzurePubSubProvider.prototype.createSubscription = function(subscription, callba
 };
 
 AzurePubSubProvider.prototype.publish = function(type, item, callback) {
-    this.serviceBus.sendTopicMessage(type, JSON.stringify(item), callback);
+    var serviceBusMessage = {
+        customProperties: item.toObject(),
+        body: JSON.stringify(item)
+    };
+
+    this.serviceBus.sendTopicMessage(type, serviceBusMessage, callback);
 };
 
 AzurePubSubProvider.prototype.receive = function(subscription, callback) {
