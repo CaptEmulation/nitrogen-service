@@ -35,7 +35,7 @@ It also starts up a CommandManager for the camera.  A CommandManager in Nitrogen
 
 CommandManager are mixed into a service or device project so that you can choose which commands you want your service and devices to support.  The Nitrogen project maintains a set of standard commands in the [commands](http://github.com/nitrogenjs/commands) subproject but you are free to define your own and mix them in as well.  Have a look at the definition of one of these command packages and package.json for the service project for a template for how to do that.
 
-The sample camera application above can be found in the [camera](https://github.com/nitrogenjs/camera) project.   This project uses the [Nitrogen client node.js module](http://github.com/nitrogenjs/client) to communicate with the service.  There is full API documentation for this library available at [https://api.nitrogen.io/docs](https://api.nitrogen.io/docs).
+The sample camera application above can be found in the [camera](https://github.com/nitrogenjs/camera) project.   This project uses the [Nitrogen client node.js module](http://github.com/nitrogenjs/client) to communicate with the service.  There is full API documentation for this library available at [https://api.nitrogen.io/docs/](https://api.nitrogen.io/docs/).
 
 Nitrogen also maintains a set of standard schemas to enable cross application / device interoperability.  See [docs/schema.md](docs/schemas.md).  To make a proposal for a new schema, make a pull request against this documentation subtree.
 
@@ -65,13 +65,13 @@ cmd.send(session);
 
 In this example, we use the excellent SunCalc node.js module to calculate the sunset time and then build a cameraCommand message.  Note that we set the timestamp of this command message to the sunset.  In Nitrogen, a CommandManager executes a command when the timestamp matches the current time.  This allows us to predeliver these command messages to the device and have it execute them at the appropriate time.  This is important because many devices for connectivity or battery reasons will not be continously connected to the Nitrogen service to receive messages and this allows us to still have precise control of a device.
 
-We also set a expires timestamp on this message for 5 minutes after the sunset.  CommandManagers will not execute commands that have expired so this signals that if the camera for whatever reason does not get this message within 5 minutes of the sunset that it should not take a picture.
+We also set a expires timestamp on this message for 5 minutes after the sunset.  CommandManagers will not execute commands that have expired so this signals that if the camera for whatever reason does not get this message withparkin 5 minutes of the sunset that it should not take a picture.
 
 ## Getting Started
 
 There is a free hosted Nitrogen service running in the cloud if you'd like to get started quickly with building a device.  Go to [https://admin.nitrogen.io](https://admin.nitrogen.io) to sign up for an account and then follow the [first devicewalkthrough](docs/walkthrough.md) to see how to get a device up and running.
 
-If at any time you run into issues, plesae file an issue with this project or email me directly at [timfpark@gmail.com](mailto:timfpark@gmail.com].  It is incredibly helpful to know what is hard for beginners to understand so please don't hesitate to reach out.
+If at any time you run into issues, plesae file an issue with this project or email me directly at timfpark@gmail.com.  It is incredibly helpful to know what is hard for beginners to understand so please don't hesitate to reach out.
 
 To run a Nitrogen service locally:
 
