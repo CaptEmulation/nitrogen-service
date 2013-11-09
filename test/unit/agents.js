@@ -55,13 +55,11 @@ describe('agent service', function() {
     });
 
     it('claim agent can claim devices', function(done) {
-        services.permissions.authorize({
-            principal: fixtures.models.principals.user,
-            principal_for: fixtures.models.principals.device,
-            action: 'admin'
-        }, {}, function(err, permission) {
+       services.permissions.remove(services.principals.servicePrincipal, {
+            issued_to: fixtures.models.principals.user.id,
+            principal_for: fixtures.models.principals.device.id
+        }, function(err, removed) {
             assert.ifError(err);
-            assert.equal(permission.authorized, false);
 
             services.principals.update(services.principals.servicePrincipal, fixtures.models.principals.device.id, { claim_code: 'TAKE-1234' }, function(err, principal) {
                 assert.equal(principal.claim_code, 'TAKE-1234');
