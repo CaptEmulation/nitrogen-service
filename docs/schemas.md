@@ -17,6 +17,7 @@ Every message includes the following fields:
 
 ## Control
 * [cameraCommand](schema/cameraCommand.md)
+* [switchCommand](schema/switchCommand.md)
 
 ## Internals
 * [claim](schema/claim.md)
