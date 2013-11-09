@@ -31,27 +31,30 @@ describe('agent service', function() {
     });
 
     it('matcher does not match 2 users at same ip address for 2nd user', function(done) {
-        services.permissions.remove(services.principals.servicePrincipal, {
-            issued_to: fixtures.models.principals.user.id,
-            principal_for: fixtures.models.principals.device.id
-        }, function(err, removed) {
-            assert.ifError(err);
+        // TODO: this is lame but give any outstanding matching operations (ala the previous test) time to run.
+        setTimeout(function() {
+            services.permissions.remove(services.principals.servicePrincipal, {
+                issued_to: fixtures.models.principals.user.id,
+                principal_for: fixtures.models.principals.device.id
+            }, function(err, removed) {
+                assert.ifError(err);
 
-            services.principals.updateLastConnection(fixtures.models.principals.user, "127.0.0.1");
-            services.principals.updateLastConnection(fixtures.models.principals.anotherUser, "127.0.0.1");
+                services.principals.updateLastConnection(fixtures.models.principals.user, "127.0.0.1");
+                services.principals.updateLastConnection(fixtures.models.principals.anotherUser, "127.0.0.1");
 
-            setTimeout(function() {
-                services.permissions.authorize({
-                    principal: fixtures.models.principals.user,
-                    principal_for: fixtures.models.principals.device,
-                    action: 'admin'
-                }, {}, function(err, permission) {
-                    assert.ifError(err);
-                    assert.equal(permission.authorized, false);
-                    done();
-                });
-            }, 200);
-        });
+                setTimeout(function() {
+                    services.permissions.authorize({
+                        principal: fixtures.models.principals.user,
+                        principal_for: fixtures.models.principals.device,
+                        action: 'admin'
+                    }, {}, function(err, permission) {
+                        assert.ifError(err);
+                        assert.equal(permission.authorized, false);
+                        done();
+                    });
+                }, 200);
+            });
+        }, 200);
     });
 
     it('claim agent can claim devices', function(done) {
