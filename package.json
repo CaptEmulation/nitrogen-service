@@ -24,6 +24,7 @@
     "nitrogen-camera": "~0.1.0",
     "nitrogen-switch": "~0.1.0",
     "passport": "~0.1.17",
+    "nitrogen": "~0.1.100",
     "passport-http-bearer": "~0.2.1",
     "request": "~2.21.0",
     "revalidator": "~0.1.5",

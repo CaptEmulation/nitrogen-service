@@ -47,15 +47,15 @@ var attachSubscriptionsEndpoint = function() {
         });
 
         socket.on('disconnect', function() {
-            log.info('subscriptions: socket: ' + socket.id + ' disconnected.  removing all subscriptions on this socket.');
+            log.info('subscriptions: socket: ' + socket.id + ' disconnected.  stopping all subscriptions on this socket.');
 
             async.each(Object.keys(socket.subscriptions), function(clientId, callback) {
-                remove(socket.subscriptions[clientId], callback);
+                stop(socket.subscriptions[clientId], callback);
             });
         });
 
         socket.on('stop', function(spec) {
-            remove(socket.subscriptions[spec.id], function(err) {
+            stop(socket.subscriptions[spec.id], function(err) {
                 if (err) log.error(err);
             });
         });
@@ -106,6 +106,10 @@ var publish = function(type, item, callback) {
     config.pubsub_provider.publish(type, item, callback);
 };
 
+var receive = function(subscription, callback) {
+    config.pubsub_provider.receive(subscription, callback);
+};
+
 var remove = function(subscription, callback) {
     if (!subscription) return log.error('undefined subscription passed to services.subscription.remove.');
 
@@ -127,7 +131,7 @@ var save = function(subscription, callback) {
     subscription.save(callback);
 };
 
-var start = function(socket, spec) {
+var start = function(socket, spec, callback) {
     var subscription = new models.Subscription({
         clientId: spec.id,
         filter: spec.filter || {},
@@ -143,26 +147,45 @@ var start = function(socket, spec) {
     subscription.filter = services.messages.filterForPrincipal(socket.handshake.principal, subscription.filter);
 
     findOrCreate(subscription, function(err, subscription) {
-        if (err) return log.error('subscriptions: failed to create: ' + err);
+        if (err) {
+            if (callback) callback('subscriptions: failed to create: ' + err);
+            return;
+        }
 
         log.info('subscriptions: connecting subscription: ' + subscription.id);
 
         socket.subscriptions[spec.id] = subscription;
-        socket.emit('ready');
 
         stream(socket, subscription);
+        if (callback) return callback(null, subscription);
     });
+};
+
+// stop is invoked when an active subscription is closed.
+// for permanent subscriptions this is a noop.
+// for temporal subscriptions this removes them.
+
+var stop = function(subscription, callback) {
+    if (!subscription.permanent) {
+        remove(subscription, callback);
+    } else {
+        return callback();
+    }
 };
 
 var stream = function(socket, subscription) {
     async.whilst(
         function() { return socket.subscriptions[subscription.clientId] !== undefined; },
         function(callback) {
-            config.pubsub_provider.receive(subscription, function(err, item) {
+            receive(subscription, function(err, item) {
                 if (err) return callback(err);
 
                 // there might not be an item when the pubsub_provider's timed out waiting for an item.
                 // in this case, we just need to check that we are still connected and restart the receive.
+
+                // TODO: ACKing received messages.  It might be the case that the socket this subscription on has
+                // disconnected in the meantime.  We also might in the future want to ACK the reception and processing
+                // of the message before proceeding.
 
                 if (item) {
                     log.debug('subscription service:  new message from subscription: ' + subscription.clientId + ' of type: ' + subscription.type + ": " + JSON.stringify(item));
@@ -184,5 +207,8 @@ module.exports = {
     attach: attach,
     create: create,
     findOrCreate: findOrCreate,
-    publish: publish
+    publish: publish,
+    receive: receive,
+    start: start,
+    stop: stop
 };

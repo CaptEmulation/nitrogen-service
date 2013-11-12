@@ -65,7 +65,7 @@ function matchDevices(message, devices, user, callback) {
     });
 }
 
-session.on({ type: 'message', filter: { type: 'ip' } }, function(message) {
+session.on({ type: 'message', filter: { type: 'ip' }, name: 'matcher' }, function(message) {
     var yesterday = new Date();
     yesterday.setDate(-1);
 
