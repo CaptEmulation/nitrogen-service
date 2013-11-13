@@ -130,13 +130,14 @@ if (process.env.AZURE_SERVICEBUS_NAMESPACE && process.env.AZURE_SERVICEBUS_ACCES
                         // receive messages and make sure we get both and in order.
                         services.subscriptions.receive(subscription, function(err, message) {
                             assert.ifError(err);
-                            console.dir(message);
+
                             assert.equal(message.body.seq, 1);
+                            assert.equal(message.type, '_permanentQueueTest');
 
                             services.subscriptions.receive(subscription, function(err, message) {
                                 assert.ifError(err);
                                 assert.equal(message.body.seq, 2);
-
+                                assert.equal(message.type, '_permanentQueueTest');
                                 done();
                             });
                         });
