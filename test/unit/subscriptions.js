@@ -6,24 +6,21 @@ var assert = require('assert')
 
 describe('subscriptions service', function() {
     it('creating a session subscription should not create row', function(done) {
-        models.Subscription.count({}, function(err, startingCount) {
+        var subscription = new models.Subscription({
+            filter: {},
+            principal: fixtures.models.principals.device.id,
+            type: 'message'
+        });
+
+        services.subscriptions.findOrCreate(subscription, function(err, createdSubscription) {
             assert.ifError(err);
+            assert.equal(createdSubscription.permanent, false);
 
-            var subscription = new models.Subscription({
-                filter: {},
-                principal: fixtures.models.principals.device.id,
-                type: 'messages'
-            });
-
-            services.subscriptions.findOrCreate(subscription, function(err, subscription) {
+            services.subscriptions.findOne(subscription, function(err, subscription) {
                 assert.ifError(err);
+                assert.equal(subscription, null);
 
-                models.Subscription.count({}, function(err, endingCount) {
-                    assert.ifError(err);
-
-                    assert.equal(startingCount, endingCount);
-                    done();
-                });
+                done();
             });
         });
     });
@@ -36,7 +33,7 @@ describe('subscriptions service', function() {
                 filter: {},
                 name: 'named',
                 principal: fixtures.models.principals.device.id,
-                type: 'messages'
+                type: 'message'
             });
 
             services.subscriptions.findOrCreate(subscription, function(err, subscription) {

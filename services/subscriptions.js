@@ -69,7 +69,8 @@ var create = function(subscription, callback) {
     subscription.permanent = !!subscription.name;
     if (!subscription.permanent) {
         // assign a random name and id if this is a non-permanent subscription.
-        subscription.id = subscription.name = new mongoose.Types.ObjectId();
+        subscription.id = new mongoose.Types.ObjectId();
+        subscription.name = Math.floor(100000 * Math.random());
     }
 
     config.pubsub_provider.createSubscription(subscription, function(err) {
@@ -206,6 +207,7 @@ var stream = function(socket, subscription) {
 module.exports = {
     attach: attach,
     create: create,
+    findOne: findOne,
     findOrCreate: findOrCreate,
     publish: publish,
     receive: receive,
