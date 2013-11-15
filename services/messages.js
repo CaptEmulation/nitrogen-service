@@ -82,21 +82,10 @@ var createMany = function(principal, messages, callback) {
     });
 };
 
-var filterForPrincipal = function(principal, filter) {
-    if (principal && principal.is('service')) return filter;
-
-    var visibilityClauses = [ { public: true } ];
-    if (principal) {
-        visibilityClauses.push({ visible_to: principal._id });
-    }
-
-    return { $and: [filter, { $or: visibilityClauses }] };
-};
-
 var find = function(principal, filter, options, callback) {
     var translatedFilter = utils.translateQuery(filter, models.Message.fieldTranslationSpec);
 
-    models.Message.find(filterForPrincipal(principal, translatedFilter), null, options, function(err, messages) {
+    models.Message.find(services.principals.filterForPrincipal(principal, translatedFilter), null, options, function(err, messages) {
         if (err) return callback(err);
 
         return callback(null, messages);
@@ -104,7 +93,7 @@ var find = function(principal, filter, options, callback) {
 };
 
 var findById = function(principal, messageId, callback) {
-    models.Message.findOne(filterForPrincipal(principal, { "_id": messageId }), function(err, message) {
+    models.Message.findOne(services.principals.filterForPrincipal(principal, { "_id": messageId }), function(err, message) {
         if (err) return callback(err);
 
         return callback(null, message);
@@ -273,7 +262,6 @@ module.exports = {
     clients: clients,
     create: create,
     createMany: createMany,
-    filterForPrincipal: filterForPrincipal,
     find: find,
     findById: findById,
     initialize: initialize,

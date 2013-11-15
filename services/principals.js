@@ -186,9 +186,7 @@ var filterForPrincipal = function(principal, filter) {
         visibilityClauses.push({ visible_to: principal._id });
     }
 
-    var query = { $and: [ filter, { $or: visibilityClauses } ] };
-    //log.info('principal query with visibility: ' + JSON.stringify(query));
-    return query;
+    return { $and: [ filter, { $or: visibilityClauses } ] };
 };
 
 var find = function(principal, filter, options, callback) {
@@ -492,6 +490,7 @@ var verifySecret = function(secret, principal, callback) {
 module.exports = {
     authenticate: authenticate,
     create: create,
+    filterForPrincipal: filterForPrincipal,
     find: find,
     findById: findById,
     generateClaimCode: generateClaimCode,

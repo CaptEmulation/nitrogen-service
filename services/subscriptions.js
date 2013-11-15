@@ -108,6 +108,8 @@ var publish = function(type, item, callback) {
 };
 
 var receive = function(subscription, callback) {
+    if (!config.pubsub_provider) return callback(new Error("subscription service: can't receive without pubsub_provider"));
+
     config.pubsub_provider.receive(subscription, callback);
 };
 
@@ -143,9 +145,7 @@ var start = function(socket, spec, callback) {
     });
 
     // compose filter that includes visibility limitations.
-
-    // TODO: this assumes messages are the only type of subscription.
-    subscription.filter = services.messages.filterForPrincipal(socket.handshake.principal, subscription.filter);
+    subscription.filter = services.principals.filterForPrincipal(socket.handshake.principal, subscription.filter);
 
     findOrCreate(subscription, function(err, subscription) {
         if (err) {
@@ -164,7 +164,7 @@ var start = function(socket, spec, callback) {
 
 // stop is invoked when an active subscription is closed.
 // for permanent subscriptions this is a noop.
-// for temporal subscriptions this removes them.
+// for session subscriptions this removes them.
 
 var stop = function(subscription, callback) {
     if (!subscription.permanent) {
