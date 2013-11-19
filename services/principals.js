@@ -358,6 +358,37 @@ var removeById = function(authorizingPrincipal, id, callback) {
     });
 };
 
+var resetPassword = function(authorizingPrincipal, principal, callback) {
+    services.permissions.authorize({
+            principal: authorizingPrincipal,
+            principal_for: principal,
+            action: 'admin'
+        }, principal, function(err, permission) {
+            if (err) return callback(err);
+            if (!permission.authorized) return callback(utils.authorizationError(permission));
+
+            generateRandomPassword(function(err, randomPassword) {
+                if (err) return callback(err);
+
+                changePassword(principal, randomPassword, function(err, principal) {
+                    // TODO: generate email with randomly generated password
+//                    config.email_provider.send()
+                    callback(null, principal);
+                });
+            });
+        });      
+};
+
+var generateRandomPassword = function(callback) {
+    crypto.randomBytes(config.reset_password_length, function(err, randomPasswordBuf) {
+        if (err) return callback(err);
+
+        var randomPasswordString = randomPasswordBuf.toString('base64').substr(0, config.reset_password_length);
+        log.error('random password: ' + randomPasswordString);
+        return callback(null, randomPasswordString);
+    });
+};
+
 var update = function(authorizingPrincipal, id, updates, callback) {
     if (!authorizingPrincipal) return callback(utils.principalRequired());
     if (!id) return callback(utils.badRequestError('Missing required argument id.'));
@@ -515,6 +546,7 @@ module.exports = {
     generateClaimCode: generateClaimCode,
     impersonate: impersonate,
     initialize: initialize,
+    resetPassword: resetPassword,
     removeById: removeById,
     update: update,
     updateLastConnection: updateLastConnection,

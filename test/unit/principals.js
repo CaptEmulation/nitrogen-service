@@ -160,7 +160,7 @@ describe('principals service', function() {
         });
     });
 
-    it('can create a user and change its password.', function(done) {
+    it('can create a user, change its password, and then reset its password.', function(done) {
         var user = new models.Principal({ 
             type: "user",
             email: "changePassword@gmail.com",
@@ -184,12 +184,18 @@ describe('principals service', function() {
                     services.principals.changePassword(user, "anotherPassword", function(err, principal) {
                         assert.ifError(err);
                         assert.notEqual(principal.password_hash, originalPasswordHash);
-                        
+                        originalPasswordHash = principal.password_hash;
+
                         services.accessTokens.findByPrincipal(user, function(err, accessTokens) {
                             assert.ifError(err);
 
                             assert.equal(accessTokens.length, 0);
-                            done();
+
+                            services.principals.resetPassword(services.principals.servicePrincipal, user, function(err, principal) {
+                                assert.ifError(err);
+                                assert.notEqual(principal.password_hash, originalPasswordHash);
+                                done();
+                            });
                         });
                     });
                 });
