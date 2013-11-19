@@ -160,4 +160,40 @@ describe('principals service', function() {
         });
     });
 
+    it('can create a user and change its password.', function(done) {
+        var user = new models.Principal({ 
+            type: "user",
+            email: "changePassword@gmail.com",
+            public: false,
+            password: "firstPassword" 
+        });
+
+        services.principals.create(user, function(err, user) {
+            assert.ifError(err);
+
+            var originalPasswordHash = user.password_hash;
+
+            services.accessTokens.findOrCreateToken(user, function(err, accessToken) {
+                assert.ifError(err);
+                assert.notEqual(accessToken, undefined);
+
+                services.accessTokens.findByPrincipal(user, function(err, accessTokens) {
+                    assert.ifError(err);
+                    assert(accessTokens.length > 0);
+
+                    services.principals.changePassword(user, "anotherPassword", function(err, principal) {
+                        assert.ifError(err);
+                        assert.notEqual(principal.password_hash, originalPasswordHash);
+                        
+                        services.accessTokens.findByPrincipal(user, function(err, accessTokens) {
+                            assert.ifError(err);
+
+                            assert.equal(accessTokens.length, 0);
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+    });
 });

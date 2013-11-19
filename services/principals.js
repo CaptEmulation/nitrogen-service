@@ -59,6 +59,24 @@ var authenticateDevice = function(principalId, secret, callback) {
     });
 };
 
+var changePassword = function(principal, newPassword, callback) {
+    principal.password = newPassword;
+    createUserCredentials(principal, function(err, principal) {
+        if (err) return callback(err);
+
+        // changing a user's password always invalidates all current sessions.
+
+        services.accessTokens.removeByPrincipal(principal, function(err) {
+            if (err) return callback(err);
+
+            update(services.principals.servicePrincipal, principal.id, {
+                salt: principal.salt, 
+                password_hash: principal.password_hash
+            }, callback);
+        }); 
+    });
+};
+
 var create = function(principal, callback) {
     validate(principal, function(err) {
         if (err) return callback(err);
@@ -489,6 +507,7 @@ var verifySecret = function(secret, principal, callback) {
 
 module.exports = {
     authenticate: authenticate,
+    changePassword: changePassword,
     create: create,
     filterForPrincipal: filterForPrincipal,
     find: find,
