@@ -384,7 +384,6 @@ var generateRandomPassword = function(callback) {
         if (err) return callback(err);
 
         var randomPasswordString = randomPasswordBuf.toString('base64').substr(0, config.reset_password_length);
-        log.error('random password: ' + randomPasswordString);
         return callback(null, randomPasswordString);
     });
 };

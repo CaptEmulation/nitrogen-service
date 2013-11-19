@@ -72,6 +72,19 @@ exports.remove = function(req, res) {
     });
 };
 
+exports.resetPassword = function(req, res) {
+    services.principals.find(services.principals.servicePrincipal, { email: req.params.email }, function(err, principals) {
+        if (err) return utils.handleError(res, err);
+        if (principals.length < 1) return utils.notFoundError(res);
+
+        services.principals.resetPassword(services.principals.servicePrincipal, principals[0], function(err) {
+            if (err) return utils.handleError(res, err);
+
+            res.send(200);
+        });
+    });
+};
+
 exports.show = function(req, res) {
 	services.principals.findById(req.user, req.params.id, function (err, principal) {
 		if (err) return utils.handleError(res, err);

@@ -1,6 +1,4 @@
 session.on({ type: 'message', filter: { type: 'claim' }, name: 'claimAgent' }, function(message) {
-    log.error('claimAgent message: ' + JSON.stringify(message));
-
     if (!message.body.claim_code) {
         log.error("claimAgent: no claim_code provided in claim request sent by " + message.from);
         return;

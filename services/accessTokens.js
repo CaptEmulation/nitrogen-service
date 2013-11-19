@@ -24,7 +24,6 @@ var find = function(query, options, callback) {
 };
 
 var findByPrincipal = function(principal, callback) {
-    log.error('looking for access tokens for principal with id: ' + principal.id);
     find({ principal: principal.id }, { sort: { expires_at: -1 } }, callback);
 };
 

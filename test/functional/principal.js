@@ -92,6 +92,24 @@ describe('principals endpoint', function() {
         });
     });
 
+    it('should be able to reset a principals password', function(done) {
+        request.post(config.principals_endpoint, { 
+          json: { type: 'user',
+                  email: 'resetuser@server.org',
+                  password: 'sEcReT55' } }, function(err, resp, body) {
+
+            assert.ifError(err);
+            assert.equal(resp.statusCode, 200);
+
+            request.post({ url: config.principals_endpoint + "/reset/" + body.principal.email }, function(err, resp, body) {
+                assert.ifError(err);
+                assert.equal(resp.statusCode, 200);
+
+                done();
+            });
+        });
+    });
+
     it('should reject requests for a principal without access token', function(done) {
         request({ url: config.principals_endpoint + '/' + fixtures.models.principals.device.id, json: true }, function(get_err, get_resp, get_body) {
             assert.equal(get_err, null);

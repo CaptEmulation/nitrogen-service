@@ -74,6 +74,7 @@ config.password_hash_iterations = 10000;
 config.password_hash_length = 128;
 config.device_secret_bytes = 128;
 config.salt_length_bytes = 64;
+config.reset_password_length = 10;
 
 config.access_token_bytes = 32;
 config.access_token_lifetime = 1; // days
