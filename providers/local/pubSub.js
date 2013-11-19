@@ -41,4 +41,10 @@ MemoryPubSubProvider.prototype.removeSubscription = function(subscription, callb
     callback();
 };
 
+MemoryPubSubProvider.prototype.resetForTest = function(callback) {
+    this.subscriptions = {}
+
+    return callback();
+};
+
 module.exports = MemoryPubSubProvider;

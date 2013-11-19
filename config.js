@@ -105,6 +105,12 @@ config.cache_provider = new providers.local.MemoryCacheProvider(config);
 
 config.pubsub_provider = new providers.local.MemoryPubSubProvider(config);
 
+config.redis_servers = {
+    'localhost': { port: 6379, host: '127.0.0.1', id: 'localhost' }
+};
+
+//config.pubsub_provider = new providers.redis.RedisPubSubProvider(config);
+
 config.request_log_format = ':remote-addr - - [:date] ":method :url HTTP/:http-version" :status :res[content-length] :response-time ":referrer" ":user-agent"';
 
 // You can use Loggly's log service by uncommenting this lines and providing the appropriate 
@@ -123,7 +129,7 @@ if (process.env.LOGGLY_SUBDOMAIN &&
     });
 }
 
-log.add(winston.transports.Console, { colorize: true, timestamp: true, level: 'info' });
+log.add(winston.transports.Console, { colorize: true, timestamp: true, level: 'warn' });
 
 // if you'd like additional indexes applied to messages, you can specify them here.
 config.message_indexes = [

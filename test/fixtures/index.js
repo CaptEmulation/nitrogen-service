@@ -8,7 +8,11 @@ var async = require('async')
 var fixtures = {};
 
 var removeAll = function (modelType, callback) {
-    modelType.remove({}, callback);
+    modelType.remove({}, function(err) {
+        if (err) return callback(err);
+
+        config.pubsub_provider.resetForTest(callback);
+    });
 };
 
 var createDeviceFixtures = function(callback) {

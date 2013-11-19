@@ -26,6 +26,7 @@
     "passport": "~0.1.17",
     "nitrogen": "~0.1.100",
     "passport-http-bearer": "~0.2.1",
+    "redis": "*",
     "request": "~2.21.0",
     "revalidator": "~0.1.5",
     "sift": "~0.0.12",
