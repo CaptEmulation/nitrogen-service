@@ -204,7 +204,11 @@ var filterForPrincipal = function(principal, filter) {
         visibilityClauses.push({ visible_to: principal._id });
     }
 
-    return { $and: [ filter, { $or: visibilityClauses } ] };
+    // only do more complex filter check if there is a filter.
+    if (filter && Object.keys(filter).length > 0)
+        return { $and: [ filter, { $or: visibilityClauses } ] };
+    else
+        return { $or: visibilityClauses };
 };
 
 var find = function(principal, filter, options, callback) {

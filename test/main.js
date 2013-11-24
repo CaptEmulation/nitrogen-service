@@ -1,12 +1,17 @@
-var fixtures = require('./fixtures')
+var config = require('../config')
+  , fixtures = require('./fixtures')
   , log = require('../log')
   , services = require('../services');
 
 before(function(done) {
-    fixtures.reset(function(err) {
-        if (err) throw err;
+    config.pubsub_provider.resetForTest(function(err) {
+        if (err) return callback(err);
 
-        log.debug("FIXTURES: creation finished...");
-        done();
+        fixtures.reset(function(err) {
+            if (err) throw err;
+
+            log.debug("FIXTURES: creation finished...");
+            done();
+        });
     });
 });
