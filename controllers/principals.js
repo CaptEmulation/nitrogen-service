@@ -5,17 +5,34 @@ var config = require('../config')
   , utils = require('../utils');
 
 var sendAuthResponse = function(res, principal, accessToken) {
-    res.send({ 'principal': principal, 'accessToken': accessToken });
+    res.set('X-n2-set-access-token', JSON.stringify(accessToken));
+    res.send({ principal: principal, accessToken: accessToken });
 };
 
 exports.authenticate = function(req, res) {
-    services.principals.authenticate(req.body, function (err, principal, accessToken) {
+    services.principals.authenticate(req.body, function(err, principal, accessToken) {
         if (err) return utils.handleError(res, err);
 
         // since the authenticateRequest middleware was not run on this request run it manually.
         services.principals.updateLastConnection(principal, utils.ipFromRequest(req));
 
         sendAuthResponse(res, principal, accessToken);
+    });
+};
+
+exports.changePassword = function(req, res) {
+
+    // even though we have an accesstoken to validate this request, we still want the 
+    // user to provide a password to reauthenticate such that we know it is them, and not a hijacked
+    // browser window that is making the change password request.
+    services.principals.authenticate(req.body, function(err, principal) {
+        if (err) return utils.handleError(res, err);
+
+        services.principals.changePassword(principal, req.body.new_password, function(err, principal, accessToken) {
+            if (err) return utils.handleError(res, err);
+
+            sendAuthResponse(res, principal.toObject(), accessToken);
+        });
     });
 };
 

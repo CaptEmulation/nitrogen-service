@@ -63,7 +63,6 @@ AzurePubSubProvider.prototype.createSubscription = function(subscription, callba
     this.serviceBus.createSubscription(subscription.type, subscription.fullyQualifiedName(), function(err) {
         if (err) {
             // non error - already exists.
-            log.error(JSON.stringify(err));
             if (err.detail && err.detail.indexOf('already exists') !== -1)
                 return callback();
             else

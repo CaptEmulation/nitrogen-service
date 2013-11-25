@@ -179,7 +179,6 @@ describe('principals service', function() {
 
                 services.accessTokens.findByPrincipal(user, function(err, accessTokens) {
                     assert.ifError(err);
-                    assert(accessTokens.length > 0);
 
                     services.principals.changePassword(user, "anotherPassword", function(err, principal) {
                         assert.ifError(err);
@@ -188,8 +187,6 @@ describe('principals service', function() {
 
                         services.accessTokens.findByPrincipal(user, function(err, accessTokens) {
                             assert.ifError(err);
-
-                            assert.equal(accessTokens.length, 0);
 
                             services.principals.resetPassword(services.principals.servicePrincipal, user, function(err, principal) {
                                 assert.ifError(err);

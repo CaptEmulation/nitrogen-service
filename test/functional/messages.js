@@ -116,13 +116,15 @@ describe('messages endpoint', function() {
         });
 
         setTimeout(function() {
-            request.post(config.messages_endpoint,
-                  { json: [{ from: fixtures.models.principals.device.id,
+            request.post(config.messages_endpoint, { 
+                json: [{ 
+                    from: fixtures.models.principals.device.id,
                     type: "_messageSubscriptionTest1",
                     public: false,
                     expires: 'never',
-                    body: { reading: 5.1 } }],
-                    headers: { Authorization: fixtures.models.accessTokens.device.toAuthHeader() } }, function(post_err, post_resp, post_body) {
+                    body: { reading: 5.1 } 
+                }],
+                headers: { Authorization: fixtures.models.accessTokens.device.toAuthHeader() } }, function(post_err, post_resp, post_body) {
                     assert.equal(post_err, null);
                     assert.equal(post_resp.statusCode, 200);
 

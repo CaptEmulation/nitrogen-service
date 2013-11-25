@@ -3,7 +3,7 @@ var app = require('../../server')
   , config = require('../../config')
   , fixtures = require('../fixtures')
   , io = require('socket.io-client')
-  , mongoose = require('mongoose')
+  , models = require('../../models')
   , request = require('request')
   , services = require('../../services');
 
@@ -104,6 +104,34 @@ describe('principals endpoint', function() {
             request.post({ url: config.principals_endpoint + "/reset/" + body.principal.email }, function(err, resp, body) {
                 assert.ifError(err);
                 assert.equal(resp.statusCode, 200);
+
+                done();
+            });
+        });
+    });
+
+    it('should be able to change a principals password', function(done) {
+        var authObject = {
+            type: 'user',
+            email: 'changeuser@server.org',
+            password: 'sEcReT55'
+        };
+
+        request.post(config.principals_endpoint, { json: authObject }, function(err, resp, body) {
+
+            assert.ifError(err);
+            assert.equal(resp.statusCode, 200);
+            var accessToken = new models.AccessToken(body.accessToken);
+
+            authObject.new_password = "SUPERS3CRET";
+            request.post({ 
+                json: authObject,
+                headers: { Authorization: accessToken.toAuthHeader() },
+                url: config.principals_endpoint + "/password" 
+            }, function(err, resp, body) {
+                assert.ifError(err);
+                assert.equal(resp.statusCode, 200);
+                assert.notEqual(body.accessToken.token, accessToken.token);
 
                 done();
             });

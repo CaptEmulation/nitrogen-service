@@ -86,24 +86,20 @@ if (config.pubsub_provider instanceof providers.redis.RedisPubSubProvider) {
                 // create a message
                 services.messages.create(services.principals.servicePrincipal, msg, function(err) {
                     assert.ifError(err);
-                    log.error('1st message created');
 
                     // create a 2nd message
                     msg.body.seq = 2;
                     services.messages.create(services.principals.servicePrincipal, msg, function(err) {
                         assert.ifError(err);
-                        log.error('2nd message created');
 
                         // receive messages and make sure we get both and in order.
                         services.subscriptions.receive(subscription, function(err, message) {
                             assert.ifError(err);
-                            log.error('1st message received');
 
                             assert.equal(message.body.seq, 1);
                             assert.equal(message.type, '_permanentQueueTest');
 
                             services.subscriptions.receive(subscription, function(err, message) {
-                                log.error('2nd message received');
                                 assert.ifError(err);
                                 assert.equal(message.body.seq, 2);
                                 assert.equal(message.type, '_permanentQueueTest');

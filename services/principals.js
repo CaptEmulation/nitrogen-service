@@ -64,15 +64,20 @@ var changePassword = function(principal, newPassword, callback) {
     createUserCredentials(principal, function(err, principal) {
         if (err) return callback(err);
 
-        // changing a user's password always invalidates all current sessions.
-
+        // changing a user's password always invalidates all current access tokens.
         services.accessTokens.removeByPrincipal(principal, function(err) {
             if (err) return callback(err);
 
-            update(services.principals.servicePrincipal, principal.id, {
-                salt: principal.salt, 
-                password_hash: principal.password_hash
-            }, callback);
+            // but create a new token for this user and return it in the callback.
+            services.accessTokens.findOrCreateToken(principal, function(err, accessToken) {
+
+                update(services.principals.servicePrincipal, principal.id, {
+                    salt: principal.salt, 
+                    password_hash: principal.password_hash
+                }, function(err, principal) {
+                    return callback(err, principal, accessToken);
+                });
+            });
         }); 
     });
 };
@@ -375,9 +380,17 @@ var resetPassword = function(authorizingPrincipal, principal, callback) {
                 if (err) return callback(err);
 
                 changePassword(principal, randomPassword, function(err, principal) {
-                    // TODO: generate email with randomly generated password
-//                    config.email_provider.send()
-                    callback(null, principal);
+                    var email = {
+                        to: principal.email,
+                        from: config.service_email_address,
+                        subject: "Password Reset",      // TODO: Localization
+                        text: "Your Nitrogen password was reset to " + randomPassword + "\n" +
+                              "Please login at http://admin.nitrogen.io/ and change it to a permanent one as soon as possible."
+                    };
+
+                    services.email.send(email, function(err) {
+                        return callback(null, principal);
+                    });
                 });
             });
         });      

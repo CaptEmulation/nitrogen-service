@@ -67,7 +67,8 @@ mongoose.connection.once('open', function () {
         app.post(config.principals_path + '/auth',                                 controllers.principals.authenticate);
         app.post(config.principals_path + '/impersonate', middleware.authenticateRequest, controllers.principals.impersonate);
         app.post(config.principals_path + '/reset/:email',                         controllers.principals.resetPassword);
-        app.put(config.principals_path + '/:id',   middleware.authenticateRequest, controllers.principals.update);
+        app.put(config.principals_path + '/:id',   middleware.authenticateRequest, controllers.principals.update);        
+        app.post(config.principals_path + '/password', middleware.authenticateRequest, controllers.principals.changePassword);
         app.delete(config.principals_path + '/:id', middleware.authenticateRequest, controllers.principals.remove);
 
         app.get(config.messages_path + '/:id',     middleware.authenticateRequest, controllers.messages.show);

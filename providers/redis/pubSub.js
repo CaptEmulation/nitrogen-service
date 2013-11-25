@@ -96,7 +96,7 @@ RedisPubSubProvider.prototype.removeSubscription = function(subscription, callba
 RedisPubSubProvider.prototype.resetForTest = function(callback) {
     if (process.env.NODE_ENV === "production") return callback();
 
-    log.error('reseting Redis store completely for test');
+    log.info('redis pubsub provider: resetting Redis store completely for test');
 
     var client = this.clientForServer(Object.keys(this.config.redis_servers)[0]);
     client.flushdb(callback);
