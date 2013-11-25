@@ -97,19 +97,26 @@ config.blob_provider = new providers.local.LocalBlobProvider(config);
 
 config.cache_provider = new providers.local.MemoryCacheProvider(config);
 
+config.email_provider = new providers.local.NullEmailProvider(config);
+
 // You can use Azure's Service Bus as a pubsub provider using this configuration.
 //
 // if (process.env.AZURE_SERVICEBUS_NAMESPACE && process.env.AZURE_SERVICEBUS_ACCESS_KEY) {
 //    config.pubsub_provider = new providers.azure.AzurePubSubProvider(config);
 // }
 
-config.pubsub_provider = new providers.local.MemoryPubSubProvider(config);
+//config.pubsub_provider = new providers.local.MemoryPubSubProvider(config);
 
 config.redis_servers = {
     'localhost': { port: 6379, host: '127.0.0.1', id: 'localhost' }
 };
 
-//config.pubsub_provider = new providers.redis.RedisPubSubProvider(config);
+config.pubsub_provider = new providers.redis.RedisPubSubProvider(config);
+
+// config.email_provider = new providers.sendgrid.SendgridEmailProvider(config);
+
+// config.SENDGRID_API_USER = "";
+// config.SENDGRID_API_KEY = "";
 
 config.request_log_format = ':remote-addr - - [:date] ":method :url HTTP/:http-version" :status :res[content-length] :response-time ":referrer" ":user-agent"';
 
@@ -129,9 +136,9 @@ if (process.env.LOGGLY_SUBDOMAIN &&
     });
 }
 
-log.add(winston.transports.Console, { colorize: true, timestamp: true, level: 'warn' });
+log.add(winston.transports.Console, { colorize: true, timestamp: true, level: 'info' });
 
-// if you'd like additional indexes applied to messages, you can specify them here.
+// if you'd like additional indexes applied to messages at the database layer, you can specify them here.
 config.message_indexes = [
 ];
 
@@ -144,5 +151,8 @@ config.janitor_interval = 60 * 1000;
 
 // Validate all message schemas to conform to all core and installed schemas.
 config.validate_schemas = true;
+
+// Email address that the service should use for administrative emails.
+config.service_email_address = "admin@nitrogen.io";
 
 module.exports = config;

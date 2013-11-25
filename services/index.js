@@ -5,6 +5,7 @@ var async = require('async')
 exports.accessTokens = require('./accessTokens');
 exports.agents = require('./agents');
 exports.blobs = require('./blobs');
+exports.email = require('./email');
 exports.global = require('./global');
 exports.messages = require('./messages');
 exports.permissions = require('./permissions');
