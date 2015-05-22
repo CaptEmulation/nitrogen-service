@@ -206,7 +206,10 @@ var processDirectoryItem = function(itemPath, item) {
             log.info('parsing schemas in path: ' + fullPath);
             var schemas = fs.readdirSync(fullPath);
             schemas.forEach(function(schemaFile) {
-                loadSchema(fullPath, schemaFile);
+                // We only want to load pure JSON files
+                if (/\.json$/.test(schemaFile)) {
+                    loadSchema(fullPath, schemaFile);
+                }
             });
         } else if (item === 'browser') {
             var clients = fs.readdirSync(fullPath);
